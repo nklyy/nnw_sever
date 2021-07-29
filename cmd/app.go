@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/spf13/viper"
 	"nnw_s/config"
 	"nnw_s/pkg/handler"
 	"nnw_s/pkg/repository"
@@ -13,7 +12,8 @@ import (
 
 func Execute() {
 	// Init config
-	cfg, err := initConfig()
+	path := "config"
+	cfg, err := config.InitConfig(path)
 	if err != nil {
 		fmt.Printf("ERROR: %s \n", err)
 		return
@@ -60,28 +60,4 @@ func Execute() {
 		fmt.Printf("ERROR: %s \n", err)
 		return
 	}
-}
-
-func initConfig() (*config.Configurations, error) {
-	viper.AddConfigPath("config")
-
-	viper.SetConfigName("app")
-
-	viper.SetConfigType("env")
-
-	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	var configuration config.Configurations
-	err = viper.Unmarshal(&configuration)
-	if err != nil {
-		//fmt.Printf("Unable to decode into struct, %v", err)
-		return nil, err
-	}
-
-	return &configuration, nil
 }
