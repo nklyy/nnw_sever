@@ -5,22 +5,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
-	"log"
 	"nnw_s/config"
 	"nnw_s/pkg/repository"
 )
 
 func Execute() {
+	// Init config
 	cfg, err := initConfig()
 	if err != nil {
-		log.Fatalf("error initializing config: %s", err.Error())
+		fmt.Printf("ERROR: %s \n", err)
+		return
 	}
 
+	// Create App
 	app := fiber.New()
 
 	// Connection to DB
 	_, err = repository.MongoDbConnection(cfg)
 	if err != nil {
+		fmt.Printf("ERROR: %s \n", err)
 		return
 	}
 
@@ -74,7 +77,8 @@ func initConfig() (*config.Configurations, error) {
 	var configuration config.Configurations
 	err = viper.Unmarshal(&configuration)
 	if err != nil {
-		fmt.Printf("Unable to decode into struct, %v", err)
+		//fmt.Printf("Unable to decode into struct, %v", err)
+		return nil, err
 	}
 
 	return &configuration, nil

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"log"
 	"nnw_s/config"
 	"time"
 
@@ -14,22 +13,22 @@ import (
 func MongoDbConnection(cfg *config.Configurations) (*mongo.Database, error) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(cfg.MongoDbUrl))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		defer client.Disconnect(ctx)
-		log.Fatal(err)
+		return nil, err
 	}
 
-	collection := client.Database("NNW")
+	collection := client.Database(cfg.MongoDbName)
 
 	return collection, nil
 }
