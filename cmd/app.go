@@ -6,7 +6,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
 	"nnw_s/config"
+	"nnw_s/pkg/handler"
 	"nnw_s/pkg/repository"
+	"nnw_s/pkg/service"
 )
 
 func Execute() {
@@ -21,18 +23,18 @@ func Execute() {
 	app := fiber.New()
 
 	// Connection to DB
-	_, err = repository.MongoDbConnection(cfg)
+	db, err := repository.MongoDbConnection(cfg)
 	if err != nil {
 		fmt.Printf("ERROR: %s \n", err)
 		return
 	}
 
 	//// Init repository, service and handlers
-	//newRepository := repository.NewRepository(db)
-	//newService := service.NewService(newRepository)
-	//newHandler := handler.NewHandler(newService)
-	//
-	//newHandler.InitialRoute(app)
+	newRepository := repository.NewRepository(db)
+	newService := service.NewService(newRepository)
+	newHandler := handler.NewHandler(newService)
+
+	newHandler.InitialRoute(app)
 
 	// Init App Middleware
 	app.Use(
