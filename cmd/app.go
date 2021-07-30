@@ -29,18 +29,18 @@ func Execute() {
 		return
 	}
 
+	// Init App Middleware
+	app.Use(
+		// Add CORS to each route.
+		cors.New(),
+	)
+
 	//// Init repository, service and handlers
 	newRepository := repository.NewRepository(db)
 	newService := service.NewService(newRepository)
 	newHandler := handler.NewHandler(newService)
 
 	newHandler.InitialRoute(app)
-
-	// Init App Middleware
-	app.Use(
-		// Add CORS to each route.
-		cors.New(),
-	)
 
 	// NotFound Urls
 	app.Use(

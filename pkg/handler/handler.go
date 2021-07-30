@@ -20,8 +20,10 @@ func (h *Handler) InitialRoute(route fiber.Router) {
 
 	{
 		// User
-		v1.Get("/ping", func(ctx *fiber.Ctx) error {
-			return ctx.Status(200).SendString("OK")
-		})
+		v1.Post("/registration", h.registration)
 	}
+
+	route.Get("/ping", func(ctx *fiber.Ctx) error {
+		return ctx.Status(200).SendString("OK")
+	})
 }
