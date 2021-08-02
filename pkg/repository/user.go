@@ -36,10 +36,21 @@ func (ur *UserMongo) GetTemplateUserDataByIdDb(uid string) (*model.TemplateData,
 }
 
 func (ur *UserMongo) CreateUserDb(user model.User) (*string, error) {
-	_, err := ur.db.Collection("user").InsertOne(context.TODO(), user)
+	mod := mongo.IndexModel{
+		Keys:    bson.M{"login": 1}, // index in ascending order or -1 for descending order
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err := ur.db.Collection("user").Indexes().CreateOne(context.TODO(), mod)
 	if err != nil {
 		return nil, err
 	}
+
+	_, err = ur.db.Collection("user").InsertOne(context.TODO(), user)
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 
