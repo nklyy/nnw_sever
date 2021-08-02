@@ -7,7 +7,9 @@ import (
 
 type User interface {
 	GetUserById(userId string) (*model.User, error)
-	CreateUser(user model.User) (*string, error)
+	GetTemplateUserDataById(uid string) (*model.TemplateData, error)
+	CreateUser(login string, email string, password string, OTPKey string) (*string, error)
+	CreateTemplateUserData(secret string) (*string, error)
 	UpdateUser(user model.User) error
 }
 

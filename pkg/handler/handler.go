@@ -21,6 +21,7 @@ func (h *Handler) InitialRoute(route fiber.Router) {
 	{
 		// User
 		v1.Post("/registration", h.registration)
+		v1.Post("verify2fa", h.verify2FaCode)
 	}
 
 	route.Get("/ping", func(ctx *fiber.Ctx) error {
