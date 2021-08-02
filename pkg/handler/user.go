@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
@@ -72,7 +71,7 @@ func (h *Handler) registration(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusOK)
 }
 
-func (h *Handler) verify2FaCode(ctx *fiber.Ctx) error {
+func (h *Handler) verifyRegistration2FaCode(ctx *fiber.Ctx) error {
 	var userData userData
 
 	// Parse User Data
@@ -128,7 +127,31 @@ func (h *Handler) login(ctx *fiber.Ctx) error {
 		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}
 
-	fmt.Println(user)
+	return ctx.SendStatus(fiber.StatusOK)
+}
 
-	return ctx.JSON("")
+func (h *Handler) verifyLogin2fa(ctx *fiber.Ctx) error {
+	var userData userData
+
+	// Parse User Data
+	if err := ctx.BodyParser(&userData); err != nil {
+		ctx.Status(fiber.StatusInternalServerError)
+		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+	}
+
+	// Find user
+	user, err := h.services.GetUserByLogin(userData.Login)
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+	}
+
+	// Check Valid 2FA Code
+	valid := totp.Validate(userData.Code, user.SecretOTPKey)
+	if !valid {
+		ctx.Status(fiber.StatusBadRequest)
+		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid code!").Error()})
+	}
+
+	return ctx.SendStatus(fiber.StatusOK)
 }

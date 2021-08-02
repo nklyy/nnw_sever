@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -39,7 +38,6 @@ func (ur *UserMongo) GetTemplateUserDataByIdDb(uid string) (*model.TemplateData,
 
 	err := ur.db.Collection("templateUserData").FindOne(context.TODO(), bson.M{"uid": uid}).Decode(&templateUser)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 

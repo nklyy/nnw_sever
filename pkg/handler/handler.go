@@ -18,13 +18,15 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitialRoute(route fiber.Router) {
 	v1 := route.Group("/v1")
 
+	// Auth
 	{
 		// Registration
 		v1.Post("/registration", h.registration)
-		v1.Post("verify2fa", h.verify2FaCode)
+		v1.Post("verifyRegister2fa", h.verifyRegistration2FaCode)
 
 		// Login
 		v1.Post("/login", h.login)
+		v1.Post("verifyLogin2fa", h.verifyLogin2fa)
 	}
 
 	route.Get("/ping", func(ctx *fiber.Ctx) error {
