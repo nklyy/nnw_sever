@@ -7,6 +7,7 @@ import (
 
 type User interface {
 	GetUserByIdDb(userId string) (*model.User, error)
+	GetUserByLoginDb(login string) (*model.User, error)
 	GetTemplateUserDataByIdDb(uid string) (*model.TemplateData, error)
 	CreateUserDb(user model.User) (*string, error)
 	CreateTemplateUserDataDb(templateData model.TemplateData) (*string, error)

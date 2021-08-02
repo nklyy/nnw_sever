@@ -28,6 +28,15 @@ func (us *UserService) GetUserById(userId string) (*model.User, error) {
 	return user, nil
 }
 
+func (us *UserService) GetUserByLogin(login string) (*model.User, error) {
+	user, err := us.repo.GetUserByLoginDb(login)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (us *UserService) GetTemplateUserDataById(uid string) (*model.TemplateData, error) {
 	templateUserData, err := us.repo.GetTemplateUserDataByIdDb(uid)
 	if err != nil {

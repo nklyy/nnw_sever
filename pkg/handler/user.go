@@ -3,8 +3,10 @@ package handler
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pquerna/otp/totp"
+	"golang.org/x/crypto/bcrypt"
 	"image/png"
 )
 
@@ -101,4 +103,32 @@ func (h *Handler) verify2FaCode(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.SendStatus(fiber.StatusOK)
+}
+
+func (h *Handler) login(ctx *fiber.Ctx) error {
+	var userData userData
+
+	// Parse User Data
+	if err := ctx.BodyParser(&userData); err != nil {
+		ctx.Status(fiber.StatusInternalServerError)
+		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+	}
+
+	// Find user
+	user, err := h.services.GetUserByLogin(userData.Login)
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+	}
+
+	// Check password
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userData.Password))
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+	}
+
+	fmt.Println(user)
+
+	return ctx.JSON("")
 }

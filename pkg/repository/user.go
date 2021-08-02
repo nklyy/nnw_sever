@@ -23,6 +23,17 @@ func (ur *UserMongo) GetUserByIdDb(userId string) (*model.User, error) {
 	return nil, nil
 }
 
+func (ur *UserMongo) GetUserByLoginDb(login string) (*model.User, error) {
+	var user model.User
+
+	err := ur.db.Collection("user").FindOne(context.TODO(), bson.M{"login": login}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (ur *UserMongo) GetTemplateUserDataByIdDb(uid string) (*model.TemplateData, error) {
 	var templateUser model.TemplateData
 
