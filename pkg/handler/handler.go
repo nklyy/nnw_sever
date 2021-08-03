@@ -22,11 +22,13 @@ func (h *Handler) InitialRoute(route fiber.Router) {
 	{
 		// Registration
 		v1.Post("/registration", h.registration)
-		v1.Post("verifyRegister2fa", h.verifyRegistration2FaCode)
+		v1.Post("/verifyRegister2fa", h.verifyRegistration2FaCode)
 
 		// Login
 		v1.Post("/login", h.login)
-		v1.Post("verifyLogin2fa", h.verifyLogin2fa)
+		v1.Post("/verifyLogin2fa", h.verifyLogin2fa)
+
+		v1.Post("/checkLogin", h.checkLogin)
 	}
 
 	route.Get("/ping", func(ctx *fiber.Ctx) error {

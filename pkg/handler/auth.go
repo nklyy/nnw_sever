@@ -137,3 +137,24 @@ func (h *Handler) verifyLogin2fa(ctx *fiber.Ctx) error {
 
 	return ctx.SendStatus(fiber.StatusOK)
 }
+
+func (h *Handler) checkLogin(ctx *fiber.Ctx) error {
+	var userData userData
+
+	// Parse User Data
+	if err := ctx.BodyParser(&userData); err != nil {
+		ctx.Status(fiber.StatusInternalServerError)
+		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+	}
+
+	user, _ := h.services.GetUserByLogin(userData.Login)
+	if user == nil {
+		return ctx.SendStatus(fiber.StatusOK)
+	}
+
+	if user.Login == userData.Login {
+		return ctx.SendStatus(fiber.StatusBadRequest)
+	}
+
+	return ctx.SendStatus(fiber.StatusInternalServerError)
+}
