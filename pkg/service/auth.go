@@ -2,12 +2,15 @@ package service
 
 import (
 	"bytes"
+	"errors"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"image/png"
+	"nnw_s/config"
 	"nnw_s/pkg/model"
 	"nnw_s/pkg/repository"
 	"time"
@@ -15,11 +18,26 @@ import (
 
 type AuthService struct {
 	repo repository.Authorization
+	cfg  config.Configurations
 }
 
-func NewAuthService(repo repository.Authorization) *AuthService {
+type Payload struct {
+	Login     string    `json:"login"`
+	IssuedAt  time.Time `json:"issued_at"`
+	ExpiredAt time.Time `json:"expired_at"`
+}
+
+func (payload *Payload) Valid() error {
+	if time.Now().After(payload.ExpiredAt) {
+		return errors.New("token has expired")
+	}
+	return nil
+}
+
+func NewAuthService(repo repository.Authorization, cfg config.Configurations) *AuthService {
 	return &AuthService{
 		repo: repo,
+		cfg:  cfg,
 	}
 }
 
@@ -86,11 +104,11 @@ func (as *AuthService) CreateTemplateUserData(secret string) (*string, error) {
 	return id, err
 }
 
-func (as *AuthService) Generate2FaImage() (*bytes.Buffer, *otp.Key, error) {
+func (as *AuthService) Generate2FaImage(userEmail string) (*bytes.Buffer, *otp.Key, error) {
 	// Generate 2FA Image
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "NNW",
-		AccountName: "example@examole.com",
+		AccountName: userEmail,
 	})
 
 	if err != nil {
@@ -110,4 +128,16 @@ func (as *AuthService) Generate2FaImage() (*bytes.Buffer, *otp.Key, error) {
 	}
 
 	return &bufImage, key, nil
+}
+
+func (as *AuthService) CreateJWTToken(login string) (string, error) {
+	payload := &Payload{
+		Login:     login,
+		IssuedAt:  time.Now(),
+		ExpiredAt: time.Now().Add(time.Second * 60),
+	}
+
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+
+	return jwtToken.SignedString([]byte(as.cfg.JwtSecretKey))
 }

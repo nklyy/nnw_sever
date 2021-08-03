@@ -2,6 +2,7 @@ package repository
 
 import (
 	"go.mongodb.org/mongo-driver/mongo"
+	"nnw_s/config"
 	"nnw_s/pkg/model"
 )
 
@@ -17,8 +18,8 @@ type Repository struct {
 	Authorization
 }
 
-func NewRepository(db *mongo.Database) *Repository {
+func NewRepository(db *mongo.Database, cfg config.Configurations) *Repository {
 	return &Repository{
-		Authorization: NewAuthMongo(db),
+		Authorization: NewAuthMongo(db, cfg),
 	}
 }

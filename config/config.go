@@ -5,10 +5,11 @@ import "github.com/spf13/viper"
 type Configurations struct {
 	PORT string `mapstructure:"PORT"`
 
-	MongoDbName string `mapstructure:"MONGO_DB_NAME"`
-	MongoDbUser string `mapstructure:"MONGO_DB_USER"`
-	MongoDbPass string `mapstructure:"MONGO_DB_PASS"`
-	MongoDbUrl  string `mapstructure:"MONGO_DB_URL"`
+	MongoDbName  string `mapstructure:"MONGO_DB_NAME"`
+	MongoDbUser  string `mapstructure:"MONGO_DB_USER"`
+	MongoDbPass  string `mapstructure:"MONGO_DB_PASS"`
+	MongoDbUrl   string `mapstructure:"MONGO_DB_URL"`
+	JwtSecretKey string `mapstructure:"JWT_SECRET_KEY"`
 }
 
 func InitConfig(path string) (*Configurations, error) {

@@ -20,22 +20,19 @@ func (h *Handler) registration(ctx *fiber.Ctx) error {
 
 	// Parse User Data
 	if err := ctx.BodyParser(&userData); err != nil {
-		ctx.Status(fiber.StatusBadRequest)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
 	}
 
 	// Generate 2FA Image
-	buffImg, key, err := h.services.Generate2FaImage()
+	buffImg, key, err := h.services.Generate2FaImage(userData.Email)
 	if err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}
 
 	// Save template uid with secret key
 	templateId, err := h.services.CreateTemplateUserData(key.Secret())
 	if err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}
 
 	// Set Header
@@ -46,8 +43,7 @@ func (h *Handler) registration(ctx *fiber.Ctx) error {
 	// Write image bytes
 	_, err = ctx.Write(buffImg.Bytes())
 	if err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}
 
 	return ctx.SendStatus(fiber.StatusOK)
@@ -58,29 +54,25 @@ func (h *Handler) verifyRegistration2FaCode(ctx *fiber.Ctx) error {
 
 	// Parse User Data
 	if err := ctx.BodyParser(&userData); err != nil {
-		ctx.Status(fiber.StatusBadRequest)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
 	}
 
 	// Get Secret
 	templateData, err := h.services.GetTemplateUserDataById(userData.Uid)
 	if err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}
 
 	// Check Valid 2FA Code
 	valid := totp.Validate(userData.Code, templateData.TwoFAS)
 	if !valid {
-		ctx.Status(fiber.StatusBadRequest)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid code!").Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Invalid code!").Error()})
 	}
 
 	// Create User
 	_, err = h.services.CreateUser(userData.Login, userData.Email, userData.Password, templateData.TwoFAS)
 	if err != nil {
-		ctx.Status(fiber.StatusBadRequest)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid code!").Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Invalid code!").Error()})
 	}
 
 	return ctx.SendStatus(fiber.StatusOK)
@@ -91,22 +83,19 @@ func (h *Handler) login(ctx *fiber.Ctx) error {
 
 	// Parse User Data
 	if err := ctx.BodyParser(&userData); err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
 	}
 
 	// Find user
 	user, err := h.services.GetUserByLogin(userData.Login)
 	if err != nil {
-		ctx.Status(fiber.StatusBadRequest)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}
 
 	// Check password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userData.Password))
 	if err != nil {
-		ctx.Status(fiber.StatusBadRequest)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}
 
 	return ctx.SendStatus(fiber.StatusOK)
@@ -117,25 +106,28 @@ func (h *Handler) verifyLogin2fa(ctx *fiber.Ctx) error {
 
 	// Parse User Data
 	if err := ctx.BodyParser(&userData); err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
 	}
 
 	// Find user
 	user, err := h.services.GetUserByLogin(userData.Login)
 	if err != nil {
-		ctx.Status(fiber.StatusBadRequest)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}
 
 	// Check Valid 2FA Code
 	valid := totp.Validate(userData.Code, user.SecretOTPKey)
 	if !valid {
-		ctx.Status(fiber.StatusBadRequest)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid code!").Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Invalid code!").Error()})
 	}
 
-	return ctx.SendStatus(fiber.StatusOK)
+	// Create JWT
+	jwtToken, err := h.services.CreateJWTToken(userData.Login)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
+	}
+
+	return ctx.Status(200).JSON(fiber.Map{"token": jwtToken})
 }
 
 func (h *Handler) checkLogin(ctx *fiber.Ctx) error {
@@ -143,10 +135,10 @@ func (h *Handler) checkLogin(ctx *fiber.Ctx) error {
 
 	// Parse User Data
 	if err := ctx.BodyParser(&userData); err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
 	}
 
+	// Find User
 	user, _ := h.services.GetUserByLogin(userData.Login)
 	if user == nil {
 		return ctx.SendStatus(fiber.StatusOK)

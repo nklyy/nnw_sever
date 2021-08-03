@@ -36,9 +36,9 @@ func Execute() {
 	)
 
 	//// Init repository, service and handlers
-	newRepository := repository.NewRepository(db)
-	newService := service.NewService(newRepository)
-	newHandler := handler.NewHandler(newService)
+	newRepository := repository.NewRepository(db, *cfg)
+	newService := service.NewService(newRepository, *cfg)
+	newHandler := handler.NewHandler(newService, *cfg)
 
 	newHandler.InitialRoute(app)
 

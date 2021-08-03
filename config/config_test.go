@@ -8,11 +8,12 @@ import (
 
 func TestInit(t *testing.T) {
 	type env struct {
-		port        string
-		mongoDbUrl  string
-		mongoDbUser string
-		mongoDbPass string
-		mongoDbName string
+		port         string
+		mongoDbUrl   string
+		mongoDbUser  string
+		mongoDbPass  string
+		mongoDbName  string
+		jwtSecretKey string
 	}
 
 	type args struct {
@@ -26,6 +27,7 @@ func TestInit(t *testing.T) {
 		os.Setenv("MONGO_DB_USER", env.mongoDbUser)
 		os.Setenv("MONGO_DB_PASS", env.mongoDbPass)
 		os.Setenv("MONGO_DB_URL", env.mongoDbUrl)
+		os.Setenv("JWT_SECRET_KEY", env.jwtSecretKey)
 	}
 
 	tests := []struct {
@@ -38,20 +40,22 @@ func TestInit(t *testing.T) {
 			name: "Test config file!",
 			args: args{
 				env: env{
-					port:        ":4000",
-					mongoDbName: "databaseName",
-					mongoDbUser: "admin",
-					mongoDbPass: "qwerty",
-					mongoDbUrl:  "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
+					port:         ":4000",
+					mongoDbName:  "databaseName",
+					mongoDbUser:  "admin",
+					mongoDbPass:  "qwerty",
+					mongoDbUrl:   "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
+					jwtSecretKey: "123qwerty",
 				},
 				path: ".",
 			},
 			want: &Configurations{
-				PORT:        ":4000",
-				MongoDbName: "databaseName",
-				MongoDbUser: "admin",
-				MongoDbPass: "qwerty",
-				MongoDbUrl:  "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
+				PORT:         ":4000",
+				MongoDbName:  "databaseName",
+				MongoDbUser:  "admin",
+				MongoDbPass:  "qwerty",
+				MongoDbUrl:   "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
+				JwtSecretKey: "123qwerty",
 			},
 		},
 	}

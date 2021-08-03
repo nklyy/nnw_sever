@@ -5,16 +5,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"nnw_s/config"
 	"nnw_s/pkg/model"
 )
 
 type AuthMongo struct {
-	db *mongo.Database
+	db  *mongo.Database
+	cfg config.Configurations
 }
 
-func NewAuthMongo(db *mongo.Database) *AuthMongo {
+func NewAuthMongo(db *mongo.Database, cfg config.Configurations) *AuthMongo {
 	return &AuthMongo{
-		db: db,
+		db:  db,
+		cfg: cfg,
 	}
 }
 
