@@ -141,3 +141,34 @@ func (as *AuthService) CreateJWTToken(login string) (string, error) {
 
 	return jwtToken.SignedString([]byte(as.cfg.JwtSecretKey))
 }
+
+func (as *AuthService) VerifyJWTToken(token string) (*string, error) {
+	keyFunc := func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, errors.New("token is invalid")
+		}
+		return []byte(as.cfg.JwtSecretKey), nil
+	}
+
+	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc)
+	if err != nil {
+		ver, ok := err.(*jwt.ValidationError)
+		if ok && errors.Is(ver.Inner, errors.New("token has expired")) {
+			return nil, errors.New("token has expired")
+		}
+		return nil, errors.New("token is invalid")
+	}
+
+	payload, ok := jwtToken.Claims.(*Payload)
+	if !ok {
+		return nil, errors.New("token is invalid")
+	}
+
+	user, err := as.repo.GetUserByLoginDb(payload.Login)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user.Login, nil
+}

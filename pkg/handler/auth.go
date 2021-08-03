@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
@@ -13,6 +14,10 @@ type userData struct {
 	Password string `json:"password"`
 	Code     string `json:"code"`
 	Uid      string `json:"uid"`
+}
+
+type Token struct {
+	Token string `json:"token"`
 }
 
 func (h *Handler) registration(ctx *fiber.Ctx) error {
@@ -149,4 +154,21 @@ func (h *Handler) checkLogin(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.SendStatus(fiber.StatusInternalServerError)
+}
+
+func (h *Handler) checkJwt(ctx *fiber.Ctx) error {
+	var token Token
+
+	// Parse User Data
+	if err := ctx.BodyParser(&token); err != nil {
+		fmt.Println(err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
+	}
+
+	_, err := h.services.VerifyJWTToken(token.Token)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Wrong token!").Error()})
+	}
+
+	return ctx.SendStatus(fiber.StatusOK)
 }

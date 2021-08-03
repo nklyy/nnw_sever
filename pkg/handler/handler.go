@@ -32,6 +32,7 @@ func (h *Handler) InitialRoute(route fiber.Router) {
 		v1.Post("/verifyLogin2fa", h.verifyLogin2fa)
 
 		v1.Post("/checkLogin", h.checkLogin)
+		v1.Post("/checkJwt", h.checkJwt)
 	}
 
 	route.Get("/ping", func(ctx *fiber.Ctx) error {
