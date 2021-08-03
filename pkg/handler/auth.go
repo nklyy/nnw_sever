@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"bytes"
 	"errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
-	"image/png"
 )
 
 type userData struct {
@@ -27,25 +25,7 @@ func (h *Handler) registration(ctx *fiber.Ctx) error {
 	}
 
 	// Generate 2FA Image
-	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "NNW",
-		AccountName: "example@examole.com",
-	})
-
-	if err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
-	}
-
-	var buf bytes.Buffer
-	img, err := key.Image(200, 200)
-	if err != nil {
-		ctx.Status(fiber.StatusInternalServerError)
-		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
-	}
-
-	// Encode image
-	err = png.Encode(&buf, img)
+	buffImg, key, err := h.services.Generate2FaImage()
 	if err != nil {
 		ctx.Status(fiber.StatusInternalServerError)
 		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
@@ -62,7 +42,9 @@ func (h *Handler) registration(ctx *fiber.Ctx) error {
 	ctx.Response().Header.Set("Content-Type", "image/png")
 	ctx.Response().Header.Set("Access-Control-Expose-Headers", "Tid")
 	ctx.Response().Header.Set("Tid", *templateId)
-	_, err = ctx.Write(buf.Bytes())
+
+	// Write image bytes
+	_, err = ctx.Write(buffImg.Bytes())
 	if err != nil {
 		ctx.Status(fiber.StatusInternalServerError)
 		return ctx.JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})

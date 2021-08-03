@@ -5,21 +5,20 @@ import (
 	"nnw_s/pkg/model"
 )
 
-type User interface {
+type Authorization interface {
 	GetUserByIdDb(userId string) (*model.User, error)
 	GetUserByLoginDb(login string) (*model.User, error)
 	GetTemplateUserDataByIdDb(uid string) (*model.TemplateData, error)
 	CreateUserDb(user model.User) (*string, error)
 	CreateTemplateUserDataDb(templateData model.TemplateData) (*string, error)
-	UpdateUserDb(user model.User) error
 }
 
 type Repository struct {
-	User
+	Authorization
 }
 
 func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{
-		User: NewUserMongo(db),
+		Authorization: NewAuthMongo(db),
 	}
 }
