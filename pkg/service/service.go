@@ -19,7 +19,7 @@ type Authorization interface {
 	CreateJWTToken(login string) (string, error)
 	VerifyJWTToken(token string) (*string, error)
 
-	Generate2FaImage(userEmail string) (*bytes.Buffer, *otp.Key, error)
+	Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, error)
 }
 
 type Service struct {

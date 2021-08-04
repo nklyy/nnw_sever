@@ -29,7 +29,7 @@ func (h *Handler) registration(ctx *fiber.Ctx) error {
 	}
 
 	// Generate 2FA Image
-	buffImg, key, err := h.services.Generate2FaImage(userData.Email)
+	buffImg, key, err := h.services.Generate2FaImage(userData.Login)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": errors.New(" Something wrong!").Error()})
 	}

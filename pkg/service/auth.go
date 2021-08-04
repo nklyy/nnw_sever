@@ -104,11 +104,11 @@ func (as *AuthService) CreateTemplateUserData(secret string) (*string, error) {
 	return id, err
 }
 
-func (as *AuthService) Generate2FaImage(userEmail string) (*bytes.Buffer, *otp.Key, error) {
+func (as *AuthService) Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, error) {
 	// Generate 2FA Image
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "NNW",
-		AccountName: userEmail,
+		AccountName: login,
 	})
 
 	if err != nil {
