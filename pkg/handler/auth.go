@@ -28,6 +28,12 @@ func (h *Handler) registration(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" Invalid json!").Error()})
 	}
 
+	// Find user
+	user, _ := h.services.GetUserByLogin(userData.Login)
+	if user != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": errors.New(" User already exist!").Error()})
+	}
+
 	// Generate 2FA Image
 	buffImg, key, err := h.services.Generate2FaImage(userData.Login)
 	if err != nil {
