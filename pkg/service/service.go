@@ -20,6 +20,8 @@ type Authorization interface {
 	VerifyJWTToken(token string) (*string, error)
 
 	Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, error)
+
+	CheckPassword(password string, hashPassword string) (bool, error)
 }
 
 type Service struct {

@@ -183,3 +183,22 @@ func (as *AuthService) VerifyJWTToken(token string) (*string, error) {
 
 	return &user.Login, nil
 }
+
+func (as *AuthService) CheckPassword(password string, hashPassword string) (bool, error) {
+	shift, err := strconv.Atoi(as.cfg.Shift)
+	if err != nil {
+		return false, err
+	}
+
+	decodePassword, err := caesarShift(password, -shift)
+	if err != nil {
+		return false, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(decodePassword))
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
+}

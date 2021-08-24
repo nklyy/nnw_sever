@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/pquerna/otp/totp"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -103,8 +102,12 @@ func (h *Handler) login(c echo.Context) error {
 	}
 
 	// Check password
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userData.Password))
+	validPass, err := h.services.CheckPassword(userData.Password, user.Password)
 	if err != nil {
+		return c.JSON(http.StatusInternalServerError, InternalServerError)
+	}
+
+	if !validPass {
 		return c.JSON(http.StatusBadRequest, InvalidPassword)
 	}
 
