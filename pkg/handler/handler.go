@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
+	"net/http"
 	"nnw_s/config"
 	"nnw_s/pkg/service"
 )
@@ -18,24 +19,24 @@ func NewHandler(services *service.Service, cfg config.Configurations) *Handler {
 	}
 }
 
-func (h *Handler) InitialRoute(route fiber.Router) {
+func (h *Handler) InitialRoute(route *echo.Echo) {
 	v1 := route.Group("/v1")
 
 	// Auth
 	{
 		// Registration
-		v1.Post("/registration", h.registration)
-		v1.Post("/verifyRegister2fa", h.verifyRegistration2FaCode)
+		v1.POST("/registration", h.registration)
+		v1.POST("/verifyRegister2fa", h.verifyRegistration2FaCode)
 
 		// Login
-		v1.Post("/login", h.login)
-		v1.Post("/verifyLogin2fa", h.verifyLogin2fa)
+		v1.POST("/login", h.login)
+		v1.POST("/verifyLogin2fa", h.verifyLogin2fa)
 
-		v1.Post("/checkLogin", h.checkLogin)
-		v1.Post("/checkJwt", h.checkJwt)
+		v1.POST("/checkLogin", h.checkUserName)
+		v1.POST("/checkJwt", h.checkJwt)
 	}
 
-	route.Get("/ping", func(ctx *fiber.Ctx) error {
-		return ctx.Status(200).SendString("OK")
+	route.GET("/ping", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, "OK")
 	})
 }

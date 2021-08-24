@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"net/http"
 	"nnw_s/config"
 	"nnw_s/pkg/handler"
 	"nnw_s/pkg/repository"
@@ -20,7 +21,7 @@ func Execute() {
 	}
 
 	// Create App
-	app := fiber.New()
+	app := echo.New()
 
 	// Connection to DB
 	db, err := repository.MongoDbConnection(cfg)
@@ -30,12 +31,12 @@ func Execute() {
 	}
 
 	// Init App Middleware
-	app.Use(
-		// Add CORS to each route.
-		cors.New(),
-	)
+	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
-	//// Init repository, service and handlers
+	// Init repository, service and handlers
 	newRepository := repository.NewRepository(db, *cfg)
 	newService := service.NewService(newRepository, *cfg)
 	newHandler := handler.NewHandler(newService, *cfg)
@@ -43,19 +44,17 @@ func Execute() {
 	newHandler.InitialRoute(app)
 
 	// NotFound Urls
-	app.Use(
-		// Anonymous function.
-		func(c *fiber.Ctx) error {
-			// Return HTTP 404 status and JSON response.
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": true,
-				"msg":   "Sorry, endpoint " + "'" + c.OriginalURL() + "'" + " is not found",
-			})
-		},
-	)
+	echo.NotFoundHandler = func(c echo.Context) error {
+		// Return HTTP 404 status and JSON response.
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"error":    true,
+			"endpoint": c.Request().URL.Path,
+			"msg":      "Sorry, endpoint is not found",
+		})
+	}
 
 	// Starting App
-	err = app.Listen(cfg.PORT)
+	err = app.Start(cfg.PORT)
 	if err != nil {
 		fmt.Printf("ERROR: %s \n", err)
 		return
