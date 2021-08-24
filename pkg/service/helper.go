@@ -2,10 +2,23 @@ package service
 
 import (
 	"encoding/base64"
+	"strings"
 )
 
 func caesarShift(text string, shift int) (string, error) {
-	decStr, err := base64.StdEncoding.DecodeString(reverseString(text))
+	var upLow string
+
+	for _, char := range text {
+		if string(char) == strings.ToUpper(string(char)) {
+			upLow += strings.ToLower(string(char))
+		} else if string(char) == strings.ToLower(string(char)) {
+			upLow += strings.ToUpper(string(char))
+		} else {
+			upLow += string(char)
+		}
+	}
+
+	decStr, err := base64.StdEncoding.DecodeString(reverseString(upLow))
 	if err != nil {
 		return "", err
 	}
