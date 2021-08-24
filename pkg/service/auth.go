@@ -13,6 +13,7 @@ import (
 	"nnw_s/config"
 	"nnw_s/pkg/model"
 	"nnw_s/pkg/repository"
+	"strconv"
 	"time"
 )
 
@@ -69,7 +70,17 @@ func (as *AuthService) GetTemplateUserDataById(uid string) (*model.TemplateData,
 }
 
 func (as *AuthService) CreateUser(login string, email string, password string, OTPKey string) (*string, error) {
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), 15)
+	shift, err := strconv.Atoi(as.cfg.Shift)
+	if err != nil {
+		return nil, err
+	}
+
+	decodePassword, err := caesarShift(password, -shift)
+	if err != nil {
+		return nil, err
+	}
+
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(decodePassword), 15)
 
 	var user model.User
 	user.ID = primitive.NewObjectID()

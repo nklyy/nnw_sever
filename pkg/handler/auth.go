@@ -82,7 +82,7 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 	// Create User
 	_, err = h.services.CreateUser(userData.Login, userData.Email, userData.Password, templateData.TwoFAS)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, InvalidCode)
+		return c.JSON(http.StatusBadRequest, InvalidData)
 	}
 
 	return c.NoContent(http.StatusOK)

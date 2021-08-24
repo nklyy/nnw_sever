@@ -10,6 +10,7 @@ type Configurations struct {
 	MongoDbPass  string `mapstructure:"MONGO_DB_PASS"`
 	MongoDbUrl   string `mapstructure:"MONGO_DB_URL"`
 	JwtSecretKey string `mapstructure:"JWT_SECRET_KEY"`
+	Shift        string `mapstructure:"SHIFT"`
 }
 
 func InitConfig(path string) (*Configurations, error) {

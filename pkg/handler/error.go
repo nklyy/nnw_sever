@@ -12,6 +12,7 @@ var (
 
 	InvalidJson     = echo.Map{"error": errors.New(" Invalid json!").Error()}
 	InvalidCode     = echo.Map{"error": errors.New(" Invalid code!").Error()}
+	InvalidData     = echo.Map{"error": errors.New(" Invalid data!").Error()}
 	InvalidPassword = echo.Map{"error": errors.New(" Invalid password!").Error()}
 
 	UserAlreadyExist = echo.Map{"error": errors.New(" User already exist!").Error()}

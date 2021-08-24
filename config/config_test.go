@@ -14,6 +14,7 @@ func TestInit(t *testing.T) {
 		mongoDbPass  string
 		mongoDbName  string
 		jwtSecretKey string
+		shift        string
 	}
 
 	type args struct {
@@ -28,6 +29,7 @@ func TestInit(t *testing.T) {
 		os.Setenv("MONGO_DB_PASS", env.mongoDbPass)
 		os.Setenv("MONGO_DB_URL", env.mongoDbUrl)
 		os.Setenv("JWT_SECRET_KEY", env.jwtSecretKey)
+		os.Setenv("SHIFT", env.shift)
 	}
 
 	tests := []struct {
@@ -46,6 +48,7 @@ func TestInit(t *testing.T) {
 					mongoDbPass:  "qwerty",
 					mongoDbUrl:   "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
 					jwtSecretKey: "123qwerty",
+					shift:        "123",
 				},
 				path: ".",
 			},
@@ -56,6 +59,7 @@ func TestInit(t *testing.T) {
 				MongoDbPass:  "qwerty",
 				MongoDbUrl:   "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
 				JwtSecretKey: "123qwerty",
+				Shift:        "123",
 			},
 		},
 	}
