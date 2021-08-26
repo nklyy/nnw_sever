@@ -11,6 +11,8 @@ type User struct {
 	Email        string             `bson:"email"`
 	Password     string             `bson:"password"`
 	SecretOTPKey string             `bson:"secret_otp_key"`
+	CreatedAt    time.Time          `bson:"created_at"`
+	UpdatedAt    time.Time          `bson:"updated_at"`
 }
 
 type TemplateData struct {

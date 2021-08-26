@@ -8,6 +8,8 @@ import (
 	"nnw_s/pkg/repository"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type Authorization interface {
 	GetUserById(userId string) (*model.User, error)
 	GetUserByLogin(login string) (*model.User, error)

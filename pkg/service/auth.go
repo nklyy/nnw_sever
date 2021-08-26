@@ -88,6 +88,8 @@ func (as *AuthService) CreateUser(login string, email string, password string, O
 	user.Email = email
 	user.Password = string(hashPassword)
 	user.SecretOTPKey = OTPKey
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
 
 	id, err := as.repo.CreateUserDb(user)
 	if err != nil {
