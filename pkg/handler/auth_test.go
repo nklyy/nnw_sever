@@ -20,6 +20,7 @@ func TestHandler_checkUserName(t *testing.T) {
 		name           string
 		inputBody      string
 		inputUser      *model.User
+		urlPath        string
 		mockBehavior   mockBehavior
 		expectedStatus int
 	}{
@@ -29,6 +30,7 @@ func TestHandler_checkUserName(t *testing.T) {
 			inputUser: &model.User{
 				Login: "login",
 			},
+			urlPath: "/v1/checkLogin",
 			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
 				r.EXPECT().GetUserByLogin(User.Login).Return(nil, nil)
 			},
@@ -40,6 +42,7 @@ func TestHandler_checkUserName(t *testing.T) {
 			inputUser: &model.User{
 				Login: "login",
 			},
+			urlPath: "/v1/checkLogin",
 			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
 				r.EXPECT().GetUserByLogin(User.Login).Return(User, nil)
 			},
@@ -61,7 +64,7 @@ func TestHandler_checkUserName(t *testing.T) {
 			app := echo.New()
 			handler.InitialRoute(app)
 
-			req := httptest.NewRequest(http.MethodPost, "/v1/checkLogin", bytes.NewBufferString(test.inputBody))
+			req := httptest.NewRequest(http.MethodPost, test.urlPath, bytes.NewBufferString(test.inputBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 			rec := httptest.NewRecorder()
