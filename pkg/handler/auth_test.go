@@ -19,20 +19,31 @@ func TestHandler_checkUserName(t *testing.T) {
 	tests := []struct {
 		name           string
 		inputBody      string
-		inputTUser     *model.User
+		inputUser      *model.User
 		mockBehavior   mockBehavior
 		expectedStatus int
 	}{
 		{
 			name:      "OK",
 			inputBody: `{"login": "login"}`,
-			inputTUser: &model.User{
+			inputUser: &model.User{
 				Login: "login",
 			},
 			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
 				r.EXPECT().GetUserByLogin(User.Login).Return(nil, nil)
 			},
 			expectedStatus: 200,
+		},
+		{
+			name:      "FAIL",
+			inputBody: `{"login": "login"}`,
+			inputUser: &model.User{
+				Login: "login",
+			},
+			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
+				r.EXPECT().GetUserByLogin(User.Login).Return(User, nil)
+			},
+			expectedStatus: 400,
 		},
 	}
 
@@ -42,7 +53,7 @@ func TestHandler_checkUserName(t *testing.T) {
 			defer controller.Finish()
 
 			repo := mock_service.NewMockAuthorization(controller)
-			test.mockBehavior(repo, test.inputTUser)
+			test.mockBehavior(repo, test.inputUser)
 
 			services := &service.Service{Authorization: repo}
 			handler := Handler{services: services}
@@ -56,7 +67,7 @@ func TestHandler_checkUserName(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := app.NewContext(req, rec)
 
-			if assert.NoError(t, handler.checkUserName(c)) {
+			if assert.NoError(t, handler.checkLogin(c)) {
 				assert.Equal(t, test.expectedStatus, rec.Code)
 			}
 		})

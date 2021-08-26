@@ -143,7 +143,7 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{"token": jwtToken})
 }
 
-func (h *Handler) checkUserName(c echo.Context) error {
+func (h *Handler) checkLogin(c echo.Context) error {
 	userData := new(userData)
 
 	// Parse User Data

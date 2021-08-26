@@ -32,7 +32,7 @@ func (h *Handler) InitialRoute(route *echo.Echo) {
 		v1.POST("/login", h.login)
 		v1.POST("/verifyLogin2fa", h.verifyLogin2fa)
 
-		v1.POST("/checkLogin", h.checkUserName)
+		v1.POST("/checkLogin", h.checkLogin)
 		v1.POST("/checkJwt", h.checkJwt)
 	}
 
