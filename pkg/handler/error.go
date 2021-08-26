@@ -20,3 +20,7 @@ var (
 
 	WrongToken = echo.Map{"error": errors.New(" Wrong token!").Error()}
 )
+
+func requiredField(field string) echo.Map {
+	return echo.Map{"error": errors.New(field + " is required!").Error()}
+}

@@ -17,12 +17,13 @@ func TestHandler_checkUserName(t *testing.T) {
 	type mockBehavior func(r *mock_service.MockAuthorization, tUser *model.User)
 
 	tests := []struct {
-		name           string
-		inputBody      string
-		inputUser      *model.User
-		urlPath        string
-		mockBehavior   mockBehavior
-		expectedStatus int
+		name                string
+		inputBody           string
+		inputUser           *model.User
+		urlPath             string
+		mockBehavior        mockBehavior
+		expectedStatus      int
+		expectedRequestBody string
 	}{
 		{
 			name:      "OK",
@@ -34,7 +35,8 @@ func TestHandler_checkUserName(t *testing.T) {
 			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
 				r.EXPECT().GetUserByLogin(User.Login).Return(nil, nil)
 			},
-			expectedStatus: 200,
+			expectedStatus:      200,
+			expectedRequestBody: "",
 		},
 		{
 			name:      "FAIL",
@@ -46,7 +48,26 @@ func TestHandler_checkUserName(t *testing.T) {
 			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
 				r.EXPECT().GetUserByLogin(User.Login).Return(User, nil)
 			},
+			expectedStatus:      400,
+			expectedRequestBody: "",
+		},
+		{
+			name:           "Required Login field!",
+			inputBody:      `{"loginnnn": "login"}`,
+			urlPath:        "/v1/checkLogin",
+			mockBehavior:   func(r *mock_service.MockAuthorization, User *model.User) {},
 			expectedStatus: 400,
+			expectedRequestBody: `{"error":"Login is required!"}
+`,
+		},
+		{
+			name:           "Empty Fields",
+			inputBody:      `{"login"}`,
+			urlPath:        "/v1/checkLogin",
+			mockBehavior:   func(r *mock_service.MockAuthorization, User *model.User) {},
+			expectedStatus: 400,
+			expectedRequestBody: `{"error":" Invalid json!"}
+`,
 		},
 	}
 
@@ -72,6 +93,7 @@ func TestHandler_checkUserName(t *testing.T) {
 
 			if assert.NoError(t, handler.checkLogin(c)) {
 				assert.Equal(t, test.expectedStatus, rec.Code)
+				assert.Equal(t, test.expectedRequestBody, rec.Body.String())
 			}
 		})
 	}

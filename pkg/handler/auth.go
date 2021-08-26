@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"github.com/pquerna/otp/totp"
 	"net/http"
@@ -19,10 +20,11 @@ type Token struct {
 }
 
 func (h *Handler) registration(c echo.Context) error {
-	userData := new(userData)
+	var userData userData
 
 	// Parse User Data
-	if err := c.Bind(userData); err != nil {
+	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
@@ -59,10 +61,11 @@ func (h *Handler) registration(c echo.Context) error {
 }
 
 func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
-	userData := new(userData)
+	var userData userData
 
 	// Parse User Data
-	if err := c.Bind(userData); err != nil {
+	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
@@ -88,10 +91,11 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 }
 
 func (h *Handler) login(c echo.Context) error {
-	userData := new(userData)
+	var userData userData
 
 	// Parse User Data
-	if err := c.Bind(userData); err != nil {
+	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
@@ -115,10 +119,11 @@ func (h *Handler) login(c echo.Context) error {
 }
 
 func (h *Handler) verifyLogin2fa(c echo.Context) error {
-	userData := new(userData)
+	var userData userData
 
 	// Parse User Data
-	if err := c.Bind(userData); err != nil {
+	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
@@ -144,11 +149,16 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 }
 
 func (h *Handler) checkLogin(c echo.Context) error {
-	userData := new(userData)
+	var userData userData
 
 	// Parse User Data
-	if err := c.Bind(userData); err != nil {
+	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
+	}
+
+	if userData.Login == "" {
+		return c.JSON(http.StatusBadRequest, requiredField("Login"))
 	}
 
 	// Find User
@@ -165,14 +175,15 @@ func (h *Handler) checkLogin(c echo.Context) error {
 }
 
 func (h *Handler) checkJwt(c echo.Context) error {
-	token := new(Token)
+	var token Token
 
 	// Parse User Data
-	if err := c.Bind(token); err != nil {
+	err := json.NewDecoder(c.Request().Body).Decode(&token)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
-	_, err := h.services.VerifyJWTToken(token.Token)
+	_, err = h.services.VerifyJWTToken(token.Token)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, WrongToken)
 	}
