@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/config"
@@ -10,12 +11,14 @@ import (
 type Handler struct {
 	services *service.Service
 	cfg      config.Configurations
+	validate *validator.Validate
 }
 
-func NewHandler(services *service.Service, cfg config.Configurations) *Handler {
+func NewHandler(services *service.Service, cfg config.Configurations, v *validator.Validate) *Handler {
 	return &Handler{
 		services: services,
 		cfg:      cfg,
+		validate: v,
 	}
 }
 

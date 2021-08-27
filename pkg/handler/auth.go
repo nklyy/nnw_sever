@@ -2,40 +2,77 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/pquerna/otp/totp"
 	"net/http"
+	"nnw_s/config"
 )
 
-type userData struct {
-	Login    string `json:"login"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Code     string `json:"code"`
-	Uid      string `json:"uid"`
+type UserRegistrationDataRequest struct {
+	Login    string `json:"login" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,passwd"`
 }
 
-type Token struct {
-	Token string `json:"token"`
+type VerifyRegistrationCodeRequest struct {
+	Login    string `json:"login" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,passwd"`
+	Code     string `json:"code" validate:"required"`
+	Uid      string `json:"uid" validate:"required"`
+}
+
+type UserLoginDataRequest struct {
+	Login    string `json:"login" validate:"required"`
+	Password string `json:"password" validate:"required,passwd"`
+}
+
+type VerifyLoginCodeRequest struct {
+	Login    string `json:"login" validate:"required"`
+	Password string `json:"password" validate:"required,passwd"`
+	Code     string `json:"code" validate:"required"`
+}
+
+type CheckLoginRequest struct {
+	Login string `json:"login" validate:"required"`
+}
+
+type CheckTokenRequest struct {
+	Token string `json:"token" validate:"required"`
 }
 
 func (h *Handler) registration(c echo.Context) error {
-	var userData userData
+	var registrationUserData UserRegistrationDataRequest
 
 	// Parse User Data
-	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	err := json.NewDecoder(c.Request().Body).Decode(&registrationUserData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
+	// Translation
+	trans := config.ValidatorConfig(h.validate)
+
+	// Validate Body
+	err = h.validate.Struct(registrationUserData)
+	if err != nil {
+		var errArray []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errArray = append(errArray, e.Translate(trans))
+		}
+
+		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+	}
+
 	// Find user
-	user, _ := h.services.GetUserByLogin(userData.Login)
+	user, _ := h.services.GetUserByLogin(registrationUserData.Login)
 	if user != nil {
 		return c.JSON(http.StatusBadRequest, UserAlreadyExist)
 	}
 
 	// Generate 2FA Image
-	buffImg, key, err := h.services.Generate2FaImage(userData.Login)
+	buffImg, key, err := h.services.Generate2FaImage(registrationUserData.Login)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, InternalServerError)
 	}
@@ -61,28 +98,42 @@ func (h *Handler) registration(c echo.Context) error {
 }
 
 func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
-	var userData userData
+	var verifyRegistrationCode VerifyRegistrationCodeRequest
 
 	// Parse User Data
-	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	err := json.NewDecoder(c.Request().Body).Decode(&verifyRegistrationCode)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
+	// Translation
+	trans := config.ValidatorConfig(h.validate)
+
+	// Validate Body
+	err = h.validate.Struct(verifyRegistrationCode)
+	if err != nil {
+		var errArray []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errArray = append(errArray, e.Translate(trans))
+		}
+
+		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+	}
+
 	// Get Secret
-	templateData, err := h.services.GetTemplateUserDataById(userData.Uid)
+	templateData, err := h.services.GetTemplateUserDataById(verifyRegistrationCode.Uid)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, InternalServerError)
 	}
 
 	// Check Valid 2FA Code
-	valid := totp.Validate(userData.Code, templateData.TwoFAS)
+	valid := totp.Validate(verifyRegistrationCode.Code, templateData.TwoFAS)
 	if !valid {
 		return c.JSON(http.StatusBadRequest, InvalidCode)
 	}
 
 	// Create User
-	_, err = h.services.CreateUser(userData.Login, userData.Email, userData.Password, templateData.TwoFAS)
+	_, err = h.services.CreateUser(verifyRegistrationCode.Login, verifyRegistrationCode.Email, verifyRegistrationCode.Password, templateData.TwoFAS)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidData)
 	}
@@ -91,22 +142,36 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 }
 
 func (h *Handler) login(c echo.Context) error {
-	var userData userData
+	var userLoginData UserLoginDataRequest
 
 	// Parse User Data
-	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	err := json.NewDecoder(c.Request().Body).Decode(&userLoginData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
+	// Translation
+	trans := config.ValidatorConfig(h.validate)
+
+	// Validate Body
+	err = h.validate.Struct(userLoginData)
+	if err != nil {
+		var errArray []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errArray = append(errArray, e.Translate(trans))
+		}
+
+		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+	}
+
 	// Find user
-	user, err := h.services.GetUserByLogin(userData.Login)
+	user, err := h.services.GetUserByLogin(userLoginData.Login)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, UserNotFound)
 	}
 
 	// Check password
-	validPass, err := h.services.CheckPassword(userData.Password, user.Password)
+	validPass, err := h.services.CheckPassword(userLoginData.Password, user.Password)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, InternalServerError)
 	}
@@ -119,28 +184,42 @@ func (h *Handler) login(c echo.Context) error {
 }
 
 func (h *Handler) verifyLogin2fa(c echo.Context) error {
-	var userData userData
+	var verifyLoginCode VerifyLoginCodeRequest
 
 	// Parse User Data
-	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	err := json.NewDecoder(c.Request().Body).Decode(&verifyLoginCode)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
+	// Translation
+	trans := config.ValidatorConfig(h.validate)
+
+	// Validate Body
+	err = h.validate.Struct(verifyLoginCode)
+	if err != nil {
+		var errArray []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errArray = append(errArray, e.Translate(trans))
+		}
+
+		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+	}
+
 	// Find user
-	user, err := h.services.GetUserByLogin(userData.Login)
+	user, err := h.services.GetUserByLogin(verifyLoginCode.Login)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, UserNotFound)
 	}
 
 	// Check Valid 2FA Code
-	valid := totp.Validate(userData.Code, user.SecretOTPKey)
+	valid := totp.Validate(verifyLoginCode.Code, user.SecretOTPKey)
 	if !valid {
 		return c.JSON(http.StatusBadRequest, InvalidCode)
 	}
 
 	// Create JWT
-	jwtToken, err := h.services.CreateJWTToken(userData.Login)
+	jwtToken, err := h.services.CreateJWTToken(verifyLoginCode.Login)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, InternalServerError)
 	}
@@ -149,25 +228,35 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 }
 
 func (h *Handler) checkLogin(c echo.Context) error {
-	var userData userData
+	var checkLoginData CheckLoginRequest
 
 	// Parse User Data
-	err := json.NewDecoder(c.Request().Body).Decode(&userData)
+	err := json.NewDecoder(c.Request().Body).Decode(&checkLoginData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
-	if userData.Login == "" {
-		return c.JSON(http.StatusBadRequest, requiredField("Login"))
+	// Translation
+	trans := config.ValidatorConfig(h.validate)
+
+	// Validate Body
+	err = h.validate.Struct(checkLoginData)
+	if err != nil {
+		var errArray []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errArray = append(errArray, e.Translate(trans))
+		}
+
+		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
 	}
 
 	// Find User
-	user, _ := h.services.GetUserByLogin(userData.Login)
+	user, err := h.services.GetUserByLogin(checkLoginData.Login)
 	if user == nil {
 		return c.NoContent(http.StatusOK)
 	}
 
-	if user.Login == userData.Login {
+	if user.Login == checkLoginData.Login {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
@@ -175,15 +264,29 @@ func (h *Handler) checkLogin(c echo.Context) error {
 }
 
 func (h *Handler) checkJwt(c echo.Context) error {
-	var token Token
+	var checkTokenData CheckTokenRequest
 
 	// Parse User Data
-	err := json.NewDecoder(c.Request().Body).Decode(&token)
+	err := json.NewDecoder(c.Request().Body).Decode(&checkTokenData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
 
-	_, err = h.services.VerifyJWTToken(token.Token)
+	// Translation
+	trans := config.ValidatorConfig(h.validate)
+
+	// Validate Body
+	err = h.validate.Struct(checkTokenData)
+	if err != nil {
+		var errArray []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errArray = append(errArray, e.Translate(trans))
+		}
+
+		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+	}
+
+	_, err = h.services.VerifyJWTToken(checkTokenData.Token)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, WrongToken)
 	}

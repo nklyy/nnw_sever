@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
@@ -36,10 +37,13 @@ func Execute() {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
+	// Set up validator
+	validate := validator.New()
+
 	// Init repository, service and handlers
 	newRepository := repository.NewRepository(db, *cfg)
 	newService := service.NewService(newRepository, *cfg)
-	newHandler := handler.NewHandler(newService, *cfg)
+	newHandler := handler.NewHandler(newService, *cfg, validate)
 
 	newHandler.InitialRoute(app)
 
