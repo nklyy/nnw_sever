@@ -144,6 +144,7 @@ func (as *AuthService) Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, 
 }
 
 func (as *AuthService) CreateJWTToken(login string) (string, error) {
+	// Create JWT
 	payload := &Payload{
 		Login:     login,
 		IssuedAt:  time.Now(),
@@ -151,11 +152,34 @@ func (as *AuthService) CreateJWTToken(login string) (string, error) {
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	signedToken, err := jwtToken.SignedString([]byte(as.cfg.JwtSecretKey))
+	if err != nil {
+		return "", err
+	}
 
-	return jwtToken.SignedString([]byte(as.cfg.JwtSecretKey))
+	// Create JWT in DataBase
+	var jwtData model.JWTData
+	jwtData.ID = primitive.NewObjectID()
+	jwtData.Jwt = signedToken
+	jwtData.CreatedAt = time.Now()
+	jwtData.UpdatedAt = time.Now()
+
+	id, err := as.repo.CreateJwtDb(jwtData)
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
 }
 
-func (as *AuthService) VerifyJWTToken(token string) (*string, error) {
+func (as *AuthService) VerifyJWTToken(id string) (*string, error) {
+	// Get Jwt from DataBase
+	token, err := as.repo.GetJwtDb(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify JWT
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -164,7 +188,7 @@ func (as *AuthService) VerifyJWTToken(token string) (*string, error) {
 		return []byte(as.cfg.JwtSecretKey), nil
 	}
 
-	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc)
+	jwtToken, err := jwt.ParseWithClaims(*token, &Payload{}, keyFunc)
 	if err != nil {
 		ver, ok := err.(*jwt.ValidationError)
 		if ok && errors.Is(ver.Inner, errors.New("token has expired")) {

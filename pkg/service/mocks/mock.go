@@ -158,16 +158,16 @@ func (mr *MockAuthorizationMockRecorder) GetUserByLogin(login interface{}) *gomo
 }
 
 // VerifyJWTToken mocks base method.
-func (m *MockAuthorization) VerifyJWTToken(token string) (*string, error) {
+func (m *MockAuthorization) VerifyJWTToken(id string) (*string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyJWTToken", token)
+	ret := m.ctrl.Call(m, "VerifyJWTToken", id)
 	ret0, _ := ret[0].(*string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // VerifyJWTToken indicates an expected call of VerifyJWTToken.
-func (mr *MockAuthorizationMockRecorder) VerifyJWTToken(token interface{}) *gomock.Call {
+func (mr *MockAuthorizationMockRecorder) VerifyJWTToken(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyJWTToken", reflect.TypeOf((*MockAuthorization)(nil).VerifyJWTToken), token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyJWTToken", reflect.TypeOf((*MockAuthorization)(nil).VerifyJWTToken), id)
 }

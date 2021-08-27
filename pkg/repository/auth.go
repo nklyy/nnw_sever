@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"nnw_s/config"
@@ -47,6 +48,22 @@ func (ar *AuthMongo) GetTemplateUserDataByIdDb(uid string) (*model.TemplateData,
 	return &templateUser, nil
 }
 
+func (ar *AuthMongo) GetJwtDb(id string) (*string, error) {
+	var jwtData model.JWTData
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ar.db.Collection("jwt").FindOne(context.TODO(), bson.M{"_id": objectId}).Decode(&jwtData)
+	if err != nil {
+		return nil, err
+	}
+
+	return &jwtData.Jwt, nil
+}
+
 func (ar *AuthMongo) CreateUserDb(user model.User) (*string, error) {
 	mod := mongo.IndexModel{
 		Keys:    bson.M{"login": 1}, // index in ascending order or -1 for descending order
@@ -83,4 +100,23 @@ func (ar *AuthMongo) CreateTemplateUserDataDb(templateData model.TemplateData) (
 	}
 
 	return &templateData.Uid, nil
+}
+
+func (ar *AuthMongo) CreateJwtDb(jwtData model.JWTData) (string, error) {
+	mod := mongo.IndexModel{
+		Keys:    bson.M{"created_at": 1}, // index in ascending order or -1 for descending order
+		Options: options.Index().SetExpireAfterSeconds(60),
+	}
+
+	_, err := ar.db.Collection("jwt").Indexes().CreateOne(context.TODO(), mod)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = ar.db.Collection("jwt").InsertOne(context.TODO(), jwtData)
+	if err != nil {
+		return "", err
+	}
+
+	return jwtData.ID.Hex(), nil
 }

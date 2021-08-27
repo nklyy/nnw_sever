@@ -19,7 +19,7 @@ type Authorization interface {
 	CreateTemplateUserData(secret string) (*string, error)
 
 	CreateJWTToken(login string) (string, error)
-	VerifyJWTToken(token string) (*string, error)
+	VerifyJWTToken(id string) (*string, error)
 
 	Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, error)
 
