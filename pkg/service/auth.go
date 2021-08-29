@@ -143,6 +143,10 @@ func (as *AuthService) Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, 
 	return &bufImage, key, nil
 }
 
+func (as *AuthService) Check2FaCode(code string, secret string) bool {
+	return totp.Validate(code, secret)
+}
+
 func (as *AuthService) CreateJWTToken(login string) (string, error) {
 	// Create JWT
 	payload := &Payload{

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/pquerna/otp/totp"
 	"net/http"
 	"nnw_s/config"
 )
@@ -127,7 +126,7 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 	}
 
 	// Check Valid 2FA Code
-	valid := totp.Validate(verifyRegistrationCode.Code, templateData.TwoFAS)
+	valid := h.services.Check2FaCode(verifyRegistrationCode.Code, templateData.TwoFAS)
 	if !valid {
 		return c.JSON(http.StatusBadRequest, InvalidCode)
 	}
@@ -213,7 +212,7 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 	}
 
 	// Check Valid 2FA Code
-	valid := totp.Validate(verifyLoginCode.Code, user.SecretOTPKey)
+	valid := h.services.Check2FaCode(verifyLoginCode.Code, user.SecretOTPKey)
 	if !valid {
 		return c.JSON(http.StatusBadRequest, InvalidCode)
 	}

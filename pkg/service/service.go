@@ -22,6 +22,7 @@ type Authorization interface {
 	VerifyJWTToken(id string) (*string, error)
 
 	Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, error)
+	Check2FaCode(code string, secret string) bool
 
 	CheckPassword(password string, hashPassword string) (bool, error)
 }

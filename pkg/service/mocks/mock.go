@@ -36,6 +36,20 @@ func (m *MockAuthorization) EXPECT() *MockAuthorizationMockRecorder {
 	return m.recorder
 }
 
+// Check2FaCode mocks base method.
+func (m *MockAuthorization) Check2FaCode(code, secret string) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Check2FaCode", code, secret)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// Check2FaCode indicates an expected call of Check2FaCode.
+func (mr *MockAuthorizationMockRecorder) Check2FaCode(code, secret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check2FaCode", reflect.TypeOf((*MockAuthorization)(nil).Check2FaCode), code, secret)
+}
+
 // CheckPassword mocks base method.
 func (m *MockAuthorization) CheckPassword(password, hashPassword string) (bool, error) {
 	m.ctrl.T.Helper()
