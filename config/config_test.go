@@ -15,6 +15,7 @@ func TestInit(t *testing.T) {
 		mongoDbName  string
 		jwtSecretKey string
 		shift        string
+		passwordSalt string
 	}
 
 	type args struct {
@@ -30,6 +31,7 @@ func TestInit(t *testing.T) {
 		os.Setenv("MONGO_DB_URL", env.mongoDbUrl)
 		os.Setenv("JWT_SECRET_KEY", env.jwtSecretKey)
 		os.Setenv("SHIFT", env.shift)
+		os.Setenv("PASSWORD_SALT", env.passwordSalt)
 	}
 
 	tests := []struct {
@@ -49,8 +51,9 @@ func TestInit(t *testing.T) {
 					mongoDbUrl:   "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
 					jwtSecretKey: "123qwerty",
 					shift:        "123",
+					passwordSalt: "123",
 				},
-				path: ".",
+				path: "..",
 			},
 			want: &Configurations{
 				PORT:         ":4000",
@@ -60,6 +63,7 @@ func TestInit(t *testing.T) {
 				MongoDbUrl:   "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
 				JwtSecretKey: "123qwerty",
 				Shift:        "123",
+				PasswordSalt: "123",
 			},
 		},
 	}
@@ -68,7 +72,7 @@ func TestInit(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			setEnv(test.args.env)
 
-			got, err := InitConfig(test.args.path)
+			got, err := InitConfig(test.args.path, "")
 			if (err != nil) != test.wantError {
 				t.Errorf("Init() error = %v, wantErr %v", err, test.wantError)
 

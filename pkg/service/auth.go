@@ -75,12 +75,17 @@ func (as *AuthService) CreateUser(login string, email string, password string, O
 		return nil, err
 	}
 
+	salt, err := strconv.Atoi(as.cfg.PasswordSalt)
+	if err != nil {
+		return nil, err
+	}
+
 	decodePassword, err := caesarShift(password, -shift)
 	if err != nil {
 		return nil, err
 	}
 
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(decodePassword), 15)
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(decodePassword), salt)
 
 	var user model.User
 	user.ID = primitive.NewObjectID()
