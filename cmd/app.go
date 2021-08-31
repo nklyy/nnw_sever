@@ -59,7 +59,7 @@ func Execute() {
 	}
 
 	// Starting App
-	err = app.Start(cfg.PORT)
+	err = app.Start(":" + cfg.PORT)
 	if err != nil {
 		fmt.Printf("ERROR: %s \n", err)
 		return
