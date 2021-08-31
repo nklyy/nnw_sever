@@ -14,7 +14,7 @@ import (
 
 func Execute() {
 	// Init config
-	path := "config"
+	path := "."
 	cfg, err := config.InitConfig(path)
 	if err != nil {
 		fmt.Printf("ERROR: %s \n", err)
