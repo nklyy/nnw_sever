@@ -63,6 +63,8 @@ func setFromEnv(cfg *Configurations) {
 
 	cfg.Shift = os.Getenv("SHIFT")
 	cfg.PasswordSalt = os.Getenv("PASSWORD_SALT")
+
+	cfg.PORT = os.Getenv("PORT")
 }
 
 func ValidatorConfig(v *validator.Validate) ut.Translator {
