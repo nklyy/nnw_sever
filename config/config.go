@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/spf13/viper"
+	"os"
 	"unicode"
 )
 
@@ -19,9 +20,17 @@ type Configurations struct {
 	MongoDbUrl   string `mapstructure:"MONGO_DB_URL"`
 	JwtSecretKey string `mapstructure:"JWT_SECRET_KEY"`
 	Shift        string `mapstructure:"SHIFT"`
+	PasswordSalt string `mapstructure:"PASSWORD_SALT"`
 }
 
-func InitConfig(path string) (*Configurations, error) {
+func InitConfig(path string, env string) (*Configurations, error) {
+	var configuration Configurations
+
+	if env == "PRODUCTION" {
+		setFromEnv(&configuration)
+		return &configuration, nil
+	}
+
 	viper.AddConfigPath(path)
 
 	viper.SetConfigName(".env")
@@ -35,7 +44,6 @@ func InitConfig(path string) (*Configurations, error) {
 		return nil, err
 	}
 
-	var configuration Configurations
 	err = viper.Unmarshal(&configuration)
 	if err != nil {
 		//fmt.Printf("Unable to decode into struct, %v", err)
@@ -43,6 +51,18 @@ func InitConfig(path string) (*Configurations, error) {
 	}
 
 	return &configuration, nil
+}
+
+func setFromEnv(cfg *Configurations) {
+	cfg.MongoDbName = os.Getenv("MONGO_DB_NAME")
+	cfg.MongoDbUser = os.Getenv("MONGO_DB_USER")
+	cfg.MongoDbPass = os.Getenv("MONGO_DB_PASS")
+	cfg.MongoDbUrl = os.Getenv("MONGO_DB_URL")
+
+	cfg.JwtSecretKey = os.Getenv("JWT_SECRET_KEY")
+
+	cfg.Shift = os.Getenv("SHIFT")
+	cfg.PasswordSalt = os.Getenv("PASSWORD_SALT")
 }
 
 func ValidatorConfig(v *validator.Validate) ut.Translator {

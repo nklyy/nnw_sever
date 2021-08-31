@@ -10,12 +10,13 @@ import (
 	"nnw_s/pkg/handler"
 	"nnw_s/pkg/repository"
 	"nnw_s/pkg/service"
+	"os"
 )
 
 func Execute() {
 	// Init config
 	path := "."
-	cfg, err := config.InitConfig(path)
+	cfg, err := config.InitConfig(path, os.Getenv("APP_ENV"))
 	if err != nil {
 		fmt.Printf("ERROR: %s \n", err)
 		return
