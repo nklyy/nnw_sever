@@ -23,7 +23,7 @@ type AuthService struct {
 }
 
 type Payload struct {
-	Login     string    `json:"login"`
+	Email     string    `json:"email"`
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
@@ -51,8 +51,8 @@ func (as *AuthService) GetUserById(userId string) (*model.User, error) {
 	return user, nil
 }
 
-func (as *AuthService) GetUserByLogin(login string) (*model.User, error) {
-	user, err := as.repo.GetUserByLoginDb(login)
+func (as *AuthService) GetUserByEmail(email string) (*model.User, error) {
+	user, err := as.repo.GetUserByEmailDb(email)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (as *AuthService) GetTemplateUserDataById(uid string) (*model.TemplateData,
 	return templateUserData, nil
 }
 
-func (as *AuthService) CreateUser(login string, email string, password string, OTPKey string) (*string, error) {
+func (as *AuthService) CreateUser(email string, password string, OTPKey string) (*string, error) {
 	shift, err := strconv.Atoi(as.cfg.Shift)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,6 @@ func (as *AuthService) CreateUser(login string, email string, password string, O
 
 	var user model.User
 	user.ID = primitive.NewObjectID()
-	user.Login = login
 	user.Email = email
 	user.Password = string(hashPassword)
 	user.SecretOTPKey = OTPKey
@@ -122,11 +121,11 @@ func (as *AuthService) CreateTemplateUserData(secret string) (*string, error) {
 	return id, err
 }
 
-func (as *AuthService) Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, error) {
+func (as *AuthService) Generate2FaImage(email string) (*bytes.Buffer, *otp.Key, error) {
 	// Generate 2FA Image
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "NNW",
-		AccountName: login,
+		AccountName: email,
 	})
 
 	if err != nil {
@@ -152,10 +151,10 @@ func (as *AuthService) Check2FaCode(code string, secret string) bool {
 	return totp.Validate(code, secret)
 }
 
-func (as *AuthService) CreateJWTToken(login string) (string, error) {
+func (as *AuthService) CreateJWTToken(email string) (string, error) {
 	// Create JWT
 	payload := &Payload{
-		Login:     login,
+		Email:     email,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(time.Second * 60),
 	}
@@ -211,12 +210,12 @@ func (as *AuthService) VerifyJWTToken(id string) (*string, error) {
 		return nil, errors.New("token is invalid")
 	}
 
-	user, err := as.repo.GetUserByLoginDb(payload.Login)
+	user, err := as.repo.GetUserByEmailDb(payload.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	return &user.Login, nil
+	return &user.Email, nil
 }
 
 func (as *AuthService) CheckPassword(password string, hashPassword string) (bool, error) {

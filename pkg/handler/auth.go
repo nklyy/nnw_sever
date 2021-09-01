@@ -9,13 +9,11 @@ import (
 )
 
 type UserRegistrationDataRequest struct {
-	Login    string `json:"login" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,passwd"`
 }
 
 type VerifyRegistrationCodeRequest struct {
-	Login    string `json:"login" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,passwd"`
 	Code     string `json:"code" validate:"required"`
@@ -23,18 +21,18 @@ type VerifyRegistrationCodeRequest struct {
 }
 
 type UserLoginDataRequest struct {
-	Login    string `json:"login" validate:"required"`
+	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required,passwd"`
 }
 
 type VerifyLoginCodeRequest struct {
-	Login    string `json:"login" validate:"required"`
+	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required,passwd"`
 	Code     string `json:"code" validate:"required"`
 }
 
-type CheckLoginRequest struct {
-	Login string `json:"login" validate:"required"`
+type CheckEmailRequest struct {
+	Email string `json:"email" validate:"required"`
 }
 
 type CheckTokenRequest struct {
@@ -65,13 +63,13 @@ func (h *Handler) registration(c echo.Context) error {
 	}
 
 	// Find user
-	user, _ := h.services.GetUserByLogin(registrationUserData.Login)
+	user, _ := h.services.GetUserByEmail(registrationUserData.Email)
 	if user != nil {
 		return c.JSON(http.StatusBadRequest, UserAlreadyExist)
 	}
 
 	// Generate 2FA Image
-	buffImg, key, err := h.services.Generate2FaImage(registrationUserData.Login)
+	buffImg, key, err := h.services.Generate2FaImage(registrationUserData.Email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, InternalServerError)
 	}
@@ -132,7 +130,7 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 	}
 
 	// Create User
-	_, err = h.services.CreateUser(verifyRegistrationCode.Login, verifyRegistrationCode.Email, verifyRegistrationCode.Password, templateData.TwoFAS)
+	_, err = h.services.CreateUser(verifyRegistrationCode.Email, verifyRegistrationCode.Password, templateData.TwoFAS)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidData)
 	}
@@ -164,7 +162,7 @@ func (h *Handler) login(c echo.Context) error {
 	}
 
 	// Find user
-	user, err := h.services.GetUserByLogin(userLoginData.Login)
+	user, err := h.services.GetUserByEmail(userLoginData.Email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, UserNotFound)
 	}
@@ -206,7 +204,7 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 	}
 
 	// Find user
-	user, err := h.services.GetUserByLogin(verifyLoginCode.Login)
+	user, err := h.services.GetUserByEmail(verifyLoginCode.Email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, UserNotFound)
 	}
@@ -218,7 +216,7 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 	}
 
 	// Create JWT
-	jwtToken, err := h.services.CreateJWTToken(verifyLoginCode.Login)
+	jwtToken, err := h.services.CreateJWTToken(verifyLoginCode.Email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, InternalServerError)
 	}
@@ -226,11 +224,11 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{"token": jwtToken})
 }
 
-func (h *Handler) checkLogin(c echo.Context) error {
-	var checkLoginData CheckLoginRequest
+func (h *Handler) checkEmail(c echo.Context) error {
+	var checkEmailData CheckEmailRequest
 
 	// Parse User Data
-	err := json.NewDecoder(c.Request().Body).Decode(&checkLoginData)
+	err := json.NewDecoder(c.Request().Body).Decode(&checkEmailData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, InvalidJson)
 	}
@@ -239,7 +237,7 @@ func (h *Handler) checkLogin(c echo.Context) error {
 	trans := config.ValidatorConfig(h.validate)
 
 	// Validate Body
-	err = h.validate.Struct(checkLoginData)
+	err = h.validate.Struct(checkEmailData)
 	if err != nil {
 		var errArray []string
 		for _, e := range err.(validator.ValidationErrors) {
@@ -250,12 +248,12 @@ func (h *Handler) checkLogin(c echo.Context) error {
 	}
 
 	// Find User
-	user, err := h.services.GetUserByLogin(checkLoginData.Login)
+	user, err := h.services.GetUserByEmail(checkEmailData.Email)
 	if user == nil {
 		return c.NoContent(http.StatusOK)
 	}
 
-	if user.Login == checkLoginData.Login {
+	if user.Email == checkEmailData.Email {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
