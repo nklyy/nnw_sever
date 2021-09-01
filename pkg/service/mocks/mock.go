@@ -66,18 +66,18 @@ func (mr *MockAuthorizationMockRecorder) CheckPassword(password, hashPassword in
 }
 
 // CreateJWTToken mocks base method.
-func (m *MockAuthorization) CreateJWTToken(login string) (string, error) {
+func (m *MockAuthorization) CreateJWTToken(email string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateJWTToken", login)
+	ret := m.ctrl.Call(m, "CreateJWTToken", email)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateJWTToken indicates an expected call of CreateJWTToken.
-func (mr *MockAuthorizationMockRecorder) CreateJWTToken(login interface{}) *gomock.Call {
+func (mr *MockAuthorizationMockRecorder) CreateJWTToken(email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateJWTToken", reflect.TypeOf((*MockAuthorization)(nil).CreateJWTToken), login)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateJWTToken", reflect.TypeOf((*MockAuthorization)(nil).CreateJWTToken), email)
 }
 
 // CreateTemplateUserData mocks base method.
@@ -96,24 +96,24 @@ func (mr *MockAuthorizationMockRecorder) CreateTemplateUserData(secret interface
 }
 
 // CreateUser mocks base method.
-func (m *MockAuthorization) CreateUser(login, email, password, OTPKey string) (*string, error) {
+func (m *MockAuthorization) CreateUser(email, password, OTPKey string) (*string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateUser", login, email, password, OTPKey)
+	ret := m.ctrl.Call(m, "CreateUser", email, password, OTPKey)
 	ret0, _ := ret[0].(*string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateUser indicates an expected call of CreateUser.
-func (mr *MockAuthorizationMockRecorder) CreateUser(login, email, password, OTPKey interface{}) *gomock.Call {
+func (mr *MockAuthorizationMockRecorder) CreateUser(email, password, OTPKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockAuthorization)(nil).CreateUser), login, email, password, OTPKey)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockAuthorization)(nil).CreateUser), email, password, OTPKey)
 }
 
 // Generate2FaImage mocks base method.
-func (m *MockAuthorization) Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, error) {
+func (m *MockAuthorization) Generate2FaImage(email string) (*bytes.Buffer, *otp.Key, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Generate2FaImage", login)
+	ret := m.ctrl.Call(m, "Generate2FaImage", email)
 	ret0, _ := ret[0].(*bytes.Buffer)
 	ret1, _ := ret[1].(*otp.Key)
 	ret2, _ := ret[2].(error)
@@ -121,9 +121,9 @@ func (m *MockAuthorization) Generate2FaImage(login string) (*bytes.Buffer, *otp.
 }
 
 // Generate2FaImage indicates an expected call of Generate2FaImage.
-func (mr *MockAuthorizationMockRecorder) Generate2FaImage(login interface{}) *gomock.Call {
+func (mr *MockAuthorizationMockRecorder) Generate2FaImage(email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate2FaImage", reflect.TypeOf((*MockAuthorization)(nil).Generate2FaImage), login)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate2FaImage", reflect.TypeOf((*MockAuthorization)(nil).Generate2FaImage), email)
 }
 
 // GetTemplateUserDataById mocks base method.
@@ -141,6 +141,21 @@ func (mr *MockAuthorizationMockRecorder) GetTemplateUserDataById(uid interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTemplateUserDataById", reflect.TypeOf((*MockAuthorization)(nil).GetTemplateUserDataById), uid)
 }
 
+// GetUserByEmail mocks base method.
+func (m *MockAuthorization) GetUserByEmail(email string) (*model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByEmail", email)
+	ret0, _ := ret[0].(*model.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByEmail indicates an expected call of GetUserByEmail.
+func (mr *MockAuthorizationMockRecorder) GetUserByEmail(email interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockAuthorization)(nil).GetUserByEmail), email)
+}
+
 // GetUserById mocks base method.
 func (m *MockAuthorization) GetUserById(userId string) (*model.User, error) {
 	m.ctrl.T.Helper()
@@ -154,21 +169,6 @@ func (m *MockAuthorization) GetUserById(userId string) (*model.User, error) {
 func (mr *MockAuthorizationMockRecorder) GetUserById(userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserById", reflect.TypeOf((*MockAuthorization)(nil).GetUserById), userId)
-}
-
-// GetUserByLogin mocks base method.
-func (m *MockAuthorization) GetUserByLogin(login string) (*model.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByLogin", login)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUserByLogin indicates an expected call of GetUserByLogin.
-func (mr *MockAuthorizationMockRecorder) GetUserByLogin(login interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByLogin", reflect.TypeOf((*MockAuthorization)(nil).GetUserByLogin), login)
 }
 
 // VerifyJWTToken mocks base method.

@@ -12,16 +12,16 @@ import (
 
 type Authorization interface {
 	GetUserById(userId string) (*model.User, error)
-	GetUserByLogin(login string) (*model.User, error)
+	GetUserByEmail(email string) (*model.User, error)
 	GetTemplateUserDataById(uid string) (*model.TemplateData, error)
 
-	CreateUser(login string, email string, password string, OTPKey string) (*string, error)
+	CreateUser(email string, password string, OTPKey string) (*string, error)
 	CreateTemplateUserData(secret string) (*string, error)
 
-	CreateJWTToken(login string) (string, error)
+	CreateJWTToken(email string) (string, error)
 	VerifyJWTToken(id string) (*string, error)
 
-	Generate2FaImage(login string) (*bytes.Buffer, *otp.Key, error)
+	Generate2FaImage(email string) (*bytes.Buffer, *otp.Key, error)
 	Check2FaCode(code string, secret string) bool
 
 	CheckPassword(password string, hashPassword string) (bool, error)

@@ -26,10 +26,10 @@ func (ar *AuthMongo) GetUserByIdDb(userId string) (*model.User, error) {
 	return nil, nil
 }
 
-func (ar *AuthMongo) GetUserByLoginDb(login string) (*model.User, error) {
+func (ar *AuthMongo) GetUserByEmailDb(email string) (*model.User, error) {
 	var user model.User
 
-	err := ar.db.Collection("user").FindOne(context.TODO(), bson.M{"login": login}).Decode(&user)
+	err := ar.db.Collection("user").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (ar *AuthMongo) GetJwtDb(id string) (*string, error) {
 
 func (ar *AuthMongo) CreateUserDb(user model.User) (*string, error) {
 	mod := mongo.IndexModel{
-		Keys:    bson.M{"login": 1}, // index in ascending order or -1 for descending order
+		Keys:    bson.M{"email": 1}, // index in ascending order or -1 for descending order
 		Options: options.Index().SetUnique(true),
 	}
 

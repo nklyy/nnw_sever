@@ -8,7 +8,7 @@ import (
 
 type Authorization interface {
 	GetUserByIdDb(userId string) (*model.User, error)
-	GetUserByLoginDb(login string) (*model.User, error)
+	GetUserByEmailDb(email string) (*model.User, error)
 	GetTemplateUserDataByIdDb(uid string) (*model.TemplateData, error)
 	GetJwtDb(id string) (*string, error)
 
