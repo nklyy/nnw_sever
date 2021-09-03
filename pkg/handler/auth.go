@@ -21,18 +21,18 @@ type VerifyRegistrationCodeRequest struct {
 }
 
 type UserLoginDataRequest struct {
-	Email    string `json:"email" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,passwd"`
 }
 
 type VerifyLoginCodeRequest struct {
-	Email    string `json:"email" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,passwd"`
 	Code     string `json:"code" validate:"required"`
 }
 
 type CheckEmailRequest struct {
-	Email string `json:"email" validate:"required"`
+	Email string `json:"email" validate:"required,email"`
 }
 
 type CheckTokenRequest struct {
