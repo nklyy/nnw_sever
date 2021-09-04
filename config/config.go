@@ -8,13 +8,20 @@ import (
 type Configurations struct {
 	PORT string `mapstructure:"PORT"`
 
-	MongoDbName  string `mapstructure:"MONGO_DB_NAME"`
-	MongoDbUser  string `mapstructure:"MONGO_DB_USER"`
-	MongoDbPass  string `mapstructure:"MONGO_DB_PASS"`
-	MongoDbUrl   string `mapstructure:"MONGO_DB_URL"`
+	MongoDbName string `mapstructure:"MONGO_DB_NAME"`
+	MongoDbUser string `mapstructure:"MONGO_DB_USER"`
+	MongoDbPass string `mapstructure:"MONGO_DB_PASS"`
+	MongoDbUrl  string `mapstructure:"MONGO_DB_URL"`
+
 	JwtSecretKey string `mapstructure:"JWT_SECRET_KEY"`
+
 	Shift        string `mapstructure:"SHIFT"`
 	PasswordSalt string `mapstructure:"PASSWORD_SALT"`
+
+	SmtpHost        string `mapstructure:"SMTP_HOST"`
+	SmtpPort        string `mapstructure:"SMTP_PORT"`
+	SmtpUserApiKey  string `mapstructure:"SMTP_USER_API_KEY"`
+	SmtpPasswordKey string `mapstructure:"SMTP_PASSWORD_KEY"`
 }
 
 func InitConfig(path string, env string) (*Configurations, error) {
@@ -59,4 +66,9 @@ func setFromEnv(cfg *Configurations) {
 	cfg.PasswordSalt = os.Getenv("PASSWORD_SALT")
 
 	cfg.PORT = os.Getenv("PORT")
+
+	cfg.SmtpHost = os.Getenv("SMTP_HOST")
+	cfg.SmtpPort = os.Getenv("SMTP_PORT")
+	cfg.SmtpUserApiKey = os.Getenv("SMTP_USER_API_KEY")
+	cfg.SmtpPasswordKey = os.Getenv("SMTP_PASSWORD_KEY")
 }
