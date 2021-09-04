@@ -31,8 +31,8 @@ type Service struct {
 	Authorization
 }
 
-func NewService(repos *repository.Repository, cfg config.Configurations) *Service {
+func NewService(repos *repository.Repository, cfg config.Configurations, emailClient config.SMTPClient) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization, cfg),
+		Authorization: NewAuthService(repos.Authorization, cfg, emailClient),
 	}
 }

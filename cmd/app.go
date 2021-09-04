@@ -11,6 +11,7 @@ import (
 	"nnw_s/pkg/repository"
 	"nnw_s/pkg/service"
 	"os"
+	"strconv"
 )
 
 func Execute() {
@@ -38,12 +39,20 @@ func Execute() {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
+	// Set-up SMTP
+	smtpPort, err := strconv.Atoi(cfg.SmtpPort)
+	if err != nil {
+		fmt.Println("ERROR: Incorrect SMTP PORT!")
+		return
+	}
+	emailClient := config.NewSMTPClient(cfg.SmtpHost, smtpPort, cfg.SmtpUserApiKey, cfg.SmtpPasswordKey)
+
 	// Set up validator
 	validate := validator.New()
 
 	// Init repository, service and handlers
 	newRepository := repository.NewRepository(db, *cfg)
-	newService := service.NewService(newRepository, *cfg)
+	newService := service.NewService(newRepository, *cfg, *emailClient)
 	newHandler := handler.NewHandler(newService, *cfg, validate)
 
 	newHandler.InitialRoute(app)

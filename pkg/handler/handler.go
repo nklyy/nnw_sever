@@ -27,7 +27,7 @@ func (h *Handler) InitialRoute(route *echo.Echo) {
 
 	// Auth
 	{
-		// Registration
+		// Registration and Verify Email
 		v1.POST("/registration", h.registration)
 		v1.POST("/verifyRegister2fa", h.verifyRegistration2FaCode)
 

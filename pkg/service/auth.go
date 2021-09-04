@@ -18,8 +18,9 @@ import (
 )
 
 type AuthService struct {
-	repo repository.Authorization
-	cfg  config.Configurations
+	repo        repository.Authorization
+	cfg         config.Configurations
+	emailClient config.SMTPClient
 }
 
 type Payload struct {
@@ -35,10 +36,11 @@ func (payload *Payload) Valid() error {
 	return nil
 }
 
-func NewAuthService(repo repository.Authorization, cfg config.Configurations) *AuthService {
+func NewAuthService(repo repository.Authorization, cfg config.Configurations, emailClient config.SMTPClient) *AuthService {
 	return &AuthService{
-		repo: repo,
-		cfg:  cfg,
+		repo:        repo,
+		cfg:         cfg,
+		emailClient: emailClient,
 	}
 }
 
