@@ -29,9 +29,9 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 	}{
 		{
 			name:      "OK",
-			inputBody: `{"email": "email", "password": "passwordA1", "code": "code"}`,
+			inputBody: `{"email": "test@gmail.com", "password": "passwordA1", "code": "code"}`,
 			inputUser: &user.User{
-				Email:        "email",
+				Email:        "test@gmail.com",
 				Password:     "password",
 				SecretOTPKey: "secret",
 			},
@@ -65,9 +65,9 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 		},
 		{
 			name:      "Not found user!",
-			inputBody: `{"email": "email", "password": "passwordA1", "code": "code"}`,
+			inputBody: `{"email": "test@gmail.com", "password": "passwordA1", "code": "code"}`,
 			inputUser: &user.User{
-				Email:        "email",
+				Email:        "test@gmail.com",
 				Password:     "password",
 				SecretOTPKey: "secret",
 			},
@@ -81,9 +81,9 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 		},
 		{
 			name:      "Invalid code!",
-			inputBody: `{"email": "email", "password": "passwordA1", "code": "code"}`,
+			inputBody: `{"email": "test@gmail.com", "password": "passwordA1", "code": "code"}`,
 			inputUser: &user.User{
-				Email:        "email",
+				Email:        "test@gmail.com",
 				Password:     "password",
 				SecretOTPKey: "secret",
 			},
@@ -98,9 +98,9 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 		},
 		{
 			name:      "Fail create JWT!",
-			inputBody: `{"email": "email", "password": "passwordA1", "code": "code"}`,
+			inputBody: `{"email": "test@gmail.com", "password": "passwordA1", "code": "code"}`,
 			inputUser: &user.User{
-				Email:        "email",
+				Email:        "test@gmail.com",
 				Password:     "password",
 				SecretOTPKey: "secret",
 			},
@@ -160,9 +160,9 @@ func TestHandler_checkEmail(t *testing.T) {
 	}{
 		{
 			name:      "OK",
-			inputBody: `{"email": "email"}`,
+			inputBody: `{"email": "test@gmail.com"}`,
 			inputUser: &user.User{
-				Email: "email",
+				Email: "test@gmail.com",
 			},
 			urlPath: "/v1/auth/checkEmail",
 			mockBehavior: func(r *auth_mock.MockIAuthService, ru *user_mock.MockIUserService, User *user.User) {
@@ -173,7 +173,7 @@ func TestHandler_checkEmail(t *testing.T) {
 		},
 		{
 			name:      "FAIL",
-			inputBody: `{"email": "email"}`,
+			inputBody: `{"email": "test@gmail.com"}`,
 			inputUser: &user.User{
 				Email: "email",
 			},
