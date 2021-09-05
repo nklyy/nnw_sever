@@ -25,14 +25,17 @@ type Authorization interface {
 	Check2FaCode(code string, secret string) bool
 
 	CheckPassword(password string, hashPassword string) (bool, error)
+
+	CreateEmail(email string, emailType string) error
+	CheckEmailCode(email string, code string, emailType string) (bool, error)
 }
 
 type Service struct {
 	Authorization
 }
 
-func NewService(repos *repository.Repository, cfg config.Configurations) *Service {
+func NewService(repos *repository.Repository, cfg config.Configurations, emailClient config.SMTPClient) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization, cfg),
+		Authorization: NewAuthService(repos.Authorization, cfg, emailClient),
 	}
 }

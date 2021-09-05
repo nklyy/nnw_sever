@@ -22,6 +22,8 @@ func NewAuthMongo(db *mongo.Database, cfg config.Configurations) *AuthMongo {
 	}
 }
 
+// Functions for get data
+
 func (ar *AuthMongo) GetUserByIdDb(userId string) (*model.User, error) {
 	return nil, nil
 }
@@ -63,6 +65,20 @@ func (ar *AuthMongo) GetJwtDb(id string) (*string, error) {
 
 	return &jwtData.Jwt, nil
 }
+
+func (ar *AuthMongo) GetEmailDb(email string, code string, emailType string) (*model.Email, error) {
+	var emailData model.Email
+
+	err := ar.db.Collection("email").FindOne(context.TODO(), bson.M{"email": email, "code": code, "email_type": emailType}).Decode(&emailData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &emailData, nil
+}
+
+// Functions for create data
 
 func (ar *AuthMongo) CreateUserDb(user model.User) (*string, error) {
 	mod := mongo.IndexModel{
@@ -119,4 +135,23 @@ func (ar *AuthMongo) CreateJwtDb(jwtData model.JWTData) (string, error) {
 	}
 
 	return jwtData.ID.Hex(), nil
+}
+
+func (ar *AuthMongo) CreateEmailDb(emailData model.Email) error {
+	mod := mongo.IndexModel{
+		Keys:    bson.M{"created_at": 1}, // index in ascending order or -1 for descending order
+		Options: options.Index().SetExpireAfterSeconds(600),
+	}
+
+	_, err := ar.db.Collection("email").Indexes().CreateOne(context.TODO(), mod)
+	if err != nil {
+		return err
+	}
+
+	_, err = ar.db.Collection("email").InsertOne(context.TODO(), emailData)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
