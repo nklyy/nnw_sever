@@ -1,4 +1,4 @@
-package handler
+package auth
 
 import (
 	"bytes"
@@ -9,19 +9,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"nnw_s/pkg/auth/service"
-	"nnw_s/pkg/auth/service/mocks"
-	"nnw_s/pkg/user/model"
+	"nnw_s/pkg/auth/mocks"
+	"nnw_s/pkg/user"
 	"testing"
 )
 
 func TestHandler_verifyLoginCode(t *testing.T) {
-	type mockBehavior func(r *mock_service.MockAuthorization, tUser *model.User)
+	type mockBehavior func(r *mock_service.mock_service, tUser *user.User)
 
 	tests := []struct {
 		name                string
 		inputBody           string
-		inputUser           *model.User
+		inputUser           *user.User
 		urlPath             string
 		mockBehavior        mockBehavior
 		expectedStatus      int
@@ -30,13 +29,13 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 		{
 			name:      "OK",
 			inputBody: `{"email": "email", "password": "passwordA1", "code": "code"}`,
-			inputUser: &model.User{
+			inputUser: &user.User{
 				Email:        "email",
 				Password:     "password",
 				SecretOTPKey: "secret",
 			},
-			urlPath: "/v1/verifyLogin2fa",
-			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
+			urlPath: "/v1/auth/verifyLogin2fa",
+			mockBehavior: func(r *mock_service.MockAuthorization, User *user.User) {
 				r.EXPECT().GetUserByEmail(User.Email).Return(User, nil)
 				r.EXPECT().Check2FaCode("code", User.SecretOTPKey).Return(true)
 				r.EXPECT().CreateJWTToken(User.Email).Return("token", nil)
@@ -49,7 +48,7 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 			name:           "Invalid json",
 			inputBody:      `{"email"}`,
 			urlPath:        "/v1/verifyLogin2fa",
-			mockBehavior:   func(r *mock_service.MockAuthorization, User *model.User) {},
+			mockBehavior:   func(r *mock_service.MockAuthorization, User *user.User) {},
 			expectedStatus: 400,
 			expectedRequestBody: `{"error":" Invalid json!"}
 `,
@@ -58,7 +57,7 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 			name:           "Required Login field!",
 			inputBody:      `{"emaillll": "email", "passwordd": "passwordA1", "codee": "code"}`,
 			urlPath:        "/v1/verifyLogin2fa",
-			mockBehavior:   func(r *mock_service.MockAuthorization, User *model.User) {},
+			mockBehavior:   func(r *mock_service.MockAuthorization, User *user.User) {},
 			expectedStatus: 400,
 			expectedRequestBody: `{"error":["Email is a required field","Password is a required field","Code is a required field"]}
 `,
@@ -66,13 +65,13 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 		{
 			name:      "Not found user!",
 			inputBody: `{"email": "email", "password": "passwordA1", "code": "code"}`,
-			inputUser: &model.User{
+			inputUser: &user.User{
 				Email:        "email",
 				Password:     "password",
 				SecretOTPKey: "secret",
 			},
-			urlPath: "/v1/verifyLogin2fa",
-			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
+			urlPath: "/v1/auth/verifyLogin2fa",
+			mockBehavior: func(r *mock_service.MockAuthorization, User *user.User) {
 				r.EXPECT().GetUserByEmail(User.Email).Return(nil, errors.New(" User not found!"))
 			},
 			expectedStatus: 400,
@@ -82,13 +81,13 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 		{
 			name:      "Invalid code!",
 			inputBody: `{"email": "email", "password": "passwordA1", "code": "code"}`,
-			inputUser: &model.User{
+			inputUser: &user.User{
 				Email:        "email",
 				Password:     "password",
 				SecretOTPKey: "secret",
 			},
-			urlPath: "/v1/verifyLogin2fa",
-			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
+			urlPath: "/v1/auth/verifyLogin2fa",
+			mockBehavior: func(r *mock_service.MockAuthorization, User *user.User) {
 				r.EXPECT().GetUserByEmail(User.Email).Return(User, nil)
 				r.EXPECT().Check2FaCode("code", User.SecretOTPKey).Return(false)
 			},
@@ -99,13 +98,13 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 		{
 			name:      "Fail create JWT!",
 			inputBody: `{"email": "email", "password": "passwordA1", "code": "code"}`,
-			inputUser: &model.User{
+			inputUser: &user.User{
 				Email:        "email",
 				Password:     "password",
 				SecretOTPKey: "secret",
 			},
-			urlPath: "/v1/verifyLogin2fa",
-			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
+			urlPath: "/v1/auth/verifyLogin2fa",
+			mockBehavior: func(r *mock_service.MockAuthorization, User *user.User) {
 				r.EXPECT().GetUserByEmail(User.Email).Return(User, nil)
 				r.EXPECT().Check2FaCode("code", User.SecretOTPKey).Return(true)
 				r.EXPECT().CreateJWTToken(User.Email).Return("", errors.New(" Something wrong!"))
@@ -124,7 +123,7 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 			repo := mock_service.NewMockAuthorization(controller)
 			test.mockBehavior(repo, test.inputUser)
 
-			services := &service.Service{Authorization: repo}
+			services := &Service{IAuthService: repo}
 
 			v := validator.New()
 			handler := Handler{authService: services, validate: v}
@@ -148,12 +147,12 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 
 // Check Login
 func TestHandler_checkEmail(t *testing.T) {
-	type mockBehavior func(r *mock_service.MockAuthorization, tUser *model.User)
+	type mockBehavior func(r *mock_service.MockAuthorization, tUser *user.User)
 
 	tests := []struct {
 		name                string
 		inputBody           string
-		inputUser           *model.User
+		inputUser           *user.User
 		urlPath             string
 		mockBehavior        mockBehavior
 		expectedStatus      int
@@ -162,11 +161,11 @@ func TestHandler_checkEmail(t *testing.T) {
 		{
 			name:      "OK",
 			inputBody: `{"email": "email"}`,
-			inputUser: &model.User{
+			inputUser: &user.User{
 				Email: "email",
 			},
-			urlPath: "/v1/checkEmail",
-			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
+			urlPath: "/v1/auth/checkEmail",
+			mockBehavior: func(r *mock_service.MockAuthorization, User *user.User) {
 				r.EXPECT().GetUserByEmail(User.Email).Return(nil, nil)
 			},
 			expectedStatus:      200,
@@ -175,11 +174,11 @@ func TestHandler_checkEmail(t *testing.T) {
 		{
 			name:      "FAIL",
 			inputBody: `{"email": "email"}`,
-			inputUser: &model.User{
+			inputUser: &user.User{
 				Email: "email",
 			},
-			urlPath: "/v1/checkEmail",
-			mockBehavior: func(r *mock_service.MockAuthorization, User *model.User) {
+			urlPath: "/v1/auth/checkEmail",
+			mockBehavior: func(r *mock_service.MockAuthorization, User *user.User) {
 				r.EXPECT().GetUserByEmail(User.Email).Return(User, nil)
 			},
 			expectedStatus:      400,
@@ -188,8 +187,8 @@ func TestHandler_checkEmail(t *testing.T) {
 		{
 			name:           "Required Email field!",
 			inputBody:      `{"emailll": "email"}`,
-			urlPath:        "/v1/checkEmail",
-			mockBehavior:   func(r *mock_service.MockAuthorization, User *model.User) {},
+			urlPath:        "/v1/auth/checkEmail",
+			mockBehavior:   func(r *mock_service.MockAuthorization, User *user.User) {},
 			expectedStatus: 400,
 			expectedRequestBody: `{"error":["Email is a required field"]}
 `,
@@ -197,8 +196,8 @@ func TestHandler_checkEmail(t *testing.T) {
 		{
 			name:           "Invalid json",
 			inputBody:      `{"email"}`,
-			urlPath:        "/v1/checkEmail",
-			mockBehavior:   func(r *mock_service.MockAuthorization, User *model.User) {},
+			urlPath:        "/v1/auth/checkEmail",
+			mockBehavior:   func(r *mock_service.MockAuthorization, User *user.User) {},
 			expectedStatus: 400,
 			expectedRequestBody: `{"error":" Invalid json!"}
 `,
@@ -213,7 +212,7 @@ func TestHandler_checkEmail(t *testing.T) {
 			repo := mock_service.NewMockAuthorization(controller)
 			test.mockBehavior(repo, test.inputUser)
 
-			services := &service.Service{Authorization: repo}
+			services := &AuthService{IAuthService: repo}
 
 			v := validator.New()
 			handler := Handler{authService: services, validate: v}
@@ -250,7 +249,7 @@ func TestHandler_checkJwt(t *testing.T) {
 		{
 			name:      "OK",
 			inputBody: `{"token": "token"}`,
-			urlPath:   "/v1/checkJwt",
+			urlPath:   "/v1/auth/checkJwt",
 			mockBehavior: func(r *mock_service.MockAuthorization) {
 				r.EXPECT().VerifyJWTToken("token").Return(nil, nil)
 			},
@@ -260,7 +259,7 @@ func TestHandler_checkJwt(t *testing.T) {
 		{
 			name:      "FAIL",
 			inputBody: `{"token": "token"}`,
-			urlPath:   "/v1/checkJwt",
+			urlPath:   "/v1/auth/checkJwt",
 			mockBehavior: func(r *mock_service.MockAuthorization) {
 				r.EXPECT().VerifyJWTToken("token").Return(nil, errors.New(" Wrong token!"))
 			},
@@ -271,7 +270,7 @@ func TestHandler_checkJwt(t *testing.T) {
 		{
 			name:           "Required Login field!",
 			inputBody:      `{"tokennn": "token"}`,
-			urlPath:        "/v1/checkJwt",
+			urlPath:        "/v1/auth/checkJwt",
 			mockBehavior:   func(r *mock_service.MockAuthorization) {},
 			expectedStatus: 400,
 			expectedRequestBody: `{"error":["Token is a required field"]}
@@ -280,7 +279,7 @@ func TestHandler_checkJwt(t *testing.T) {
 		{
 			name:           "Invalid json",
 			inputBody:      `{"token"}`,
-			urlPath:        "/v1/checkJwt",
+			urlPath:        "/v1/auth/checkJwt",
 			mockBehavior:   func(r *mock_service.MockAuthorization) {},
 			expectedStatus: 400,
 			expectedRequestBody: `{"error":" Invalid json!"}
@@ -296,7 +295,7 @@ func TestHandler_checkJwt(t *testing.T) {
 			repo := mock_service.NewMockAuthorization(controller)
 			test.mockBehavior(repo)
 
-			services := &service.Service{Authorization: repo}
+			services := &Service{IAuthService: repo}
 
 			v := validator.New()
 			handler := Handler{authService: services, validate: v}

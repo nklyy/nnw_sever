@@ -7,12 +7,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"nnw_s/config"
-	"nnw_s/pkg/auth/handler"
-	repository1 "nnw_s/pkg/auth/repository"
-	service1 "nnw_s/pkg/auth/service"
+	"nnw_s/pkg/auth"
 	"nnw_s/pkg/common"
-	repository2 "nnw_s/pkg/user/repository"
-	service2 "nnw_s/pkg/user/service"
+	"nnw_s/pkg/user"
 	"os"
 )
 
@@ -45,11 +42,11 @@ func Execute() {
 	validate := validator.New()
 
 	// Init repository, service and handlers
-	newAuthRepository := repository1.NewRepository(db, *cfg)
-	newUserRepository := repository2.NewRepository(db, *cfg)
-	newAuthService := service1.NewService(newAuthRepository, newUserRepository, *cfg)
-	newUserService := service2.NewUserService(newUserRepository, *cfg)
-	newAuthHandler := handler.NewHandler(newAuthService, newUserService, *cfg, validate)
+	newAuthRepository := auth.NewAuthRepository(db, *cfg)
+	newUserRepository := user.NewUserRepository(db, *cfg)
+	newAuthService := auth.NewAuthService(*newAuthRepository, *newUserRepository, *cfg)
+	newUserService := user.NewUserService(newUserRepository, *cfg)
+	newAuthHandler := auth.NewHandler(newAuthService, newUserService, *cfg, validate)
 
 	newAuthHandler.InitialRoute(app)
 

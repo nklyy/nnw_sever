@@ -1,4 +1,4 @@
-package service
+package user
 
 import (
 	"github.com/google/uuid"
@@ -6,31 +6,32 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"nnw_s/config"
 	"nnw_s/pkg/common"
-	"nnw_s/pkg/user/model"
-	"nnw_s/pkg/user/repository"
 	"strconv"
 	"time"
 )
 
+type IUserService interface {
+	GetUserById(userId string) (*User, error)
+	GetUserByEmail(email string) (*User, error)
+	GetTemplateUserDataById(uid string) (*TemplateData, error)
+
+	CreateUser(email string, password string, OTPKey string) (*string, error)
+	CreateTemplateUserData(secret string) (*string, error)
+}
+
 type UserService struct {
-	repo repository.User
+	repo IUserRepository
 	cfg  config.Configurations
 }
 
-type Payload struct {
-	Email     string    `json:"email"`
-	IssuedAt  time.Time `json:"issued_at"`
-	ExpiredAt time.Time `json:"expired_at"`
-}
-
-func NewUserService(repo repository.User, cfg config.Configurations) *UserService {
+func NewUserService(repo IUserRepository, cfg config.Configurations) *UserService {
 	return &UserService{
 		repo: repo,
 		cfg:  cfg,
 	}
 }
 
-func (as *UserService) GetUserById(userId string) (*model.User, error) {
+func (as *UserService) GetUserById(userId string) (*User, error) {
 	user, err := as.repo.GetUserByIdDb(userId)
 	if err != nil {
 		return nil, err
@@ -39,7 +40,7 @@ func (as *UserService) GetUserById(userId string) (*model.User, error) {
 	return user, nil
 }
 
-func (as *UserService) GetUserByEmail(email string) (*model.User, error) {
+func (as *UserService) GetUserByEmail(email string) (*User, error) {
 	user, err := as.repo.GetUserByEmailDb(email)
 	if err != nil {
 		return nil, err
@@ -48,7 +49,7 @@ func (as *UserService) GetUserByEmail(email string) (*model.User, error) {
 	return user, nil
 }
 
-func (as *UserService) GetTemplateUserDataById(uid string) (*model.TemplateData, error) {
+func (as *UserService) GetTemplateUserDataById(uid string) (*TemplateData, error) {
 	templateUserData, err := as.repo.GetTemplateUserDataByIdDb(uid)
 	if err != nil {
 		return nil, err
@@ -75,7 +76,7 @@ func (as *UserService) CreateUser(email string, password string, OTPKey string) 
 
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(decodePassword), salt)
 
-	var user model.User
+	var user User
 	user.ID = primitive.NewObjectID()
 	user.Email = email
 	user.Password = string(hashPassword)
@@ -94,7 +95,7 @@ func (as *UserService) CreateUser(email string, password string, OTPKey string) 
 func (as *UserService) CreateTemplateUserData(secret string) (*string, error) {
 	uid := uuid.New().String()
 
-	var templateData model.TemplateData
+	var templateData TemplateData
 	templateData.ID = primitive.NewObjectID()
 	templateData.Uid = uid
 	templateData.TwoFAS = secret

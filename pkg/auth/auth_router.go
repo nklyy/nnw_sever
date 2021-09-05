@@ -1,23 +1,22 @@
-package handler
+package auth
 
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/config"
-	"nnw_s/pkg/auth/service"
-	service2 "nnw_s/pkg/user/service"
+	"nnw_s/pkg/user"
 )
 
 type Handler struct {
-	authService *service.Service
-	userService *service2.UserService
+	authService *AuthService
+	userService *user.UserService
 	cfg         config.Configurations
 	validate    *validator.Validate
 }
 
-func NewHandler(aService *service.Service,
-	uService *service2.UserService,
+func NewHandler(aService *AuthService,
+	uService *user.UserService,
 	cfg config.Configurations,
 	v *validator.Validate) *Handler {
 	return &Handler{

@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"bytes"
@@ -10,17 +10,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"image/png"
 	"nnw_s/config"
-	"nnw_s/pkg/auth/model"
-	"nnw_s/pkg/auth/repository"
 	"nnw_s/pkg/common"
-	repository2 "nnw_s/pkg/user/repository"
+	"nnw_s/pkg/user"
 	"strconv"
 	"time"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
+type IAuthService interface {
+	CreateJWTToken(email string) (string, error)
+	VerifyJWTToken(id string) (*string, error)
+
+	Generate2FaImage(email string) (*bytes.Buffer, *otp.Key, error)
+	Check2FaCode(code string, secret string) bool
+
+	CheckPassword(password string, hashPassword string) (bool, error)
+}
+
 type AuthService struct {
-	arepo repository.Authorization
-	urepo repository2.User
+	arepo AuthRepository
+	urepo user.UserRepository
 	cfg   config.Configurations
 }
 
@@ -37,7 +47,7 @@ func (payload *Payload) Valid() error {
 	return nil
 }
 
-func NewAuthService(arepo repository.Authorization, urepo repository2.User, cfg config.Configurations) *AuthService {
+func NewAuthService(arepo AuthRepository, urepo user.UserRepository, cfg config.Configurations) *AuthService {
 	return &AuthService{
 		arepo: arepo,
 		urepo: urepo,
@@ -90,7 +100,7 @@ func (as *AuthService) CreateJWTToken(email string) (string, error) {
 	}
 
 	// Create JWT in DataBase
-	var jwtData model.JWTData
+	var jwtData JWTData
 	jwtData.ID = primitive.NewObjectID()
 	jwtData.Jwt = signedToken
 	jwtData.CreatedAt = time.Now()

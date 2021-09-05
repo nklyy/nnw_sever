@@ -1,4 +1,4 @@
-package repository
+package user
 
 import (
 	"context"
@@ -6,27 +6,35 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"nnw_s/config"
-	"nnw_s/pkg/user/model"
 )
 
-type UserMongo struct {
+type IUserRepository interface {
+	GetUserByIdDb(userId string) (*User, error)
+	GetUserByEmailDb(email string) (*User, error)
+	GetTemplateUserDataByIdDb(uid string) (*TemplateData, error)
+
+	CreateUserDb(user User) (*string, error)
+	CreateTemplateUserDataDb(templateData TemplateData) (*string, error)
+}
+
+type UserRepository struct {
 	db  *mongo.Database
 	cfg config.Configurations
 }
 
-func NewUserMongo(db *mongo.Database, cfg config.Configurations) *UserMongo {
-	return &UserMongo{
+func NewUserRepository(db *mongo.Database, cfg config.Configurations) *UserRepository {
+	return &UserRepository{
 		db:  db,
 		cfg: cfg,
 	}
 }
 
-func (ar *UserMongo) GetUserByIdDb(userId string) (*model.User, error) {
+func (ar *UserRepository) GetUserByIdDb(userId string) (*User, error) {
 	return nil, nil
 }
 
-func (ar *UserMongo) GetUserByEmailDb(email string) (*model.User, error) {
-	var user model.User
+func (ar *UserRepository) GetUserByEmailDb(email string) (*User, error) {
+	var user User
 
 	err := ar.db.Collection("user").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
@@ -36,8 +44,8 @@ func (ar *UserMongo) GetUserByEmailDb(email string) (*model.User, error) {
 	return &user, nil
 }
 
-func (ar *UserMongo) GetTemplateUserDataByIdDb(uid string) (*model.TemplateData, error) {
-	var templateUser model.TemplateData
+func (ar *UserRepository) GetTemplateUserDataByIdDb(uid string) (*TemplateData, error) {
+	var templateUser TemplateData
 
 	err := ar.db.Collection("templateUserData").FindOne(context.TODO(), bson.M{"uid": uid}).Decode(&templateUser)
 	if err != nil {
@@ -47,7 +55,7 @@ func (ar *UserMongo) GetTemplateUserDataByIdDb(uid string) (*model.TemplateData,
 	return &templateUser, nil
 }
 
-func (ar *UserMongo) CreateUserDb(user model.User) (*string, error) {
+func (ar *UserRepository) CreateUserDb(user User) (*string, error) {
 	mod := mongo.IndexModel{
 		Keys:    bson.M{"email": 1}, // index in ascending order or -1 for descending order
 		Options: options.Index().SetUnique(true),
@@ -66,7 +74,7 @@ func (ar *UserMongo) CreateUserDb(user model.User) (*string, error) {
 	return nil, nil
 }
 
-func (ar *UserMongo) CreateTemplateUserDataDb(templateData model.TemplateData) (*string, error) {
+func (ar *UserRepository) CreateTemplateUserDataDb(templateData TemplateData) (*string, error) {
 	mod := mongo.IndexModel{
 		Keys:    bson.M{"created_at": 1}, // index in ascending order or -1 for descending order
 		Options: options.Index().SetExpireAfterSeconds(500),

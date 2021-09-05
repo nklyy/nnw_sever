@@ -1,4 +1,4 @@
-package repository
+package auth
 
 import (
 	"context"
@@ -7,22 +7,27 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"nnw_s/config"
-	model2 "nnw_s/pkg/auth/model"
 )
 
-type AuthMongo struct {
+type IAuthRepository interface {
+	GetJwtDb(id string) (*string, error)
+	CreateJwtDb(jwtData JWTData) (string, error)
+}
+
+type AuthRepository struct {
 	db  *mongo.Database
 	cfg config.Configurations
 }
 
-func NewAuthMongo(db *mongo.Database, cfg config.Configurations) *AuthMongo {
-	return &AuthMongo{
+func NewAuthRepository(db *mongo.Database, cfg config.Configurations) *AuthRepository {
+	return &AuthRepository{
 		db:  db,
 		cfg: cfg,
 	}
 }
-func (ar *AuthMongo) GetJwtDb(id string) (*string, error) {
-	var jwtData model2.JWTData
+
+func (ar *AuthRepository) GetJwtDb(id string) (*string, error) {
+	var jwtData JWTData
 
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -37,7 +42,7 @@ func (ar *AuthMongo) GetJwtDb(id string) (*string, error) {
 	return &jwtData.Jwt, nil
 }
 
-func (ar *AuthMongo) CreateJwtDb(jwtData model2.JWTData) (string, error) {
+func (ar *AuthRepository) CreateJwtDb(jwtData JWTData) (string, error) {
 	mod := mongo.IndexModel{
 		Keys:    bson.M{"created_at": 1}, // index in ascending order or -1 for descending order
 		Options: options.Index().SetExpireAfterSeconds(60),
