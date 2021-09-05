@@ -9,14 +9,14 @@ import (
 )
 
 type Handler struct {
-	authService *AuthService
-	userService *user.UserService
+	authService IAuthService
+	userService user.IUserService
 	cfg         config.Configurations
 	validate    *validator.Validate
 }
 
-func NewHandler(aService *AuthService,
-	uService *user.UserService,
+func NewHandler(aService IAuthService,
+	uService user.IUserService,
 	cfg config.Configurations,
 	v *validator.Validate) *Handler {
 	return &Handler{
@@ -28,7 +28,7 @@ func NewHandler(aService *AuthService,
 }
 
 func (h *Handler) InitialRoute(route *echo.Echo) {
-	v1 := route.Group("/v1/auth")
+	v1 := route.Group("/v1")
 
 	// Auth
 	{

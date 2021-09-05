@@ -125,10 +125,8 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 			urepo := user_mock.NewMockIUserService(controller)
 			test.mockBehavior(arepo, urepo, test.inputUser)
 
-			services := arepo
-
 			v := validator.New()
-			handler := Handler{authService: services, validate: v}
+			handler := Handler{authService: arepo, userService: urepo, validate: v}
 
 			app := echo.New()
 			handler.InitialRoute(app)
@@ -296,7 +294,6 @@ func TestHandler_checkJwt(t *testing.T) {
 			defer controller.Finish()
 
 			arepo := auth_mock.NewMockIAuthService(controller)
-			urepo := user_mock.NewMockIUserService(controller)
 			test.mockBehavior(arepo)
 
 			services := arepo

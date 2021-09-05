@@ -47,7 +47,7 @@ func (payload *Payload) Valid() error {
 	return nil
 }
 
-func NewAuthService(arepo AuthRepository, urepo user.UserRepository, cfg config.Configurations) *AuthService {
+func NewAuthService(arepo AuthRepository, urepo user.UserRepository, cfg config.Configurations) IAuthService {
 	return &AuthService{
 		arepo: arepo,
 		urepo: urepo,
