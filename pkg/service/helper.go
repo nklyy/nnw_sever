@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/base64"
+	"math/rand"
 	"strings"
 )
 
@@ -55,4 +56,14 @@ func reverseString(str string) string {
 		byteStr[i], byteStr[j] = byteStr[j], byteStr[i]
 	}
 	return string(byteStr)
+}
+
+func emailCode() string {
+	var letterRunes = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+	b := make([]rune, 6)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }

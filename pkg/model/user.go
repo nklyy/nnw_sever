@@ -10,6 +10,7 @@ type User struct {
 	Email        string             `bson:"email"`
 	Password     string             `bson:"password"`
 	SecretOTPKey string             `bson:"secret_otp_key"`
+	VerifyEmail  bool               `bson:"verify_email"`
 	CreatedAt    time.Time          `bson:"created_at"`
 	UpdatedAt    time.Time          `bson:"updated_at"`
 }

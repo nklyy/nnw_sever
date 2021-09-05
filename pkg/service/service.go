@@ -25,6 +25,9 @@ type Authorization interface {
 	Check2FaCode(code string, secret string) bool
 
 	CheckPassword(password string, hashPassword string) (bool, error)
+
+	CreateEmail(email string, emailType string) error
+	CheckEmailCode(email string, code string, emailType string) (bool, error)
 }
 
 type Service struct {

@@ -18,6 +18,7 @@ type Configurations struct {
 	Shift        string `mapstructure:"SHIFT"`
 	PasswordSalt string `mapstructure:"PASSWORD_SALT"`
 
+	EmailFrom       string `mapstructure:"EMAIL_FROM"`
 	SmtpHost        string `mapstructure:"SMTP_HOST"`
 	SmtpPort        string `mapstructure:"SMTP_PORT"`
 	SmtpUserApiKey  string `mapstructure:"SMTP_USER_API_KEY"`
@@ -67,6 +68,7 @@ func setFromEnv(cfg *Configurations) {
 
 	cfg.PORT = os.Getenv("PORT")
 
+	cfg.EmailFrom = os.Getenv("EMAIL_FROM")
 	cfg.SmtpHost = os.Getenv("SMTP_HOST")
 	cfg.SmtpPort = os.Getenv("SMTP_PORT")
 	cfg.SmtpUserApiKey = os.Getenv("SMTP_USER_API_KEY")

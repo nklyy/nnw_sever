@@ -50,6 +50,21 @@ func (mr *MockAuthorizationMockRecorder) Check2FaCode(code, secret interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check2FaCode", reflect.TypeOf((*MockAuthorization)(nil).Check2FaCode), code, secret)
 }
 
+// CheckEmailCode mocks base method.
+func (m *MockAuthorization) CheckEmailCode(email, code, emailType string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckEmailCode", email, code, emailType)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckEmailCode indicates an expected call of CheckEmailCode.
+func (mr *MockAuthorizationMockRecorder) CheckEmailCode(email, code, emailType interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckEmailCode", reflect.TypeOf((*MockAuthorization)(nil).CheckEmailCode), email, code, emailType)
+}
+
 // CheckPassword mocks base method.
 func (m *MockAuthorization) CheckPassword(password, hashPassword string) (bool, error) {
 	m.ctrl.T.Helper()
@@ -63,6 +78,20 @@ func (m *MockAuthorization) CheckPassword(password, hashPassword string) (bool, 
 func (mr *MockAuthorizationMockRecorder) CheckPassword(password, hashPassword interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPassword", reflect.TypeOf((*MockAuthorization)(nil).CheckPassword), password, hashPassword)
+}
+
+// CreateEmail mocks base method.
+func (m *MockAuthorization) CreateEmail(email, emailType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateEmail", email, emailType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateEmail indicates an expected call of CreateEmail.
+func (mr *MockAuthorizationMockRecorder) CreateEmail(email, emailType interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEmail", reflect.TypeOf((*MockAuthorization)(nil).CreateEmail), email, emailType)
 }
 
 // CreateJWTToken mocks base method.

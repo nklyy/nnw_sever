@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/pquerna/otp"
@@ -13,7 +14,10 @@ import (
 	"nnw_s/config"
 	"nnw_s/pkg/model"
 	"nnw_s/pkg/repository"
+	"os"
+	"path"
 	"strconv"
+	"text/template"
 	"time"
 )
 
@@ -94,6 +98,7 @@ func (as *AuthService) CreateUser(email string, password string, OTPKey string) 
 	user.Email = email
 	user.Password = string(hashPassword)
 	user.SecretOTPKey = OTPKey
+	user.VerifyEmail = true
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
@@ -237,4 +242,64 @@ func (as *AuthService) CheckPassword(password string, hashPassword string) (bool
 	}
 
 	return true, nil
+}
+
+func (as *AuthService) CreateEmail(email string, emailType string) error {
+	code := emailCode()
+
+	var emailData model.Email
+	emailData.ID = primitive.NewObjectID()
+	emailData.Code = code
+	emailData.Email = email
+	emailData.EmailType = emailType
+	emailData.CreatedAt = time.Now()
+	emailData.UpdatedAt = time.Now()
+
+	err := as.repo.CreateEmailDb(emailData)
+	if err != nil {
+		return err
+	}
+
+	// Set up Email template and Send email
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	t, err := template.ParseFiles(path.Join(dir, "templates/verifyTemplate.html"))
+	if err != nil {
+		fmt.Println(3, err)
+		return err
+	}
+
+	var body bytes.Buffer
+	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	body.Write([]byte(fmt.Sprintf("Subject: Verify Email. \n%s\n\n", mimeHeaders)))
+
+	err = t.Execute(&body, struct {
+		Code string
+	}{
+		Code: code,
+	})
+	if err != nil {
+		fmt.Println(1, err)
+		return err
+	}
+
+	err = as.emailClient.SendMail(as.cfg.EmailFrom, []string{email}, body.Bytes())
+	if err != nil {
+		fmt.Println(2, err)
+		return err
+	}
+
+	return nil
+}
+
+func (as *AuthService) CheckEmailCode(email string, code string, emailType string) (bool, error) {
+	_, err := as.repo.GetEmailDb(email, code, emailType)
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
 }

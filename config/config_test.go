@@ -16,6 +16,7 @@ func TestInit(t *testing.T) {
 		jwtSecretKey    string
 		shift           string
 		passwordSalt    string
+		emailFrom       string
 		smtpHost        string
 		smtpPort        string
 		smtpUserApiKey  string
@@ -36,6 +37,7 @@ func TestInit(t *testing.T) {
 		os.Setenv("JWT_SECRET_KEY", env.jwtSecretKey)
 		os.Setenv("SHIFT", env.shift)
 		os.Setenv("PASSWORD_SALT", env.passwordSalt)
+		os.Setenv("EMAIL_FROM", env.emailFrom)
 		os.Setenv("SMTP_HOST", env.smtpHost)
 		os.Setenv("SMTP_PORT", env.smtpPort)
 		os.Setenv("SMTP_USER_API_KEY", env.smtpUserApiKey)
@@ -60,6 +62,7 @@ func TestInit(t *testing.T) {
 					jwtSecretKey:    "123qwerty",
 					shift:           "123",
 					passwordSalt:    "123",
+					emailFrom:       "example@example.com",
 					smtpHost:        "smtp.email.com",
 					smtpPort:        "25",
 					smtpUserApiKey:  "key",
@@ -76,6 +79,7 @@ func TestInit(t *testing.T) {
 				JwtSecretKey:    "123qwerty",
 				Shift:           "123",
 				PasswordSalt:    "123",
+				EmailFrom:       "example@example.com",
 				SmtpHost:        "smtp.email.com",
 				SmtpPort:        "25",
 				SmtpUserApiKey:  "key",
