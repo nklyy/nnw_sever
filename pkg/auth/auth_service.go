@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-//go:generate mockgen -source=service.go -destination=mocks/mock.go
+//go:generate mockgen -source=auth_service.go -destination=mocks/mock.go
 
 type IAuthService interface {
 	CreateJWTToken(email string) (string, error)

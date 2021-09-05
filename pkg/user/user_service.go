@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+//go:generate mockgen -source=user_service.go -destination=mocks/mock.go
+
 type IUserService interface {
 	GetUserById(userId string) (*User, error)
 	GetUserByEmail(email string) (*User, error)
