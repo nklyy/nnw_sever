@@ -8,14 +8,19 @@ import (
 
 func TestInit(t *testing.T) {
 	type env struct {
-		port         string
-		mongoDbUrl   string
-		mongoDbUser  string
-		mongoDbPass  string
-		mongoDbName  string
-		jwtSecretKey string
-		shift        string
-		passwordSalt string
+		port            string
+		mongoDbUrl      string
+		mongoDbUser     string
+		mongoDbPass     string
+		mongoDbName     string
+		jwtSecretKey    string
+		shift           string
+		passwordSalt    string
+		emailFrom       string
+		smtpHost        string
+		smtpPort        string
+		smtpUserApiKey  string
+		smtpPasswordKey string
 	}
 
 	type args struct {
@@ -32,6 +37,11 @@ func TestInit(t *testing.T) {
 		os.Setenv("JWT_SECRET_KEY", env.jwtSecretKey)
 		os.Setenv("SHIFT", env.shift)
 		os.Setenv("PASSWORD_SALT", env.passwordSalt)
+		os.Setenv("EMAIL_FROM", env.emailFrom)
+		os.Setenv("SMTP_HOST", env.smtpHost)
+		os.Setenv("SMTP_PORT", env.smtpPort)
+		os.Setenv("SMTP_USER_API_KEY", env.smtpUserApiKey)
+		os.Setenv("SMTP_PASSWORD_KEY", env.smtpPasswordKey)
 	}
 
 	tests := []struct {
@@ -44,26 +54,36 @@ func TestInit(t *testing.T) {
 			name: "Test config file!",
 			args: args{
 				env: env{
-					port:         ":4000",
-					mongoDbName:  "databaseName",
-					mongoDbUser:  "admin",
-					mongoDbPass:  "qwerty",
-					mongoDbUrl:   "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
-					jwtSecretKey: "123qwerty",
-					shift:        "123",
-					passwordSalt: "123",
+					port:            ":4000",
+					mongoDbName:     "databaseName",
+					mongoDbUser:     "admin",
+					mongoDbPass:     "qwerty",
+					mongoDbUrl:      "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
+					jwtSecretKey:    "123qwerty",
+					shift:           "123",
+					passwordSalt:    "123",
+					emailFrom:       "example@example.com",
+					smtpHost:        "smtp.email.com",
+					smtpPort:        "25",
+					smtpUserApiKey:  "key",
+					smtpPasswordKey: "password",
 				},
 				path: "..",
 			},
 			want: &Configurations{
-				PORT:         ":4000",
-				MongoDbName:  "databaseName",
-				MongoDbUser:  "admin",
-				MongoDbPass:  "qwerty",
-				MongoDbUrl:   "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
-				JwtSecretKey: "123qwerty",
-				Shift:        "123",
-				PasswordSalt: "123",
+				PORT:            ":4000",
+				MongoDbName:     "databaseName",
+				MongoDbUser:     "admin",
+				MongoDbPass:     "qwerty",
+				MongoDbUrl:      "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
+				JwtSecretKey:    "123qwerty",
+				Shift:           "123",
+				PasswordSalt:    "123",
+				EmailFrom:       "example@example.com",
+				SmtpHost:        "smtp.email.com",
+				SmtpPort:        "25",
+				SmtpUserApiKey:  "key",
+				SmtpPasswordKey: "password",
 			},
 		},
 	}

@@ -10,8 +10,12 @@ import (
 )
 
 type UserRegistrationDataRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,passwd"`
+	Email string `json:"email" validate:"required,email"`
+}
+
+type VerifyRegistrationEmailCode struct {
+	Email string `json:"email" validate:"required,email"`
+	Code  string `json:"code" validate:"required"`
 }
 
 type VerifyRegistrationCodeRequest struct {
@@ -40,7 +44,7 @@ type CheckTokenRequest struct {
 	Token string `json:"token" validate:"required"`
 }
 
-func (h *Handler) registration(c echo.Context) error {
+func (h *Handler) verifyRegistrationEmail(c echo.Context) error {
 	var registrationUserData UserRegistrationDataRequest
 
 	// Parse User Data
@@ -69,14 +73,81 @@ func (h *Handler) registration(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, common.UserAlreadyExist)
 	}
 
+	err = h.authService.CreateEmail(registrationUserData.Email, "verify")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+	}
+
+	return c.NoContent(200)
+}
+
+func (h *Handler) verifyRegistrationEmailResend(c echo.Context) error {
+	var registrationUserData UserRegistrationDataRequest
+
+	// Parse User Data
+	err := json.NewDecoder(c.Request().Body).Decode(&registrationUserData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, common.InvalidJson)
+	}
+
+	// Translation
+	trans := config.ValidatorConfig(h.validate)
+
+	// Validate Body
+	err = h.validate.Struct(registrationUserData)
+	if err != nil {
+		var errArray []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errArray = append(errArray, e.Translate(trans))
+		}
+
+		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
+	}
+
+	err = h.authService.CreateEmail(registrationUserData.Email, "verify")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+	}
+
+	return c.NoContent(200)
+}
+
+func (h *Handler) verifyRegistrationEmailCode(c echo.Context) error {
+	var verifyRegistrationEmailCode VerifyRegistrationEmailCode
+
+	// Parse User Data
+	err := json.NewDecoder(c.Request().Body).Decode(&verifyRegistrationEmailCode)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, common.InvalidJson)
+	}
+
+	// Translation
+	trans := config.ValidatorConfig(h.validate)
+
+	// Validate Body
+	err = h.validate.Struct(verifyRegistrationEmailCode)
+	if err != nil {
+		var errArray []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errArray = append(errArray, e.Translate(trans))
+		}
+
+		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
+	}
+
+	valid, err := h.authService.CheckEmailCode(verifyRegistrationEmailCode.Email, verifyRegistrationEmailCode.Code, "verify")
+	if !valid {
+		return c.JSON(http.StatusBadRequest, common.InvalidCode)
+	}
+
 	// Generate 2FA Image
-	buffImg, key, err := h.authService.Generate2FaImage(registrationUserData.Email)
+	buffImg, key, err := h.authService.Generate2FaImage(verifyRegistrationEmailCode.Email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
 	}
 
 	// Save template uid with secret key
-	templateId, err := h.userService.CreateTemplateUserData(key.Secret())
+	templateId, err := h.authService.CreateTemplateUserData(key.Secret())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
 	}
@@ -94,6 +165,7 @@ func (h *Handler) registration(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
 
 func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 	var verifyRegistrationCode VerifyRegistrationCodeRequest

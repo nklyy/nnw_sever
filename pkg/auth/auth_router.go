@@ -32,8 +32,10 @@ func (h *Handler) InitialRoute(route *echo.Echo) {
 
 	// Auth
 	{
-		// Registration
-		v1.POST("/registration", h.registration)
+		// Registration and Verify Email
+		v1.POST("/verifyRegistrationEmail", h.verifyRegistrationEmail)
+		v1.POST("/verifyRegistrationEmailResend", h.verifyRegistrationEmailResend)
+		v1.POST("/verifyRegistrationEmailCode", h.verifyRegistrationEmailCode)
 		v1.POST("/verifyRegister2fa", h.verifyRegistration2FaCode)
 
 		// Login
