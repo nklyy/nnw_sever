@@ -4,22 +4,24 @@ import (
 	"bytes"
 	"errors"
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"image/png"
 	"nnw_s/config"
-	"nnw_s/pkg/model"
-	"nnw_s/pkg/repository"
+	"nnw_s/pkg/auth/model"
+	"nnw_s/pkg/auth/repository"
+	"nnw_s/pkg/common"
+	repository2 "nnw_s/pkg/user/repository"
 	"strconv"
 	"time"
 )
 
 type AuthService struct {
-	repo repository.Authorization
-	cfg  config.Configurations
+	arepo repository.Authorization
+	urepo repository2.User
+	cfg   config.Configurations
 }
 
 type Payload struct {
@@ -35,90 +37,12 @@ func (payload *Payload) Valid() error {
 	return nil
 }
 
-func NewAuthService(repo repository.Authorization, cfg config.Configurations) *AuthService {
+func NewAuthService(arepo repository.Authorization, urepo repository2.User, cfg config.Configurations) *AuthService {
 	return &AuthService{
-		repo: repo,
-		cfg:  cfg,
+		arepo: arepo,
+		urepo: urepo,
+		cfg:   cfg,
 	}
-}
-
-func (as *AuthService) GetUserById(userId string) (*model.User, error) {
-	user, err := as.repo.GetUserByIdDb(userId)
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func (as *AuthService) GetUserByEmail(email string) (*model.User, error) {
-	user, err := as.repo.GetUserByEmailDb(email)
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func (as *AuthService) GetTemplateUserDataById(uid string) (*model.TemplateData, error) {
-	templateUserData, err := as.repo.GetTemplateUserDataByIdDb(uid)
-	if err != nil {
-		return nil, err
-	}
-
-	return templateUserData, nil
-}
-
-func (as *AuthService) CreateUser(email string, password string, OTPKey string) (*string, error) {
-	shift, err := strconv.Atoi(as.cfg.Shift)
-	if err != nil {
-		return nil, err
-	}
-
-	salt, err := strconv.Atoi(as.cfg.PasswordSalt)
-	if err != nil {
-		return nil, err
-	}
-
-	decodePassword, err := caesarShift(password, -shift)
-	if err != nil {
-		return nil, err
-	}
-
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(decodePassword), salt)
-
-	var user model.User
-	user.ID = primitive.NewObjectID()
-	user.Email = email
-	user.Password = string(hashPassword)
-	user.SecretOTPKey = OTPKey
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = time.Now()
-
-	id, err := as.repo.CreateUserDb(user)
-	if err != nil {
-		return nil, err
-	}
-
-	return id, err
-}
-
-func (as *AuthService) CreateTemplateUserData(secret string) (*string, error) {
-	uid := uuid.New().String()
-
-	var templateData model.TemplateData
-	templateData.ID = primitive.NewObjectID()
-	templateData.Uid = uid
-	templateData.TwoFAS = secret
-	templateData.CreatedAt = time.Now()
-	templateData.UpdatedAt = time.Now()
-
-	id, err := as.repo.CreateTemplateUserDataDb(templateData)
-	if err != nil {
-		return nil, err
-	}
-
-	return id, err
 }
 
 func (as *AuthService) Generate2FaImage(email string) (*bytes.Buffer, *otp.Key, error) {
@@ -172,7 +96,7 @@ func (as *AuthService) CreateJWTToken(email string) (string, error) {
 	jwtData.CreatedAt = time.Now()
 	jwtData.UpdatedAt = time.Now()
 
-	id, err := as.repo.CreateJwtDb(jwtData)
+	id, err := as.arepo.CreateJwtDb(jwtData)
 	if err != nil {
 		return "", err
 	}
@@ -182,7 +106,7 @@ func (as *AuthService) CreateJWTToken(email string) (string, error) {
 
 func (as *AuthService) VerifyJWTToken(id string) (*string, error) {
 	// Get Jwt from DataBase
-	token, err := as.repo.GetJwtDb(id)
+	token, err := as.arepo.GetJwtDb(id)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +134,7 @@ func (as *AuthService) VerifyJWTToken(id string) (*string, error) {
 		return nil, errors.New("token is invalid")
 	}
 
-	user, err := as.repo.GetUserByEmailDb(payload.Email)
+	user, err := as.urepo.GetUserByEmailDb(payload.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +148,7 @@ func (as *AuthService) CheckPassword(password string, hashPassword string) (bool
 		return false, err
 	}
 
-	decodePassword, err := caesarShift(password, -shift)
+	decodePassword, err := common.CaesarShift(password, -shift)
 	if err != nil {
 		return false, err
 	}

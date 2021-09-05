@@ -1,4 +1,4 @@
-package handler
+package common
 
 import (
 	"errors"
@@ -21,6 +21,6 @@ var (
 	WrongToken = echo.Map{"error": errors.New(" Wrong token!").Error()}
 )
 
-func invalidValidationFieldsArray(e []string) echo.Map {
+func InvalidValidationFieldsArray(e []string) echo.Map {
 	return echo.Map{"error": e}
 }

@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"nnw_s/pkg/model"
-	"nnw_s/pkg/service"
-	mock_service "nnw_s/pkg/service/mocks"
+	"nnw_s/pkg/auth/service"
+	"nnw_s/pkg/auth/service/mocks"
+	"nnw_s/pkg/user/model"
 	"testing"
 )
 
@@ -127,7 +127,7 @@ func TestHandler_verifyLoginCode(t *testing.T) {
 			services := &service.Service{Authorization: repo}
 
 			v := validator.New()
-			handler := Handler{services: services, validate: v}
+			handler := Handler{authService: services, validate: v}
 
 			app := echo.New()
 			handler.InitialRoute(app)
@@ -216,7 +216,7 @@ func TestHandler_checkEmail(t *testing.T) {
 			services := &service.Service{Authorization: repo}
 
 			v := validator.New()
-			handler := Handler{services: services, validate: v}
+			handler := Handler{authService: services, validate: v}
 
 			app := echo.New()
 			handler.InitialRoute(app)
@@ -299,7 +299,7 @@ func TestHandler_checkJwt(t *testing.T) {
 			services := &service.Service{Authorization: repo}
 
 			v := validator.New()
-			handler := Handler{services: services, validate: v}
+			handler := Handler{authService: services, validate: v}
 
 			app := echo.New()
 			handler.InitialRoute(app)

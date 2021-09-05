@@ -6,7 +6,7 @@ package mock_service
 
 import (
 	bytes "bytes"
-	model "nnw_s/pkg/model"
+	"nnw_s/pkg/user/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

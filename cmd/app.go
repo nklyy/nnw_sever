@@ -7,9 +7,12 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"nnw_s/config"
-	"nnw_s/pkg/handler"
-	"nnw_s/pkg/repository"
-	"nnw_s/pkg/service"
+	"nnw_s/pkg/auth/handler"
+	repository1 "nnw_s/pkg/auth/repository"
+	service1 "nnw_s/pkg/auth/service"
+	"nnw_s/pkg/common"
+	repository2 "nnw_s/pkg/user/repository"
+	service2 "nnw_s/pkg/user/service"
 	"os"
 )
 
@@ -26,7 +29,7 @@ func Execute() {
 	app := echo.New()
 
 	// Connection to DB
-	db, err := repository.MongoDbConnection(cfg)
+	db, err := common.MongoDbConnection(cfg)
 	if err != nil {
 		fmt.Printf("ERROR: %s \n", err)
 		return
@@ -42,11 +45,13 @@ func Execute() {
 	validate := validator.New()
 
 	// Init repository, service and handlers
-	newRepository := repository.NewRepository(db, *cfg)
-	newService := service.NewService(newRepository, *cfg)
-	newHandler := handler.NewHandler(newService, *cfg, validate)
+	newAuthRepository := repository1.NewRepository(db, *cfg)
+	newUserRepository := repository2.NewRepository(db, *cfg)
+	newAuthService := service1.NewService(newAuthRepository, newUserRepository, *cfg)
+	newUserService := service2.NewUserService(newUserRepository, *cfg)
+	newAuthHandler := handler.NewHandler(newAuthService, newUserService, *cfg, validate)
 
-	newHandler.InitialRoute(app)
+	newAuthHandler.InitialRoute(app)
 
 	// NotFound Urls
 	echo.NotFoundHandler = func(c echo.Context) error {

@@ -5,25 +5,31 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/config"
-	"nnw_s/pkg/service"
+	"nnw_s/pkg/auth/service"
+	service2 "nnw_s/pkg/user/service"
 )
 
 type Handler struct {
-	services *service.Service
-	cfg      config.Configurations
-	validate *validator.Validate
+	authService *service.Service
+	userService *service2.UserService
+	cfg         config.Configurations
+	validate    *validator.Validate
 }
 
-func NewHandler(services *service.Service, cfg config.Configurations, v *validator.Validate) *Handler {
+func NewHandler(aService *service.Service,
+	uService *service2.UserService,
+	cfg config.Configurations,
+	v *validator.Validate) *Handler {
 	return &Handler{
-		services: services,
-		cfg:      cfg,
-		validate: v,
+		authService: aService,
+		userService: uService,
+		cfg:         cfg,
+		validate:    v,
 	}
 }
 
 func (h *Handler) InitialRoute(route *echo.Echo) {
-	v1 := route.Group("/v1")
+	v1 := route.Group("/v1/auth")
 
 	// Auth
 	{

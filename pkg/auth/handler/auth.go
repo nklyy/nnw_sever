@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/config"
+	"nnw_s/pkg/common"
 )
 
 type UserRegistrationDataRequest struct {
@@ -45,7 +46,7 @@ func (h *Handler) registration(c echo.Context) error {
 	// Parse User Data
 	err := json.NewDecoder(c.Request().Body).Decode(&registrationUserData)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, InvalidJson)
+		return c.JSON(http.StatusBadRequest, common.InvalidJson)
 	}
 
 	// Translation
@@ -59,25 +60,25 @@ func (h *Handler) registration(c echo.Context) error {
 			errArray = append(errArray, e.Translate(trans))
 		}
 
-		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
 	// Find user
-	user, _ := h.services.GetUserByEmail(registrationUserData.Email)
+	user, _ := h.userService.GetUserByEmail(registrationUserData.Email)
 	if user != nil {
-		return c.JSON(http.StatusBadRequest, UserAlreadyExist)
+		return c.JSON(http.StatusBadRequest, common.UserAlreadyExist)
 	}
 
 	// Generate 2FA Image
-	buffImg, key, err := h.services.Generate2FaImage(registrationUserData.Email)
+	buffImg, key, err := h.authService.Generate2FaImage(registrationUserData.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, InternalServerError)
+		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
 	}
 
 	// Save template uid with secret key
-	templateId, err := h.services.CreateTemplateUserData(key.Secret())
+	templateId, err := h.userService.CreateTemplateUserData(key.Secret())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, InternalServerError)
+		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
 	}
 
 	// Set Header
@@ -88,7 +89,7 @@ func (h *Handler) registration(c echo.Context) error {
 	// Write image bytes
 	_, err = c.Response().Write(buffImg.Bytes())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, InternalServerError)
+		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -100,7 +101,7 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 	// Parse User Data
 	err := json.NewDecoder(c.Request().Body).Decode(&verifyRegistrationCode)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, InvalidJson)
+		return c.JSON(http.StatusBadRequest, common.InvalidJson)
 	}
 
 	// Translation
@@ -114,25 +115,25 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 			errArray = append(errArray, e.Translate(trans))
 		}
 
-		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
 	// Get Secret
-	templateData, err := h.services.GetTemplateUserDataById(verifyRegistrationCode.Uid)
+	templateData, err := h.userService.GetTemplateUserDataById(verifyRegistrationCode.Uid)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, InternalServerError)
+		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
 	}
 
 	// Check Valid 2FA Code
-	valid := h.services.Check2FaCode(verifyRegistrationCode.Code, templateData.TwoFAS)
+	valid := h.authService.Check2FaCode(verifyRegistrationCode.Code, templateData.TwoFAS)
 	if !valid {
-		return c.JSON(http.StatusBadRequest, InvalidCode)
+		return c.JSON(http.StatusBadRequest, common.InvalidCode)
 	}
 
 	// Create User
-	_, err = h.services.CreateUser(verifyRegistrationCode.Email, verifyRegistrationCode.Password, templateData.TwoFAS)
+	_, err = h.userService.CreateUser(verifyRegistrationCode.Email, verifyRegistrationCode.Password, templateData.TwoFAS)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, InvalidData)
+		return c.JSON(http.StatusBadRequest, common.InvalidData)
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -144,7 +145,7 @@ func (h *Handler) login(c echo.Context) error {
 	// Parse User Data
 	err := json.NewDecoder(c.Request().Body).Decode(&userLoginData)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, InvalidJson)
+		return c.JSON(http.StatusBadRequest, common.InvalidJson)
 	}
 
 	// Translation
@@ -158,23 +159,23 @@ func (h *Handler) login(c echo.Context) error {
 			errArray = append(errArray, e.Translate(trans))
 		}
 
-		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
 	// Find user
-	user, err := h.services.GetUserByEmail(userLoginData.Email)
+	user, err := h.userService.GetUserByEmail(userLoginData.Email)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, UserNotFound)
+		return c.JSON(http.StatusBadRequest, common.UserNotFound)
 	}
 
 	// Check password
-	validPass, err := h.services.CheckPassword(userLoginData.Password, user.Password)
+	validPass, err := h.authService.CheckPassword(userLoginData.Password, user.Password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, InternalServerError)
+		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
 	}
 
 	if !validPass {
-		return c.JSON(http.StatusBadRequest, InvalidPassword)
+		return c.JSON(http.StatusBadRequest, common.InvalidPassword)
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -186,7 +187,7 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 	// Parse User Data
 	err := json.NewDecoder(c.Request().Body).Decode(&verifyLoginCode)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, InvalidJson)
+		return c.JSON(http.StatusBadRequest, common.InvalidJson)
 	}
 
 	// Translation
@@ -200,25 +201,25 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 			errArray = append(errArray, e.Translate(trans))
 		}
 
-		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
 	// Find user
-	user, err := h.services.GetUserByEmail(verifyLoginCode.Email)
+	user, err := h.userService.GetUserByEmail(verifyLoginCode.Email)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, UserNotFound)
+		return c.JSON(http.StatusBadRequest, common.UserNotFound)
 	}
 
 	// Check Valid 2FA Code
-	valid := h.services.Check2FaCode(verifyLoginCode.Code, user.SecretOTPKey)
+	valid := h.authService.Check2FaCode(verifyLoginCode.Code, user.SecretOTPKey)
 	if !valid {
-		return c.JSON(http.StatusBadRequest, InvalidCode)
+		return c.JSON(http.StatusBadRequest, common.InvalidCode)
 	}
 
 	// Create JWT
-	jwtToken, err := h.services.CreateJWTToken(verifyLoginCode.Email)
+	jwtToken, err := h.authService.CreateJWTToken(verifyLoginCode.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, InternalServerError)
+		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"token": jwtToken})
@@ -230,7 +231,7 @@ func (h *Handler) checkEmail(c echo.Context) error {
 	// Parse User Data
 	err := json.NewDecoder(c.Request().Body).Decode(&checkEmailData)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, InvalidJson)
+		return c.JSON(http.StatusBadRequest, common.InvalidJson)
 	}
 
 	// Translation
@@ -244,11 +245,11 @@ func (h *Handler) checkEmail(c echo.Context) error {
 			errArray = append(errArray, e.Translate(trans))
 		}
 
-		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
 	// Find User
-	user, err := h.services.GetUserByEmail(checkEmailData.Email)
+	user, err := h.userService.GetUserByEmail(checkEmailData.Email)
 	if user == nil {
 		return c.NoContent(http.StatusOK)
 	}
@@ -266,7 +267,7 @@ func (h *Handler) checkJwt(c echo.Context) error {
 	// Parse User Data
 	err := json.NewDecoder(c.Request().Body).Decode(&checkTokenData)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, InvalidJson)
+		return c.JSON(http.StatusBadRequest, common.InvalidJson)
 	}
 
 	// Translation
@@ -280,12 +281,12 @@ func (h *Handler) checkJwt(c echo.Context) error {
 			errArray = append(errArray, e.Translate(trans))
 		}
 
-		return c.JSON(http.StatusBadRequest, invalidValidationFieldsArray(errArray))
+		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
-	_, err = h.services.VerifyJWTToken(checkTokenData.Token)
+	_, err = h.authService.VerifyJWTToken(checkTokenData.Token)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, WrongToken)
+		return c.JSON(http.StatusBadRequest, common.WrongToken)
 	}
 
 	return c.NoContent(http.StatusOK)

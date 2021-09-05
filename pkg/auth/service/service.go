@@ -4,20 +4,13 @@ import (
 	"bytes"
 	"github.com/pquerna/otp"
 	"nnw_s/config"
-	"nnw_s/pkg/model"
-	"nnw_s/pkg/repository"
+	"nnw_s/pkg/auth/repository"
+	repository2 "nnw_s/pkg/user/repository"
 )
 
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
 
 type Authorization interface {
-	GetUserById(userId string) (*model.User, error)
-	GetUserByEmail(email string) (*model.User, error)
-	GetTemplateUserDataById(uid string) (*model.TemplateData, error)
-
-	CreateUser(email string, password string, OTPKey string) (*string, error)
-	CreateTemplateUserData(secret string) (*string, error)
-
 	CreateJWTToken(email string) (string, error)
 	VerifyJWTToken(id string) (*string, error)
 
@@ -31,8 +24,10 @@ type Service struct {
 	Authorization
 }
 
-func NewService(repos *repository.Repository, cfg config.Configurations) *Service {
+func NewService(arepos *repository.Repository,
+	urepos *repository2.Repository,
+	cfg config.Configurations) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization, cfg),
+		Authorization: NewAuthService(arepos.Authorization, urepos.User, cfg),
 	}
 }

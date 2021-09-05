@@ -1,11 +1,11 @@
-package service
+package common
 
 import (
 	"encoding/base64"
 	"strings"
 )
 
-func caesarShift(text string, shift int) (string, error) {
+func CaesarShift(text string, shift int) (string, error) {
 	var upLow string
 
 	for _, char := range text {
