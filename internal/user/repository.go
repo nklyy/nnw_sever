@@ -10,8 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const templateDataExpiry = 500
-
 //go:generate mockgen -source=repository.go -destination=mocks/repository_mock.go
 type Repository interface {
 	GetUserByID(ctx context.Context, userID string) (*User, error)
