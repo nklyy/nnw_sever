@@ -9,6 +9,7 @@ import (
 func TestInit(t *testing.T) {
 	type env struct {
 		port            string
+		environment     string
 		mongoDbUrl      string
 		mongoDbUser     string
 		mongoDbPass     string
@@ -24,12 +25,12 @@ func TestInit(t *testing.T) {
 	}
 
 	type args struct {
-		path string
-		env  env
+		env env
 	}
 
 	setEnv := func(env env) {
 		os.Setenv("PORT", env.port)
+		os.Setenv("ENVIRONMENT", env.environment)
 		os.Setenv("MONGO_DB_NAME", env.mongoDbName)
 		os.Setenv("MONGO_DB_USER", env.mongoDbUser)
 		os.Setenv("MONGO_DB_PASS", env.mongoDbPass)
@@ -54,7 +55,8 @@ func TestInit(t *testing.T) {
 			name: "Test config file!",
 			args: args{
 				env: env{
-					port:            ":4000",
+					port:            "4000",
+					environment:     "development",
 					mongoDbName:     "databaseName",
 					mongoDbUser:     "admin",
 					mongoDbPass:     "qwerty",
@@ -68,22 +70,31 @@ func TestInit(t *testing.T) {
 					smtpUserApiKey:  "key",
 					smtpPasswordKey: "password",
 				},
-				path: "..",
 			},
 			want: &Config{
-				PORT:            ":4000",
-				MongoDbName:     "databaseName",
-				MongoDbUser:     "admin",
-				MongoDbPass:     "qwerty",
-				MongoDbUrl:      "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
-				JwtSecretKey:    "123qwerty",
-				Shift:           "123",
-				PasswordSalt:    "123",
-				EmailFrom:       "example@example.com",
-				SmtpHost:        "smtp.email.com",
-				SmtpPort:        "25",
-				SmtpUserApiKey:  "key",
-				SmtpPasswordKey: "password",
+				PORT:        "4000",
+				Environment: "development",
+				EmailFrom:   "example@example.com",
+
+				Secrets: Secrets{
+					JwtSecretKey: "123qwerty",
+					Shift:        "123",
+					PasswordSalt: "123",
+				},
+
+				MongoConfig: MongoConfig{
+					MongoDbName: "databaseName",
+					MongoDbUser: "admin",
+					MongoDbPass: "qwerty",
+					MongoDbUrl:  "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
+				},
+
+				SMTPConfig: SMTPConfig{
+					SmtpHost:        "smtp.email.com",
+					SmtpPort:        "25",
+					SmtpUserApiKey:  "key",
+					SmtpPasswordKey: "password",
+				},
 			},
 		},
 	}
@@ -92,7 +103,7 @@ func TestInit(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			setEnv(test.args.env)
 
-			got, err := InitConfig(test.args.path, "")
+			got, err := Get()
 			if (err != nil) != test.wantError {
 				t.Errorf("Init() error = %v, wantErr %v", err, test.wantError)
 

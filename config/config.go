@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	PORT        string `default:"4000" envconfig:"PORT"`
-	Environment string `default:"local" envconfig:"APP_ENV"`
+	Environment string `default:"development" envconfig:"APP_ENV"`
 	EmailFrom   string `envconfig:"EMAIL_FROM"`
 
 	Secrets
