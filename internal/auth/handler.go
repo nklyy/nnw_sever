@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"nnw_s/config"
+	"nnw_s/pkg/errors"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -68,14 +70,14 @@ func (h *Handler) verifyRegistrationEmail(c echo.Context) error {
 	}
 
 	// Find user
-	user, _ := h.userService.GetUserByEmail(registrationUserData.Email)
+	user, _ := h.userService.GetUserByEmail(context.Background(), registrationUserData.Email)
 	if user != nil {
 		return c.JSON(http.StatusBadRequest, common.UserAlreadyExist)
 	}
 
-	err = h.authService.CreateEmail(registrationUserData.Email, "verify")
+	err = h.authService.CreateEmail(context.Background(), registrationUserData.Email, "verify")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+		return c.JSON(http.StatusInternalServerError, errors.NewInternal("Internal server error!"))
 	}
 
 	return c.NoContent(200)
@@ -104,9 +106,9 @@ func (h *Handler) verifyRegistrationEmailResend(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
-	err = h.authService.CreateEmail(registrationUserData.Email, "verify")
+	err = h.authService.CreateEmail(context.Background(), registrationUserData.Email, "verify")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+		return c.JSON(http.StatusInternalServerError, errors.NewInternal("Internal server error!"))
 	}
 
 	return c.NoContent(200)
@@ -135,32 +137,32 @@ func (h *Handler) verifyRegistrationEmailCode(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
-	valid, err := h.authService.CheckEmailCode(verifyRegistrationEmailCode.Email, verifyRegistrationEmailCode.Code, "verify")
+	valid, err := h.authService.CheckEmailCode(context.Background(), verifyRegistrationEmailCode.Email, verifyRegistrationEmailCode.Code, "verify")
 	if !valid {
 		return c.JSON(http.StatusBadRequest, common.InvalidCode)
 	}
 
 	// Generate 2FA Image
-	buffImg, key, err := h.authService.Generate2FaImage(verifyRegistrationEmailCode.Email)
+	buffImg, key, err := h.authService.Generate2FaImage(context.Background(), verifyRegistrationEmailCode.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+		return c.JSON(http.StatusInternalServerError, errors.NewInternal("Internal server error!"))
 	}
 
 	// Save template uid with secret key
-	templateId, err := h.authService.CreateTemplateUserData(key.Secret())
+	templateId, err := h.authService.CreateTemplateUserData(context.Background(), key.Secret())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+		return c.JSON(http.StatusInternalServerError, errors.NewInternal("Internal server error!"))
 	}
 
 	// Set Header
 	c.Response().Header().Set("Content-Type", "image/png")
 	c.Response().Header().Set("Access-Control-Expose-Headers", "Tid")
-	c.Response().Header().Set("Tid", *templateId)
+	c.Response().Header().Set("Tid", templateId)
 
 	// Write image bytes
 	_, err = c.Response().Write(buffImg.Bytes())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+		return c.JSON(http.StatusInternalServerError, errors.NewInternal("Internal server error!"))
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -190,9 +192,9 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 	}
 
 	// Get Secret
-	templateData, err := h.userService.GetTemplateUserDataById(verifyRegistrationCode.Uid)
+	templateData, err := h.userService.GetTemplateUserDataByID(context.Background(), verifyRegistrationCode.Uid)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+		return c.JSON(http.StatusInternalServerError, errors.NewInternal("Internal server error!"))
 	}
 
 	// Check Valid 2FA Code
@@ -202,7 +204,7 @@ func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 	}
 
 	// Create User
-	_, err = h.userService.CreateUser(verifyRegistrationCode.Email, verifyRegistrationCode.Password, templateData.TwoFAS)
+	_, err = h.userService.CreateUser(context.Background(), verifyRegistrationCode.Email, verifyRegistrationCode.Password, templateData.TwoFAS)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, common.InvalidData)
 	}
@@ -234,19 +236,15 @@ func (h *Handler) login(c echo.Context) error {
 	}
 
 	// Find user
-	user, err := h.userService.GetUserByEmail(userLoginData.Email)
+	user, err := h.userService.GetUserByEmail(context.Background(), userLoginData.Email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, common.UserNotFound)
 	}
 
 	// Check password
-	validPass, err := h.authService.CheckPassword(userLoginData.Password, user.Password)
+	err = h.authService.CheckPassword(context.Background(), userLoginData.Password, user.Password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
-	}
-
-	if !validPass {
-		return c.JSON(http.StatusBadRequest, common.InvalidPassword)
+		return c.JSON(http.StatusInternalServerError, errors.NewInternal("Internal server error!"))
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -276,7 +274,7 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 	}
 
 	// Find user
-	user, err := h.userService.GetUserByEmail(verifyLoginCode.Email)
+	user, err := h.userService.GetUserByEmail(context.Background(), verifyLoginCode.Email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, common.UserNotFound)
 	}
@@ -288,9 +286,9 @@ func (h *Handler) verifyLogin2fa(c echo.Context) error {
 	}
 
 	// Create JWT
-	jwtToken, err := h.authService.CreateJWTToken(verifyLoginCode.Email)
+	jwtToken, err := h.authService.CreateJWTToken(context.Background(), verifyLoginCode.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, common.InternalServerError)
+		return c.JSON(http.StatusInternalServerError, errors.NewInternal("Internal server error!"))
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"token": jwtToken})
@@ -320,7 +318,7 @@ func (h *Handler) checkEmail(c echo.Context) error {
 	}
 
 	// Find User
-	user, err := h.userService.GetUserByEmail(checkEmailData.Email)
+	user, err := h.userService.GetUserByEmail(context.Background(), checkEmailData.Email)
 	if user == nil {
 		return c.NoContent(http.StatusOK)
 	}
@@ -355,7 +353,7 @@ func (h *Handler) checkJwt(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, common.InvalidValidationFieldsArray(errArray))
 	}
 
-	_, err = h.authService.VerifyJWTToken(checkTokenData.Token)
+	_, err = h.authService.VerifyJWTToken(context.Background(), checkTokenData.Token)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, common.WrongToken)
 	}

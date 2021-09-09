@@ -59,7 +59,7 @@ func (repo *repository) GetUserByEmail(ctx context.Context, email string) (*User
 	return &user, nil
 }
 
-func (repo *repository) SaveUser(ctx context.Context, user User) (string, error) {
+func (repo *repository) SaveUser(ctx context.Context, user *User) (string, error) {
 	mod := mongo.IndexModel{
 		Keys:    bson.M{"email": 1}, // index in ascending order or -1 for descending order
 		Options: options.Index().SetUnique(true),

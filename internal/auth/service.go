@@ -5,27 +5,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"image/png"
-	"nnw_s/config"
-	"nnw_s/internal/user"
-	"nnw_s/pkg/helpers"
-	"os"
-	"path"
-	"strconv"
-	"text/template"
-	"time"
-
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
+	"html/template"
+	"image/png"
+	"nnw_s/config"
+	"nnw_s/internal/user"
+	"nnw_s/pkg/helpers"
+	"nnw_s/pkg/smtp"
+	"os"
+	"path"
+	"strconv"
+	"time"
 )
 
 const jwtExpiry = time.Second * 60
 
 //go:generate mockgen -source=service.go -destination=mocks/service_mock.go
+
 type Service interface {
 	CreateJWTToken(ctx context.Context, email string) (string, error)
 	VerifyJWTToken(ctx context.Context, id string) (string, error)
@@ -38,17 +39,17 @@ type Service interface {
 	CreateTemplateUserData(ctx context.Context, secret string) (string, error)
 
 	CreateEmail(ctx context.Context, email string, emailType string) error
-	CheckEmailCode(ctx context.Context, email string, code string, emailType string) error
+	CheckEmailCode(ctx context.Context, email string, code string, emailType string) (bool, error)
 }
 
 type service struct {
 	authRepo    Repository
 	userRepo    user.Repository
-	emailClient config.SMTPClient
+	emailClient smtp.Client
 	cfg         config.Config
 }
 
-func NewService(authRepo Repository, userRepo user.Repository, cfg config.Config, emailClient config.SMTPClient) Service {
+func NewService(authRepo Repository, userRepo user.Repository, cfg config.Config, emailClient smtp.Client) Service {
 	return &service{
 		authRepo:    authRepo,
 		userRepo:    userRepo,
@@ -57,7 +58,7 @@ func NewService(authRepo Repository, userRepo user.Repository, cfg config.Config
 	}
 }
 
-func (svc *service) Generate2FaImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error) {
+func (s *service) Generate2FaImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error) {
 	// Generate 2FA Image
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "NNW",
@@ -83,11 +84,11 @@ func (svc *service) Generate2FaImage(ctx context.Context, email string) (*bytes.
 	return &bufImage, key, nil
 }
 
-func (as *service) Check2FaCode(code, secret string) bool {
+func (s *service) Check2FaCode(code, secret string) bool {
 	return totp.Validate(code, secret)
 }
 
-func (as *service) CreateJWTToken(ctx context.Context, email string) (string, error) {
+func (s *service) CreateJWTToken(ctx context.Context, email string) (string, error) {
 	// Create JWT
 	payload := &Payload{
 		Email:     email,
@@ -96,7 +97,7 @@ func (as *service) CreateJWTToken(ctx context.Context, email string) (string, er
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
-	signedToken, err := jwtToken.SignedString([]byte(as.cfg.JwtSecretKey))
+	signedToken, err := jwtToken.SignedString([]byte(s.cfg.JwtSecretKey))
 	if err != nil {
 		return "", err
 	}
@@ -108,7 +109,7 @@ func (as *service) CreateJWTToken(ctx context.Context, email string) (string, er
 	jwtData.CreatedAt = time.Now()
 	jwtData.UpdatedAt = time.Now()
 
-	id, err := as.authRepo.CreateJwt(ctx, jwtData)
+	id, err := s.authRepo.CreateJwt(ctx, jwtData)
 	if err != nil {
 		return "", err
 	}
@@ -116,9 +117,9 @@ func (as *service) CreateJWTToken(ctx context.Context, email string) (string, er
 	return id, nil
 }
 
-func (as *service) VerifyJWTToken(ctx context.Context, id string) (string, error) {
+func (s *service) VerifyJWTToken(ctx context.Context, id string) (string, error) {
 	// Get Jwt from DataBase
-	token, err := as.authRepo.GetJwt(ctx, id)
+	token, err := s.authRepo.GetJwt(ctx, id)
 	if err != nil {
 		return "", err
 	}
@@ -129,10 +130,10 @@ func (as *service) VerifyJWTToken(ctx context.Context, id string) (string, error
 		if !ok {
 			return nil, errors.New("token is invalid")
 		}
-		return []byte(as.cfg.JwtSecretKey), nil
+		return []byte(s.cfg.JwtSecretKey), nil
 	}
 
-	jwtToken, err := jwt.ParseWithClaims(*token, &Payload{}, keyFunc)
+	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc)
 	if err != nil {
 		ver, ok := err.(*jwt.ValidationError)
 		if ok && errors.Is(ver.Inner, errors.New("token has expired")) {
@@ -146,15 +147,15 @@ func (as *service) VerifyJWTToken(ctx context.Context, id string) (string, error
 		return "", errors.New("token is invalid")
 	}
 
-	user, err := as.userRepo.GetUserByEmail(ctx, payload.Email)
+	dbUser, err := s.userRepo.GetUserByEmail(ctx, payload.Email)
 	if err != nil {
 		return "", err
 	}
 
-	return user.Email, nil
+	return dbUser.Email, nil
 }
 
-func (as *service) CreateTemplateUserData(ctx context.Context, secret string) (string, error) {
+func (s *service) CreateTemplateUserData(ctx context.Context, secret string) (string, error) {
 	uid := uuid.New().String()
 
 	var templateData user.TemplateData
@@ -164,7 +165,7 @@ func (as *service) CreateTemplateUserData(ctx context.Context, secret string) (s
 	templateData.CreatedAt = time.Now()
 	templateData.UpdatedAt = time.Now()
 
-	id, err := as.authRepo.CreateTemplateUserData(ctx, templateData)
+	id, err := s.authRepo.CreateTemplateUserData(ctx, templateData)
 	if err != nil {
 		return "", err
 	}
@@ -172,8 +173,8 @@ func (as *service) CreateTemplateUserData(ctx context.Context, secret string) (s
 	return id, err
 }
 
-func (as *service) CheckPassword(ctx context.Context, password string, hashPassword string) error {
-	shift, err := strconv.Atoi(as.cfg.Shift)
+func (s *service) CheckPassword(ctx context.Context, password string, hashPassword string) error {
+	shift, err := strconv.Atoi(s.cfg.Shift)
 	if err != nil {
 		return err
 	}
@@ -191,7 +192,7 @@ func (as *service) CheckPassword(ctx context.Context, password string, hashPassw
 	return nil
 }
 
-func (as *service) CreateEmail(ctx context.Context, email, emailType string) error {
+func (s *service) CreateEmail(ctx context.Context, email, emailType string) error {
 	code := helpers.EmailCode()
 
 	var emailData Email
@@ -202,7 +203,7 @@ func (as *service) CreateEmail(ctx context.Context, email, emailType string) err
 	emailData.CreatedAt = time.Now()
 	emailData.UpdatedAt = time.Now()
 
-	err := as.authRepo.CreateEmail(ctx, emailData)
+	err := s.authRepo.CreateEmail(ctx, emailData)
 	if err != nil {
 		return err
 	}
@@ -233,7 +234,7 @@ func (as *service) CreateEmail(ctx context.Context, email, emailType string) err
 		return err
 	}
 
-	err = as.emailClient.SendMail(as.cfg.EmailFrom, []string{email}, body.Bytes())
+	err = s.emailClient.SendMail(s.cfg.EmailFrom, []string{email}, body.Bytes())
 	if err != nil {
 		fmt.Println(2, err)
 		return err
@@ -242,7 +243,11 @@ func (as *service) CreateEmail(ctx context.Context, email, emailType string) err
 	return nil
 }
 
-func (as *service) CheckEmailCode(ctx context.Context, email, code, emailType string) error {
-	_, err := as.authRepo.GetEmail(ctx, email, code, emailType)
-	return err
+func (s *service) CheckEmailCode(ctx context.Context, email, code, emailType string) (bool, error) {
+	_, err := s.authRepo.GetEmail(ctx, email, code, emailType)
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
 }
