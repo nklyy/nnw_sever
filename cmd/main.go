@@ -1,11 +1,15 @@
-package cmd
+package main
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
 	"nnw_s/config"
+	"nnw_s/internal/auth"
+	"nnw_s/internal/user"
 	"nnw_s/pkg/mongodb"
+	"nnw_s/pkg/smtp"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -42,18 +46,27 @@ func main() {
 		fmt.Println("ERROR: Incorrect SMTP PORT!")
 		return
 	}
-	emailClient := config.NewSMTPClient(cfg.SmtpHost, smtpPort, cfg.SmtpUserApiKey, cfg.SmtpPasswordKey)
+
+	emailClient := smtp.NewClient(cfg.SmtpHost, smtpPort, cfg.SmtpUserApiKey, cfg.SmtpPasswordKey)
 
 	// Set up validator
 	validate := validator.New()
 
-	// Init repository, service and handlers
-	newAuthRepository := auth.NewAuthRepository(db, *cfg)
-	newUserRepository := user.NewUserRepository(db, *cfg)
-	newAuthService := auth.NewAuthService(*newAuthRepository, *newUserRepository, *cfg, *emailClient)
-	newUserService := user.NewUserService(newUserRepository, *cfg)
+	// Init logger
+	logger := logrus.New()
+
+	// Init repositories
+	newAuthRepository := auth.NewRepository(db, *cfg)
+	newUserRepository := user.NewRepository(db, logger)
+
+	// Init Services
+	newAuthService := auth.NewService(newAuthRepository, newUserRepository, *cfg, *emailClient)
+	newUserService, _ := user.NewService(newUserRepository, *cfg)
+
+	// Init handlers
 	newAuthHandler := auth.NewHandler(newAuthService, newUserService, *cfg, validate)
 
+	// Init routes
 	newAuthHandler.InitialRoute(app)
 
 	// NotFound Urls
