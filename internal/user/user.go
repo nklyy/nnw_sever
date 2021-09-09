@@ -16,10 +16,18 @@ type User struct {
 	UpdatedAt    time.Time          `bson:"updated_at"`
 }
 
-type TemplateData struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	Uid       string             `bson:"uid"`
-	TwoFAS    string             `bson:"two_fas"`
-	CreatedAt time.Time          `bson:"created_at"`
-	UpdatedAt time.Time          `bson:"updated_at"`
+func NewUser(email, passwordHash, secretOTP string) (*User, error) {
+	// put other validation
+	if email == "" {
+		return nil, ErrInvalidEmail
+	}
+
+	return &User{
+		ID:           primitive.NewObjectID(),
+		Email:        email,
+		Password:     passwordHash,
+		SecretOTPKey: secretOTP,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}, nil
 }
