@@ -7,7 +7,6 @@ import (
 	"nnw_s/pkg/helpers"
 
 	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 )
 
 //go:generate mockgen -source=service.go -destination=mocks/service_mock.go
@@ -63,13 +62,7 @@ func (svc *service) CreateUser(ctx context.Context, email, password, otpSecret s
 		return "", errors.NewInternal(err.Error())
 	}
 
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(decodedPassword), svc.opts.PasswordSalt)
-	if err != nil {
-		svc.log.WithContext(ctx).Errorf("failed to hash password: %v", err)
-		return "", errors.NewInternal(err.Error())
-	}
-
-	newUser, err := NewUser(email, string(hashPassword), otpSecret)
+	newUser, err := NewUser(email, decodedPassword, otpSecret, svc.opts.PasswordSalt)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create user entity due to validation error: %v", err)
 		return "", err
