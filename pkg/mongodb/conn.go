@@ -1,4 +1,4 @@
-package common
+package mongodb
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func MongoDbConnection(cfg *config.Configurations) (*mongo.Database, error) {
+func NewConn(cfg *config.Config) (*mongo.Database, error) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(cfg.MongoDbUrl))
 	if err != nil {
 		return nil, err

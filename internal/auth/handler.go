@@ -2,11 +2,11 @@ package auth
 
 import (
 	"encoding/json"
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/config"
-	"nnw_s/pkg/common"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
 )
 
 type UserRegistrationDataRequest struct {
@@ -165,7 +165,6 @@ func (h *Handler) verifyRegistrationEmailCode(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
-
 
 func (h *Handler) verifyRegistration2FaCode(c echo.Context) error {
 	var verifyRegistrationCode VerifyRegistrationCodeRequest

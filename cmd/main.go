@@ -2,32 +2,29 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"nnw_s/config"
+	"nnw_s/pkg/mongodb"
+	"strconv"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"net/http"
-	"nnw_s/config"
-	"nnw_s/pkg/auth"
-	"nnw_s/pkg/common"
-	"nnw_s/pkg/user"
-	"os"
-	"strconv"
 )
 
-func Execute() {
+func main() {
 	// Init config
-	path := "."
-	cfg, err := config.InitConfig(path, os.Getenv("APP_ENV"))
+	cfg, err := config.Get()
 	if err != nil {
-		fmt.Printf("ERROR: %s \n", err)
-		return
+		log.Fatalf("failed to load config: %v", err)
 	}
 
 	// Create App
 	app := echo.New()
 
 	// Connection to DB
-	db, err := common.MongoDbConnection(cfg)
+	db, err := mongodb.NewConn(cfg)
 	if err != nil {
 		fmt.Printf("ERROR: %s \n", err)
 		return

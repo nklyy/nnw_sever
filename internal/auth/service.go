@@ -2,72 +2,62 @@ package auth
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
+	"image/png"
+	"nnw_s/config"
+	"nnw_s/internal/user"
+	"nnw_s/pkg/helpers"
+	"os"
+	"path"
+	"strconv"
+	"text/template"
+	"time"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
-	"image/png"
-	"nnw_s/config"
-	"nnw_s/pkg/common"
-	"nnw_s/pkg/user"
-	"os"
-	"path"
-	"strconv"
-	"text/template"
-	"time"
 )
 
-//go:generate mockgen -source=auth_service.go -destination=mocks/mock.go
+const jwtExpiry = time.Second * 60
 
-type IAuthService interface {
-	CreateJWTToken(email string) (string, error)
-	VerifyJWTToken(id string) (*string, error)
+//go:generate mockgen -source=service.go -destination=mocks/service_mock.go
+type Service interface {
+	CreateJWTToken(ctx context.Context, email string) (string, error)
+	VerifyJWTToken(ctx context.Context, id string) (string, error)
 
-	Generate2FaImage(email string) (*bytes.Buffer, *otp.Key, error)
+	Generate2FaImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error)
 	Check2FaCode(code string, secret string) bool
 
-	CheckPassword(password string, hashPassword string) (bool, error)
+	CheckPassword(ctx context.Context, password string, hashPassword string) error
 
-	CreateTemplateUserData(secret string) (*string, error)
+	CreateTemplateUserData(ctx context.Context, secret string) (string, error)
 
-	CreateEmail(email string, emailType string) error
-	CheckEmailCode(email string, code string, emailType string) (bool, error)
+	CreateEmail(ctx context.Context, email string, emailType string) error
+	CheckEmailCode(ctx context.Context, email string, code string, emailType string) error
 }
 
-type AuthService struct {
-	arepo AuthRepository
-	urepo user.UserRepository
-	cfg   config.Configurations
+type service struct {
+	authRepo    Repository
+	userRepo    user.Repository
 	emailClient config.SMTPClient
+	cfg         config.Config
 }
 
-type Payload struct {
-	Email     string    `json:"email"`
-	IssuedAt  time.Time `json:"issued_at"`
-	ExpiredAt time.Time `json:"expired_at"`
-}
-
-func (payload *Payload) Valid() error {
-	if time.Now().After(payload.ExpiredAt) {
-		return errors.New("token has expired")
-	}
-	return nil
-}
-
-func NewAuthService(arepo AuthRepository, urepo user.UserRepository, cfg config.Configurations, emailClient config.SMTPClient) IAuthService {
-	return &AuthService{
-		arepo: arepo,
-		urepo: urepo,
-		cfg:   cfg,
+func NewService(authRepo Repository, userRepo user.Repository, cfg config.Config, emailClient config.SMTPClient) Service {
+	return &service{
+		authRepo:    authRepo,
+		userRepo:    userRepo,
+		cfg:         cfg,
 		emailClient: emailClient,
 	}
 }
 
-func (as *AuthService) Generate2FaImage(email string) (*bytes.Buffer, *otp.Key, error) {
+func (svc *service) Generate2FaImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error) {
 	// Generate 2FA Image
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "NNW",
@@ -93,16 +83,16 @@ func (as *AuthService) Generate2FaImage(email string) (*bytes.Buffer, *otp.Key, 
 	return &bufImage, key, nil
 }
 
-func (as *AuthService) Check2FaCode(code string, secret string) bool {
+func (as *service) Check2FaCode(code, secret string) bool {
 	return totp.Validate(code, secret)
 }
 
-func (as *AuthService) CreateJWTToken(email string) (string, error) {
+func (as *service) CreateJWTToken(ctx context.Context, email string) (string, error) {
 	// Create JWT
 	payload := &Payload{
 		Email:     email,
 		IssuedAt:  time.Now(),
-		ExpiredAt: time.Now().Add(time.Second * 60),
+		ExpiredAt: time.Now().Add(jwtExpiry),
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
@@ -112,13 +102,13 @@ func (as *AuthService) CreateJWTToken(email string) (string, error) {
 	}
 
 	// Create JWT in DataBase
-	var jwtData JWTData
+	var jwtData JWT
 	jwtData.ID = primitive.NewObjectID()
 	jwtData.Jwt = signedToken
 	jwtData.CreatedAt = time.Now()
 	jwtData.UpdatedAt = time.Now()
 
-	id, err := as.arepo.CreateJwtDb(jwtData)
+	id, err := as.authRepo.CreateJwt(ctx, jwtData)
 	if err != nil {
 		return "", err
 	}
@@ -126,11 +116,11 @@ func (as *AuthService) CreateJWTToken(email string) (string, error) {
 	return id, nil
 }
 
-func (as *AuthService) VerifyJWTToken(id string) (*string, error) {
+func (as *service) VerifyJWTToken(ctx context.Context, id string) (string, error) {
 	// Get Jwt from DataBase
-	token, err := as.arepo.GetJwtDb(id)
+	token, err := as.authRepo.GetJwt(ctx, id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	// Verify JWT
@@ -146,63 +136,63 @@ func (as *AuthService) VerifyJWTToken(id string) (*string, error) {
 	if err != nil {
 		ver, ok := err.(*jwt.ValidationError)
 		if ok && errors.Is(ver.Inner, errors.New("token has expired")) {
-			return nil, errors.New("token has expired")
+			return "", errors.New("token has expired")
 		}
-		return nil, errors.New("token is invalid")
+		return "", errors.New("token is invalid")
 	}
 
 	payload, ok := jwtToken.Claims.(*Payload)
 	if !ok {
-		return nil, errors.New("token is invalid")
+		return "", errors.New("token is invalid")
 	}
 
-	user, err := as.urepo.GetUserByEmailDb(payload.Email)
+	user, err := as.userRepo.GetUserByEmail(ctx, payload.Email)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &user.Email, nil
+	return user.Email, nil
 }
 
-func (as *AuthService) CreateTemplateUserData(secret string) (*string, error) {
+func (as *service) CreateTemplateUserData(ctx context.Context, secret string) (string, error) {
 	uid := uuid.New().String()
 
-	var templateData TemplateData
+	var templateData user.TemplateData
 	templateData.ID = primitive.NewObjectID()
 	templateData.Uid = uid
 	templateData.TwoFAS = secret
 	templateData.CreatedAt = time.Now()
 	templateData.UpdatedAt = time.Now()
 
-	id, err := as.arepo.CreateTemplateUserDataDb(templateData)
+	id, err := as.authRepo.CreateTemplateUserData(ctx, templateData)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	return id, err
 }
 
-func (as *AuthService) CheckPassword(password string, hashPassword string) (bool, error) {
+func (as *service) CheckPassword(ctx context.Context, password string, hashPassword string) error {
 	shift, err := strconv.Atoi(as.cfg.Shift)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	decodePassword, err := common.CaesarShift(password, -shift)
+	decodePassword, err := helpers.CaesarShift(password, -shift)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(decodePassword))
 	if err != nil {
-		return false, nil
+		return errors.New("password does not valid")
 	}
 
-	return true, nil
+	return nil
 }
 
-func (as *AuthService) CreateEmail(email string, emailType string) error {
-	code := common.EmailCode()
+func (as *service) CreateEmail(ctx context.Context, email, emailType string) error {
+	code := helpers.EmailCode()
 
 	var emailData Email
 	emailData.ID = primitive.NewObjectID()
@@ -212,7 +202,7 @@ func (as *AuthService) CreateEmail(email string, emailType string) error {
 	emailData.CreatedAt = time.Now()
 	emailData.UpdatedAt = time.Now()
 
-	err := as.arepo.CreateEmailDb(emailData)
+	err := as.authRepo.CreateEmail(ctx, emailData)
 	if err != nil {
 		return err
 	}
@@ -252,11 +242,7 @@ func (as *AuthService) CreateEmail(email string, emailType string) error {
 	return nil
 }
 
-func (as *AuthService) CheckEmailCode(email string, code string, emailType string) (bool, error) {
-	_, err := as.arepo.GetEmailDb(email, code, emailType)
-	if err != nil {
-		return false, err
-	}
-
-	return true, err
+func (as *service) CheckEmailCode(ctx context.Context, email, code, emailType string) error {
+	_, err := as.authRepo.GetEmail(ctx, email, code, emailType)
+	return err
 }

@@ -47,7 +47,7 @@ func TestInit(t *testing.T) {
 	tests := []struct {
 		name      string
 		args      args
-		want      *Configurations
+		want      *Config
 		wantError bool
 	}{
 		{
@@ -70,7 +70,7 @@ func TestInit(t *testing.T) {
 				},
 				path: "..",
 			},
-			want: &Configurations{
+			want: &Config{
 				PORT:            ":4000",
 				MongoDbName:     "databaseName",
 				MongoDbUser:     "admin",

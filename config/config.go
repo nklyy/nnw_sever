@@ -1,76 +1,59 @@
 package config
 
 import (
-	"github.com/spf13/viper"
-	"os"
+	"sync"
+
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
 
-type Configurations struct {
-	PORT string `mapstructure:"PORT"`
+type Config struct {
+	PORT        string `default:"4000" envconfig:"PORT"`
+	Environment string `default:"local" envconfig:"APP_ENV"`
+	EmailFrom   string `envconfig:"EMAIL_FROM"`
 
-	MongoDbName string `mapstructure:"MONGO_DB_NAME"`
-	MongoDbUser string `mapstructure:"MONGO_DB_USER"`
-	MongoDbPass string `mapstructure:"MONGO_DB_PASS"`
-	MongoDbUrl  string `mapstructure:"MONGO_DB_URL"`
-
-	JwtSecretKey string `mapstructure:"JWT_SECRET_KEY"`
-
-	Shift        string `mapstructure:"SHIFT"`
-	PasswordSalt string `mapstructure:"PASSWORD_SALT"`
-
-	EmailFrom       string `mapstructure:"EMAIL_FROM"`
-	SmtpHost        string `mapstructure:"SMTP_HOST"`
-	SmtpPort        string `mapstructure:"SMTP_PORT"`
-	SmtpUserApiKey  string `mapstructure:"SMTP_USER_API_KEY"`
-	SmtpPasswordKey string `mapstructure:"SMTP_PASSWORD_KEY"`
+	Secrets
+	MongoConfig
+	SMTPConfig
 }
 
-func InitConfig(path string, env string) (*Configurations, error) {
-	var configuration Configurations
-
-	if env == "PRODUCTION" {
-		setFromEnv(&configuration)
-		return &configuration, nil
-	}
-
-	viper.AddConfigPath(path)
-
-	viper.SetConfigName(".env")
-
-	viper.SetConfigType("env")
-
-	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	err = viper.Unmarshal(&configuration)
-	if err != nil {
-		//fmt.Printf("Unable to decode into struct, %v", err)
-		return nil, err
-	}
-
-	return &configuration, nil
+type Secrets struct {
+	JwtSecretKey string `envconfig:"JWT_SECRET_KEY"`
+	Shift        string `envconfig:"SHIFT"`
+	PasswordSalt string `envconfig:"PASSWORD_SALT"`
 }
 
-func setFromEnv(cfg *Configurations) {
-	cfg.MongoDbName = os.Getenv("MONGO_DB_NAME")
-	cfg.MongoDbUser = os.Getenv("MONGO_DB_USER")
-	cfg.MongoDbPass = os.Getenv("MONGO_DB_PASS")
-	cfg.MongoDbUrl = os.Getenv("MONGO_DB_URL")
+type MongoConfig struct {
+	MongoDbName string `envconfig:"MONGO_DB_NAME"`
+	MongoDbUser string `envconfig:"MONGO_DB_USER"`
+	MongoDbPass string `envconfig:"MONGO_DB_PASS"`
+	MongoDbUrl  string `envconfig:"MONGO_DB_URL"`
+}
 
-	cfg.JwtSecretKey = os.Getenv("JWT_SECRET_KEY")
+type SMTPConfig struct {
+	SmtpHost        string `envconfig:"SMTP_HOST"`
+	SmtpPort        string `envconfig:"SMTP_PORT"`
+	SmtpUserApiKey  string `envconfig:"SMTP_USER_API_KEY"`
+	SmtpPasswordKey string `envconfig:"SMTP_PASSWORD_KEY"`
+}
 
-	cfg.Shift = os.Getenv("SHIFT")
-	cfg.PasswordSalt = os.Getenv("PASSWORD_SALT")
+var (
+	once   sync.Once
+	config *Config
+)
 
-	cfg.PORT = os.Getenv("PORT")
+func Get() (*Config, error) {
+	var err error
+	once.Do(func() {
+		var cfg Config
+		_ = godotenv.Load()
 
-	cfg.EmailFrom = os.Getenv("EMAIL_FROM")
-	cfg.SmtpHost = os.Getenv("SMTP_HOST")
-	cfg.SmtpPort = os.Getenv("SMTP_PORT")
-	cfg.SmtpUserApiKey = os.Getenv("SMTP_USER_API_KEY")
-	cfg.SmtpPasswordKey = os.Getenv("SMTP_PASSWORD_KEY")
+		if err = envconfig.Process("", &cfg); err != nil {
+			return
+		}
+
+		config = &cfg
+	})
+
+	return config, err
 }
