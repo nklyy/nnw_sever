@@ -34,7 +34,7 @@ func (repo *repository) GetUserByID(ctx context.Context, userID string) (*User, 
 	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"_id": userID}).Decode(&user); err != nil {
 		if err == mongo.ErrNoDocuments {
 			repo.log.WithContext(ctx).Errorf("unable to find user by id '%s': %v", userID, err)
-			return nil, ErrUserNotFound
+			return nil, ErrNotFound
 		}
 
 		repo.log.WithContext(ctx).Errorf("unable to find user due to internal error: %v; id: %s", err, userID)
@@ -49,7 +49,7 @@ func (repo *repository) GetUserByEmail(ctx context.Context, email string) (*User
 	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"email": email}).Decode(&user); err != nil {
 		if err == mongo.ErrNoDocuments {
 			repo.log.WithContext(ctx).Errorf("unable to find user by email '%s': %v", email, err)
-			return nil, ErrUserNotFound
+			return nil, ErrNotFound
 		}
 
 		repo.log.WithContext(ctx).Errorf("unable to find user due to internal error: %v; email: %s", err, email)
@@ -73,8 +73,13 @@ func (repo *repository) SaveUser(ctx context.Context, user *User) (string, error
 
 	_, err = repo.db.Collection("user").InsertOne(ctx, user)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			repo.log.WithContext(ctx).Errorf("failed to insert user data to db due to duplicate error: %v", err)
+			return "", ErrAlreadyExists
+		}
+
 		repo.log.WithContext(ctx).Errorf("failed to insert user data to db: %v", err)
 		return "", errors.NewInternal(err.Error())
 	}
-	return user.ID.String(), nil
+	return user.ID.Hex(), nil
 }

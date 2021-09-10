@@ -14,7 +14,7 @@ type Error struct {
 func (err Error) Error() string {
 	repr := fmt.Sprintf("code: %v; status: %v", err.Code, err.Status)
 	if err.Message != "" {
-		repr += "message: " + err.Message
+		repr += "; message: " + err.Message
 	}
 	return repr
 }

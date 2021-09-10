@@ -14,7 +14,7 @@ import (
 type Service interface {
 	GetUserByID(ctx context.Context, userID string) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
-	CreateUser(ctx context.Context, email, password, otpSecret string) (string, error)
+	CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error)
 }
 
 type service struct {
@@ -24,7 +24,7 @@ type service struct {
 }
 
 type ServiceOptions struct {
-	log          *logrus.Logger
+	Log          *logrus.Logger
 	Shift        int
 	PasswordSalt int
 }
@@ -36,7 +36,7 @@ func NewService(repo Repository, opts *ServiceOptions) (Service, error) {
 	if opts == nil {
 		return nil, errors.NewInternal("invalid service options")
 	}
-	if opts.log == nil {
+	if opts.Log == nil {
 		return nil, errors.NewInternal("invalid logger")
 	}
 	if opts.PasswordSalt == 0 {
@@ -45,7 +45,7 @@ func NewService(repo Repository, opts *ServiceOptions) (Service, error) {
 	if opts.Shift == 0 {
 		return nil, errors.NewInternal("invalid shift")
 	}
-	return &service{repo: repo, opts: opts, log: opts.log}, nil
+	return &service{repo: repo, opts: opts, log: opts.Log}, nil
 }
 
 func (svc *service) GetUserByID(ctx context.Context, userID string) (*User, error) {
@@ -56,14 +56,14 @@ func (svc *service) GetUserByEmail(ctx context.Context, email string) (*User, er
 	return svc.repo.GetUserByEmail(ctx, email)
 }
 
-func (svc *service) CreateUser(ctx context.Context, email, password, otpSecret string) (string, error) {
-	decodedPassword, err := helpers.CaesarShift(password, -svc.opts.Shift)
+func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error) {
+	decodedPassword, err := helpers.CaesarShift(dto.Password, -svc.opts.Shift)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to decode password: %v", err)
 		return "", errors.NewInternal(err.Error())
 	}
 
-	newUser, err := NewUser(email, decodedPassword, otpSecret)
+	newUser, err := NewUser(dto.Email, decodedPassword, dto.SecretOTP)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create user due to validation error: %v", err)
 		return "", err
