@@ -9,6 +9,8 @@ on:
   push:
     branches: 
       - master
+      - development
+
   pull_request:
     branches: 
       - master
@@ -37,7 +39,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-        
+
       - name: Run tests
         run: make test
 
@@ -49,7 +51,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-        
+
       - name: Run linter
         run: make lint
 
@@ -63,7 +65,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-      
+
       - name: Build image
         run: echo "Building and pushing image \"${{ env.BUILD_SHA }}\" to registry"
 
@@ -78,6 +80,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-        
+
       - name: Deploy image somewhere
         run: echo "Deploing image somewhere"
