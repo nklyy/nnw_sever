@@ -61,7 +61,7 @@ func main() {
 
 	// Init Services
 	newAuthService := auth.NewService(newAuthRepository, newUserRepository, *cfg, *emailClient)
-	newUserService, _ := user.NewService(newUserRepository, *cfg)
+	newUserService, _ := user.NewService(newUserRepository, cfg, logger)
 
 	// Init handlers
 	newAuthHandler := auth.NewHandler(newAuthService, newUserService, *cfg, validate)

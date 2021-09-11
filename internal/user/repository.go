@@ -14,7 +14,13 @@ import (
 type Repository interface {
 	GetUserByID(ctx context.Context, userID string) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	GetActiveUser(ctx context.Context, email string) (*User, error)
+	GetDisableUser(ctx context.Context, email string) (*User, error)
+
 	SaveUser(ctx context.Context, user *User) (string, error)
+
+	UpdateUser(ctx context.Context, user *User) error
+	UpdateDisableUser(ctx context.Context, user *User) error
 }
 
 type repository struct {
@@ -38,6 +44,36 @@ func (repo *repository) GetUserByID(ctx context.Context, userID string) (*User, 
 		}
 
 		repo.log.WithContext(ctx).Errorf("unable to find user due to internal error: %v; id: %s", err, userID)
+		return nil, errors.NewInternal(err.Error())
+	}
+
+	return &user, nil
+}
+
+func (repo *repository) GetActiveUser(ctx context.Context, email string) (*User, error) {
+	var user User
+	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"email": email, "status": "active"}).Decode(&user); err != nil {
+		if err == mongo.ErrNoDocuments {
+			repo.log.WithContext(ctx).Errorf("unable to find user by email '%s': %v", email, err)
+			return nil, ErrNotFound
+		}
+
+		repo.log.WithContext(ctx).Errorf("unable to find user due to internal error: %v; email: %s", err, email)
+		return nil, errors.NewInternal(err.Error())
+	}
+
+	return &user, nil
+}
+
+func (repo *repository) GetDisableUser(ctx context.Context, email string) (*User, error) {
+	var user User
+	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"email": email, "status": "disable"}).Decode(&user); err != nil {
+		if err == mongo.ErrNoDocuments {
+			repo.log.WithContext(ctx).Errorf("unable to find user by email '%s': %v", email, err)
+			return nil, ErrNotFound
+		}
+
+		repo.log.WithContext(ctx).Errorf("unable to find user due to internal error: %v; email: %s", err, email)
 		return nil, errors.NewInternal(err.Error())
 	}
 
@@ -82,4 +118,23 @@ func (repo *repository) SaveUser(ctx context.Context, user *User) (string, error
 		return "", errors.NewInternal(err.Error())
 	}
 	return user.ID.Hex(), nil
+}
+
+func (repo *repository) UpdateUser(ctx context.Context, user *User) error {
+	_, err := repo.db.Collection("user").UpdateOne(ctx, bson.M{"email": user.Email}, bson.D{{"$set", user}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *repository) UpdateDisableUser(ctx context.Context, user *User) error {
+	_, err := repo.db.Collection("user").UpdateOne(ctx, bson.M{"email": user.Email}, bson.D{{"$set", user}})
+	if err != nil {
+		repo.log.WithContext(ctx).Errorf("failed to update user data in db: %v", err)
+		return errors.NewInternal(err.Error())
+	}
+
+	return nil
 }

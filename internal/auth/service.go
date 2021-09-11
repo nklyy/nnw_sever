@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,6 +18,7 @@ import (
 	"nnw_s/pkg/smtp"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -35,8 +35,6 @@ type Service interface {
 	Check2FaCode(code string, secret string) bool
 
 	CheckPassword(ctx context.Context, password string, hashPassword string) error
-
-	CreateTemplateUserData(ctx context.Context, secret string) (string, error)
 
 	CreateEmail(ctx context.Context, email string, emailType string) error
 	CheckEmailCode(ctx context.Context, email string, code string, emailType string) (bool, error)
@@ -155,24 +153,6 @@ func (s *service) VerifyJWTToken(ctx context.Context, id string) (string, error)
 	return dbUser.Email, nil
 }
 
-func (s *service) CreateTemplateUserData(ctx context.Context, secret string) (string, error) {
-	uid := uuid.New().String()
-
-	var templateData user.TemplateData
-	templateData.ID = primitive.NewObjectID()
-	templateData.Uid = uid
-	templateData.TwoFAS = secret
-	templateData.CreatedAt = time.Now()
-	templateData.UpdatedAt = time.Now()
-
-	id, err := s.authRepo.CreateTemplateUserData(ctx, templateData)
-	if err != nil {
-		return "", err
-	}
-
-	return id, err
-}
-
 func (s *service) CheckPassword(ctx context.Context, password string, hashPassword string) error {
 	shift, err := strconv.Atoi(s.cfg.Shift)
 	if err != nil {
@@ -214,7 +194,9 @@ func (s *service) CreateEmail(ctx context.Context, email, emailType string) erro
 		fmt.Println(err)
 	}
 
-	t, err := template.ParseFiles(path.Join(dir, "templates/verifyTemplate.html"))
+	root := filepath.Dir(dir)
+
+	t, err := template.ParseFiles(path.Join(root, "templates/verifyTemplate.html"))
 	if err != nil {
 		fmt.Println(3, err)
 		return err

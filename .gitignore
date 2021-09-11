@@ -20,4 +20,4 @@ vendor/
 # IDE - VSCode
 .vscode/*
 
-.env
+cmd/.env

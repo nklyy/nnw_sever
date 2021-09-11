@@ -6,10 +6,12 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
+	"nnw_s/pkg/helpers"
+	"strconv"
 	"unicode"
 )
 
-func ValidatorConfig(v *validator.Validate) ut.Translator {
+func ValidatorConfig(v *validator.Validate, cfg Config) ut.Translator {
 	translator := en.New()
 	uni := ut.New(translator, translator)
 
@@ -54,7 +56,11 @@ func ValidatorConfig(v *validator.Validate) ut.Translator {
 			hasLower  = false
 			hasNumber = false
 		)
-		if len(fl.Field().String()) > 7 {
+
+		passwordShift, _ := strconv.Atoi(cfg.Shift)
+		decodePassword, _ := helpers.CaesarShift(fl.Field().String(), -passwordShift)
+
+		if len(decodePassword) > 7 {
 			hasMinLen = true
 		}
 		for _, char := range fl.Field().String() {

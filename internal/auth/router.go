@@ -30,15 +30,19 @@ func NewHandler(authService Service,
 
 func (h *Handler) InitialRoute(route *echo.Echo) {
 	v1 := route.Group("/v1")
+
 	// Registration and Verify Email
-	v1.POST("/verifyRegistrationEmail", h.verifyRegistrationEmail)
-	v1.POST("/verifyRegistrationEmailResend", h.verifyRegistrationEmailResend)
-	v1.POST("/verifyRegistrationEmailCode", h.verifyRegistrationEmailCode)
-	v1.POST("/verifyRegister2fa", h.verifyRegistration2FaCode)
+	v1.POST("/preRegistration", h.preRegistration)
+	v1.POST("/sendVerifyRegistrationEmail", h.sendVerifyRegistrationEmail)
+	v1.POST("/resendVerifyRegistrationEmail", h.resendVerifyRegistrationEmail)
+	v1.POST("/checkRegistrationEmailCode", h.checkRegistrationEmailCode)
+	v1.POST("/generateRegistration2FA", h.generate2FAQrCode)
+	v1.POST("/checkRegistration2FA", h.checkRegistration2FaCode)
+	v1.POST("/finishRegistration", h.finishRegistration)
 
 	// Login
 	v1.POST("/login", h.login)
-	v1.POST("/verifyLogin2fa", h.verifyLogin2fa)
+	v1.POST("/checkLogin2fa", h.checkLogin2faCode)
 
 	v1.POST("/checkEmail", h.checkEmail)
 	v1.POST("/checkJwt", h.checkJwt)

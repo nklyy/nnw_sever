@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"nnw_s/config"
+	"strconv"
 
 	"nnw_s/pkg/errors"
 	"nnw_s/pkg/helpers"
@@ -14,38 +16,35 @@ import (
 type Service interface {
 	GetUserByID(ctx context.Context, userID string) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	GetActiveUser(ctx context.Context, email string) (*User, error)
+	GetDisableUser(ctx context.Context, email string) (*User, error)
+
 	CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error)
+
+	UpdateUser(ctx context.Context, dto *User) error
+	UpdateDisableUser(ctx context.Context, oldUser *User) error
 }
 
 type service struct {
 	repo Repository
 	log  *logrus.Logger
-	opts *ServiceOptions
+	cfg  *config.Config
 }
 
-type ServiceOptions struct {
-	Log          *logrus.Logger
-	Shift        int
-	PasswordSalt int
-}
-
-func NewService(repo Repository, opts *ServiceOptions) (Service, error) {
+func NewService(repo Repository, cfg *config.Config, log *logrus.Logger) (Service, error) {
 	if repo == nil {
 		return nil, errors.NewInternal("invalid repo")
 	}
-	if opts == nil {
+
+	if cfg == nil {
 		return nil, errors.NewInternal("invalid service options")
 	}
-	if opts.Log == nil {
+
+	if log == nil {
 		return nil, errors.NewInternal("invalid logger")
 	}
-	if opts.PasswordSalt == 0 {
-		return nil, errors.NewInternal("invalid password salt")
-	}
-	if opts.Shift == 0 {
-		return nil, errors.NewInternal("invalid shift")
-	}
-	return &service{repo: repo, opts: opts, log: opts.Log}, nil
+
+	return &service{repo: repo, cfg: cfg, log: log}, nil
 }
 
 func (svc *service) GetUserByID(ctx context.Context, userID string) (*User, error) {
@@ -56,8 +55,26 @@ func (svc *service) GetUserByEmail(ctx context.Context, email string) (*User, er
 	return svc.repo.GetUserByEmail(ctx, email)
 }
 
+func (svc *service) GetActiveUser(ctx context.Context, email string) (*User, error) {
+	return svc.repo.GetActiveUser(ctx, email)
+}
+
+func (svc *service) GetDisableUser(ctx context.Context, email string) (*User, error) {
+	return svc.repo.GetDisableUser(ctx, email)
+}
+
 func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error) {
-	decodedPassword, err := helpers.CaesarShift(dto.Password, -svc.opts.Shift)
+	numberPasswordSalt, err := strconv.Atoi(svc.cfg.PasswordSalt)
+	if err != nil {
+		return "", errors.NewInternal("invalid password salt type")
+	}
+
+	numberShift, err := strconv.Atoi(svc.cfg.Shift)
+	if err != nil {
+		return "", errors.NewInternal("invalid shift type")
+	}
+
+	decodedPassword, err := helpers.CaesarShift(dto.Password, -numberShift)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to decode password: %v", err)
 		return "", errors.NewInternal(err.Error())
@@ -69,7 +86,7 @@ func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string,
 		return "", err
 	}
 
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), svc.opts.PasswordSalt)
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), numberPasswordSalt)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to hash user password: %v", err)
 		return "", errors.NewInternal(err.Error())
@@ -83,4 +100,52 @@ func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string,
 		return "", err
 	}
 	return id, err
+}
+
+func (svc *service) UpdateUser(ctx context.Context, updateUser *User) error {
+	err := svc.repo.UpdateUser(ctx, updateUser)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to save user in db: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (svc *service) UpdateDisableUser(ctx context.Context, oldUser *User) error {
+	numberPasswordSalt, err := strconv.Atoi(svc.cfg.PasswordSalt)
+	if err != nil {
+		return errors.NewInternal("invalid password salt type")
+	}
+
+	numberShift, err := strconv.Atoi(svc.cfg.Shift)
+	if err != nil {
+		return errors.NewInternal("invalid shift type")
+	}
+
+	decodedPassword, err := helpers.CaesarShift(oldUser.Password, -numberShift)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to decode password: %v", err)
+		return errors.NewInternal(err.Error())
+	}
+
+	newDisableUser, err := NewDisableUser(oldUser.Email, decodedPassword, oldUser)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to create user due to validation error: %v", err)
+		return err
+	}
+
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(newDisableUser.Password), numberPasswordSalt)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to hash user password: %v", err)
+		return errors.NewInternal(err.Error())
+	}
+
+	newDisableUser.Password = string(hashPassword)
+
+	err = svc.repo.UpdateDisableUser(ctx, newDisableUser)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to update user in db: %v", err)
+		return err
+	}
+	return nil
 }
