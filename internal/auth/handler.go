@@ -142,7 +142,7 @@ func (h *Handler) sendVerifyRegistrationEmail(c echo.Context) error {
 
 	// Find disable user
 	disableUser, _ := h.userService.GetDisableUser(context.Background(), verifyEmailData.Email)
-	if disableUser != nil {
+	if disableUser == nil {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
 	}
 
@@ -213,6 +213,20 @@ func (h *Handler) checkRegistrationEmailCode(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidCode, "Invalid email code!"))
 	}
 
+	// Find disable user
+	disableUser, _ := h.userService.GetDisableUser(context.Background(), checkRegistrationEmailCodeData.Email)
+	if disableUser == nil {
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
+	}
+
+	// Create User
+	disableUser.VerifyEmail = true
+	disableUser.UpdatedAt = time.Now()
+	err = h.userService.UpdateUser(context.Background(), disableUser)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidData, "Invalid user data!"))
+	}
+
 	return c.NoContent(http.StatusOK)
 }
 
@@ -241,7 +255,7 @@ func (h *Handler) generate2FAQrCode(c echo.Context) error {
 
 	// Find disable user
 	disableUser, _ := h.userService.GetDisableUser(context.Background(), generate2FAQrCodeData.Email)
-	if disableUser != nil {
+	if disableUser == nil {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
 	}
 
@@ -297,7 +311,7 @@ func (h *Handler) checkRegistration2FaCode(c echo.Context) error {
 
 	// Find disable user
 	disableUser, _ := h.userService.GetDisableUser(context.Background(), checkRegistrationCodeData.Email)
-	if disableUser != nil {
+	if disableUser == nil {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
 	}
 
@@ -335,12 +349,13 @@ func (h *Handler) finishRegistration(c echo.Context) error {
 
 	// Find disable user
 	disableUser, _ := h.userService.GetDisableUser(context.Background(), finishRegistrationData.Email)
-	if disableUser != nil {
+	if disableUser == nil {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
 	}
 
 	// Create User
 	disableUser.Status = "active"
+	disableUser.UpdatedAt = time.Now()
 	err = h.userService.UpdateUser(context.Background(), disableUser)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidData, "Invalid user data!"))

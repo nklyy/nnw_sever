@@ -191,14 +191,13 @@ func (s *service) CreateEmail(ctx context.Context, email, emailType string) erro
 	// Set up Email template and Send email
 	dir, err := os.Getwd()
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	root := filepath.Dir(dir)
 
 	t, err := template.ParseFiles(path.Join(root, "templates/verifyTemplate.html"))
 	if err != nil {
-		fmt.Println(3, err)
 		return err
 	}
 
@@ -212,13 +211,11 @@ func (s *service) CreateEmail(ctx context.Context, email, emailType string) erro
 		Code: code,
 	})
 	if err != nil {
-		fmt.Println(1, err)
 		return err
 	}
 
 	err = s.emailClient.SendMail(s.cfg.EmailFrom, []string{email}, body.Bytes())
 	if err != nil {
-		fmt.Println(2, err)
 		return err
 	}
 
