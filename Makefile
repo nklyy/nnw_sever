@@ -32,7 +32,7 @@ gen-mock: clean deps
 
 test: gen-mock
 	$(call pprint,Runnning tests...)
-	go test ./... -coverprofile .cover.out
+	go test -v ./... -coverprofile .cover.out
 	$(call completed)
 
 build: clean deps

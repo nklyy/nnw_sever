@@ -1,0 +1,68 @@
+name: nnw-workflow
+env:
+  REGISTRY: ""
+  USER: ""
+  PASSWORD: ""
+  BUILD_SHA: "nnw-server-${{ github.sha }}"
+
+on:
+  [push, pull_request]:
+    branches: 
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build web server
+    steps:
+      - name: Setup Go
+      - uses: actions/setup-go@v2
+      - with:
+        - go-version: 1.16
+
+      - name: Checkout code
+      - uses: actions/checkout@v1
+
+      - name: Get dependensies and build
+      - run: make build
+
+  test:
+    runs-on: ubuntu-latest
+    name: Run tests
+    needs:
+      - build
+    steps:
+      - name: Run tests
+      - run: make test
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Run linter
+    needs:
+      - build
+    steps:
+      - name: Run linter
+      - run: make lint
+
+  build-image:
+    runs-on: ubuntu-latest
+    name: Build Docker image
+    needs:
+      - build
+      - test
+      - lint
+    steps:
+      - name: Build image
+      - run: echo "Building and pushing image \"${{ env.BUILD_SHA }}\" to registry"
+
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Docker image
+    needs:
+      - build
+      - test
+      - lint
+      - build-image
+    steps:
+      - name: Deploy image somewhere
+      - run: echo "Deploing image somewhere"
