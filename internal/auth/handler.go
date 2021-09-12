@@ -87,13 +87,13 @@ func (h *Handler) preRegistration(c echo.Context) error {
 	}
 
 	// Find active user
-	activeUser, _ := h.userService.GetActiveUser(context.Background(), registrationUserData.Email)
+	activeUser, _ := h.userService.GetUserByEmail(context.Background(), registrationUserData.Email, "active")
 	if activeUser != nil {
-		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrAlreadyExists, "User already exist!"))
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(user.ErrAlreadyExists, "User already exist!"))
 	}
 
 	// Find disable user
-	disableUser, _ := h.userService.GetDisableUser(context.Background(), registrationUserData.Email)
+	disableUser, _ := h.userService.GetUserByEmail(context.Background(), registrationUserData.Email, "disable")
 	if disableUser != nil {
 		disableUser.Email = registrationUserData.Email
 		disableUser.Password = registrationUserData.Password
@@ -106,7 +106,7 @@ func (h *Handler) preRegistration(c echo.Context) error {
 		var userDto user.CreateUserDTO
 		userDto.Email = registrationUserData.Email
 		userDto.Password = registrationUserData.Password
-		userDto.SecretOTP = "null"
+		userDto.SecretOTP = nil
 
 		_, err := h.userService.CreateUser(context.Background(), &userDto)
 		if err != nil {
@@ -141,9 +141,9 @@ func (h *Handler) sendVerifyRegistrationEmail(c echo.Context) error {
 	}
 
 	// Find disable user
-	disableUser, _ := h.userService.GetDisableUser(context.Background(), verifyEmailData.Email)
+	disableUser, _ := h.userService.GetUserByEmail(context.Background(), verifyEmailData.Email, "disable")
 	if disableUser == nil {
-		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(user.ErrNotFound, "User not found!"))
 	}
 
 	err = h.authService.CreateEmail(context.Background(), verifyEmailData.Email, "verify")
@@ -214,9 +214,9 @@ func (h *Handler) checkRegistrationEmailCode(c echo.Context) error {
 	}
 
 	// Find disable user
-	disableUser, _ := h.userService.GetDisableUser(context.Background(), checkRegistrationEmailCodeData.Email)
+	disableUser, _ := h.userService.GetUserByEmail(context.Background(), checkRegistrationEmailCodeData.Email, "disable")
 	if disableUser == nil {
-		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(user.ErrNotFound, "User not found!"))
 	}
 
 	// Create User
@@ -254,9 +254,9 @@ func (h *Handler) generate2FAQrCode(c echo.Context) error {
 	}
 
 	// Find disable user
-	disableUser, _ := h.userService.GetDisableUser(context.Background(), generate2FAQrCodeData.Email)
+	disableUser, _ := h.userService.GetUserByEmail(context.Background(), generate2FAQrCodeData.Email, "disable")
 	if disableUser == nil {
-		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(user.ErrNotFound, "User not found!"))
 	}
 
 	// Generate 2FA Image
@@ -266,7 +266,8 @@ func (h *Handler) generate2FAQrCode(c echo.Context) error {
 	}
 
 	// Update user SecretOTP key
-	disableUser.SecretOTPKey = key.Secret()
+	secretOtp := key.Secret()
+	disableUser.SecretOTPKey = &secretOtp
 	disableUser.UpdatedAt = time.Now()
 	err = h.userService.UpdateUser(context.Background(), disableUser)
 	if err != nil {
@@ -310,13 +311,13 @@ func (h *Handler) checkRegistration2FaCode(c echo.Context) error {
 	}
 
 	// Find disable user
-	disableUser, _ := h.userService.GetDisableUser(context.Background(), checkRegistrationCodeData.Email)
+	disableUser, _ := h.userService.GetUserByEmail(context.Background(), checkRegistrationCodeData.Email, "disable")
 	if disableUser == nil {
-		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(user.ErrNotFound, "User not found!"))
 	}
 
 	// Check Valid 2FA Code
-	valid := h.authService.Check2FaCode(checkRegistrationCodeData.Code, disableUser.SecretOTPKey)
+	valid := h.authService.Check2FaCode(checkRegistrationCodeData.Code, *disableUser.SecretOTPKey)
 	if !valid {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidCode, "Invalid 2FA code!"))
 	}
@@ -348,9 +349,9 @@ func (h *Handler) finishRegistration(c echo.Context) error {
 	}
 
 	// Find disable user
-	disableUser, _ := h.userService.GetDisableUser(context.Background(), finishRegistrationData.Email)
+	disableUser, _ := h.userService.GetUserByEmail(context.Background(), finishRegistrationData.Email, "disable")
 	if disableUser == nil {
-		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(user.ErrNotFound, "User not found!"))
 	}
 
 	// Create User
@@ -388,13 +389,13 @@ func (h *Handler) login(c echo.Context) error {
 	}
 
 	// Find user
-	userByEmail, err := h.userService.GetUserByEmail(context.Background(), userLoginData.Email)
+	activeUser, err := h.userService.GetUserByEmail(context.Background(), userLoginData.Email, "active")
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(user.ErrNotFound, "User not found!"))
 	}
 
 	// Check password
-	err = h.authService.CheckPassword(context.Background(), userLoginData.Password, userByEmail.Password)
+	err = h.authService.CheckPassword(context.Background(), userLoginData.Password, activeUser.Password)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidData, "Incorrect login data!"))
 	}
@@ -426,13 +427,13 @@ func (h *Handler) checkLogin2faCode(c echo.Context) error {
 	}
 
 	// Find user
-	userByEmail, err := h.userService.GetUserByEmail(context.Background(), checkLogin2FACodeData.Email)
+	activeUser, err := h.userService.GetUserByEmail(context.Background(), checkLogin2FACodeData.Email, "active")
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrNotFound, "User not found!"))
+		return c.JSON(http.StatusBadRequest, errors.WithMessage(user.ErrNotFound, "User not found!"))
 	}
 
 	// Check Valid 2FA Code
-	valid := h.authService.Check2FaCode(checkLogin2FACodeData.Code, userByEmail.SecretOTPKey)
+	valid := h.authService.Check2FaCode(checkLogin2FACodeData.Code, *activeUser.SecretOTPKey)
 	if !valid {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidCode, "Invalid 2FA code!"))
 	}
@@ -470,12 +471,12 @@ func (h *Handler) checkEmail(c echo.Context) error {
 	}
 
 	// Find User
-	userByEmail, err := h.userService.GetUserByEmail(context.Background(), checkEmailData.Email)
-	if userByEmail == nil {
+	activeUser, err := h.userService.GetUserByEmail(context.Background(), checkEmailData.Email, "active")
+	if activeUser == nil {
 		return c.NoContent(http.StatusOK)
 	}
 
-	if userByEmail.Email == checkEmailData.Email {
+	if activeUser.Email == checkEmailData.Email {
 		return c.NoContent(http.StatusBadRequest)
 	}
 

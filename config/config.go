@@ -19,8 +19,8 @@ type Config struct {
 
 type Secrets struct {
 	JwtSecretKey string `envconfig:"JWT_SECRET_KEY"`
-	Shift        string `envconfig:"SHIFT"`
-	PasswordSalt string `envconfig:"PASSWORD_SALT"`
+	Shift        int    `envconfig:"SHIFT"`
+	PasswordSalt int    `envconfig:"PASSWORD_SALT"`
 }
 
 type MongoConfig struct {
@@ -46,7 +46,7 @@ func Get() (*Config, error) {
 	var err error
 	once.Do(func() {
 		var cfg Config
-		_ = godotenv.Load()
+		_ = godotenv.Load("../.env")
 
 		if err = envconfig.Process("", &cfg); err != nil {
 			return

@@ -13,12 +13,12 @@ type User struct {
 	Password     string             `bson:"password"`
 	Status       string             `bson:"status"`
 	VerifyEmail  bool               `bson:"verify_email"`
-	SecretOTPKey string             `bson:"secret_otp_key"`
+	SecretOTPKey *string            `bson:"secret_otp_key"`
 	CreatedAt    time.Time          `bson:"created_at"`
 	UpdatedAt    time.Time          `bson:"updated_at"`
 }
 
-func NewUser(email, password, secretOTP string) (*User, error) {
+func NewUser(email string, password string, secretOTP *string) (*User, error) {
 	// put other validation
 	if email == "" {
 		return nil, errors.WithMessage(ErrInvalidEmail, "should be not empty")

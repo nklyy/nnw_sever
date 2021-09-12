@@ -19,7 +19,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"time"
 )
 
@@ -145,7 +144,7 @@ func (s *service) VerifyJWTToken(ctx context.Context, id string) (string, error)
 		return "", errors.New("token is invalid")
 	}
 
-	dbUser, err := s.userRepo.GetUserByEmail(ctx, payload.Email)
+	dbUser, err := s.userRepo.GetUserByEmail(ctx, payload.Email, "active")
 	if err != nil {
 		return "", err
 	}
@@ -154,12 +153,7 @@ func (s *service) VerifyJWTToken(ctx context.Context, id string) (string, error)
 }
 
 func (s *service) CheckPassword(ctx context.Context, password string, hashPassword string) error {
-	shift, err := strconv.Atoi(s.cfg.Shift)
-	if err != nil {
-		return err
-	}
-
-	decodePassword, err := helpers.CaesarShift(password, -shift)
+	decodePassword, err := helpers.CaesarShift(password, -s.cfg.Shift)
 	if err != nil {
 		return err
 	}

@@ -13,9 +13,7 @@ import (
 //go:generate mockgen -source=repository.go -destination=mocks/repository_mock.go
 type Repository interface {
 	GetUserByID(ctx context.Context, userID string) (*User, error)
-	GetUserByEmail(ctx context.Context, email string) (*User, error)
-	GetActiveUser(ctx context.Context, email string) (*User, error)
-	GetDisableUser(ctx context.Context, email string) (*User, error)
+	GetUserByEmail(ctx context.Context, email string, status string) (*User, error)
 
 	SaveUser(ctx context.Context, user *User) (string, error)
 
@@ -50,39 +48,9 @@ func (repo *repository) GetUserByID(ctx context.Context, userID string) (*User, 
 	return &user, nil
 }
 
-func (repo *repository) GetActiveUser(ctx context.Context, email string) (*User, error) {
+func (repo *repository) GetUserByEmail(ctx context.Context, email string, status string) (*User, error) {
 	var user User
-	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"email": email, "status": "active"}).Decode(&user); err != nil {
-		if err == mongo.ErrNoDocuments {
-			repo.log.WithContext(ctx).Errorf("unable to find user by email '%s': %v", email, err)
-			return nil, ErrNotFound
-		}
-
-		repo.log.WithContext(ctx).Errorf("unable to find user due to internal error: %v; email: %s", err, email)
-		return nil, errors.NewInternal(err.Error())
-	}
-
-	return &user, nil
-}
-
-func (repo *repository) GetDisableUser(ctx context.Context, email string) (*User, error) {
-	var user User
-	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"email": email, "status": "disable"}).Decode(&user); err != nil {
-		if err == mongo.ErrNoDocuments {
-			repo.log.WithContext(ctx).Errorf("unable to find user by email '%s': %v", email, err)
-			return nil, ErrNotFound
-		}
-
-		repo.log.WithContext(ctx).Errorf("unable to find user due to internal error: %v; email: %s", err, email)
-		return nil, errors.NewInternal(err.Error())
-	}
-
-	return &user, nil
-}
-
-func (repo *repository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
-	var user User
-	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"email": email}).Decode(&user); err != nil {
+	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"email": email, "status": status}).Decode(&user); err != nil {
 		if err == mongo.ErrNoDocuments {
 			repo.log.WithContext(ctx).Errorf("unable to find user by email '%s': %v", email, err)
 			return nil, ErrNotFound

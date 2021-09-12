@@ -7,7 +7,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"nnw_s/pkg/helpers"
-	"strconv"
 	"unicode"
 )
 
@@ -57,13 +56,13 @@ func ValidatorConfig(v *validator.Validate, cfg Config) ut.Translator {
 			hasNumber = false
 		)
 
-		passwordShift, _ := strconv.Atoi(cfg.Shift)
-		decodePassword, _ := helpers.CaesarShift(fl.Field().String(), -passwordShift)
+		decodePassword, _ := helpers.CaesarShift(fl.Field().String(), -cfg.Shift)
 
 		if len(decodePassword) > 7 {
 			hasMinLen = true
 		}
-		for _, char := range fl.Field().String() {
+
+		for _, char := range decodePassword {
 			switch {
 			case unicode.IsUpper(char):
 				hasUpper = true
