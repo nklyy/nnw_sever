@@ -272,7 +272,7 @@ func TestCreateUser(t *testing.T) {
 			dto: &user.CreateUserDTO{
 				Email:     testUser.Email,
 				Password:  encodedPass,
-				SecretOTP: testUser.SecretOTPKey,
+				SecretOTP: testUser.SecretOTP,
 			},
 			setup: func(ctx context.Context, dto *user.CreateUserDTO) {
 				mockRepo.EXPECT().SaveUser(ctx, gomock.Any()).Return(testUser.ID.Hex(), nil)
@@ -289,7 +289,7 @@ func TestCreateUser(t *testing.T) {
 			dto: &user.CreateUserDTO{
 				Email:     testUser.Email,
 				Password:  testUser.Password,
-				SecretOTP: testUser.SecretOTPKey,
+				SecretOTP: testUser.SecretOTP,
 			},
 			setup: func(ctx context.Context, dto *user.CreateUserDTO) {},
 			expect: func(t *testing.T, id string, err error) {
@@ -303,7 +303,7 @@ func TestCreateUser(t *testing.T) {
 			dto: &user.CreateUserDTO{
 				Email:     testUser.Email,
 				Password:  encodedPass,
-				SecretOTP: testUser.SecretOTPKey,
+				SecretOTP: testUser.SecretOTP,
 			},
 			setup: func(ctx context.Context, dto *user.CreateUserDTO) {
 				mockRepo.EXPECT().SaveUser(ctx, gomock.Any()).Return("", user.ErrAlreadyExists)
@@ -319,7 +319,7 @@ func TestCreateUser(t *testing.T) {
 			dto: &user.CreateUserDTO{
 				Email:     "",
 				Password:  encodedPass,
-				SecretOTP: testUser.SecretOTPKey,
+				SecretOTP: testUser.SecretOTP,
 			},
 			setup: func(ctx context.Context, dto *user.CreateUserDTO) {},
 			expect: func(t *testing.T, id string, err error) {

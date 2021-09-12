@@ -6,6 +6,8 @@ import (
 )
 
 const (
+	StatusInvalidRequest errors.Status = "invalid_request"
+
 	StatusInvalidCode errors.Status = "invalid_code"
 	StatusInvalidData errors.Status = "invalid_data"
 	StatusInvalidJson errors.Status = "invalid_json"
@@ -13,6 +15,8 @@ const (
 )
 
 var (
+	ErrInvalidRequest = errors.New(codes.BadRequest, StatusInvalidRequest)
+
 	ErrInvalidCode = errors.New(codes.BadRequest, StatusInvalidCode)
 	ErrInvalidData = errors.New(codes.BadRequest, StatusInvalidData)
 	ErrInvalidJson = errors.New(codes.BadRequest, StatusInvalidJson)

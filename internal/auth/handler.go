@@ -220,7 +220,7 @@ func (h *Handler) checkRegistrationEmailCode(c echo.Context) error {
 	}
 
 	// Create User
-	disableUser.VerifyEmail = true
+	disableUser.IsVerified = true
 	disableUser.UpdatedAt = time.Now()
 	err = h.userService.UpdateUser(context.Background(), disableUser)
 	if err != nil {
@@ -267,7 +267,7 @@ func (h *Handler) generate2FAQrCode(c echo.Context) error {
 
 	// Update user SecretOTP key
 	secretOtp := key.Secret()
-	disableUser.SecretOTPKey = &secretOtp
+	disableUser.SecretOTP = &secretOtp
 	disableUser.UpdatedAt = time.Now()
 	err = h.userService.UpdateUser(context.Background(), disableUser)
 	if err != nil {
@@ -317,7 +317,7 @@ func (h *Handler) checkRegistration2FaCode(c echo.Context) error {
 	}
 
 	// Check Valid 2FA Code
-	valid := h.authService.Check2FaCode(checkRegistrationCodeData.Code, *disableUser.SecretOTPKey)
+	valid := h.authService.Check2FaCode(checkRegistrationCodeData.Code, *disableUser.SecretOTP)
 	if !valid {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidCode, "Invalid 2FA code!"))
 	}
@@ -433,7 +433,7 @@ func (h *Handler) checkLogin2faCode(c echo.Context) error {
 	}
 
 	// Check Valid 2FA Code
-	valid := h.authService.Check2FaCode(checkLogin2FACodeData.Code, *activeUser.SecretOTPKey)
+	valid := h.authService.Check2FaCode(checkLogin2FACodeData.Code, *activeUser.SecretOTP)
 	if !valid {
 		return c.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidCode, "Invalid 2FA code!"))
 	}

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
 	"time"
 
@@ -8,54 +9,40 @@ import (
 )
 
 type User struct {
-	ID           primitive.ObjectID `bson:"_id"`
-	Email        string             `bson:"email"`
-	Password     string             `bson:"password"`
-	Status       string             `bson:"status"`
-	VerifyEmail  bool               `bson:"verify_email"`
-	SecretOTPKey *string            `bson:"secret_otp_key"`
-	CreatedAt    time.Time          `bson:"created_at"`
-	UpdatedAt    time.Time          `bson:"updated_at"`
+	ID          primitive.ObjectID       `bson:"_id"`
+	Email       string                   `bson:"email"`
+	Credentials *credentials.Credentials `bson:"credentials"`
+	Status      Status                   `bson:"status"`
+	IsVerified  bool                     `bson:"is_verified"`
+
+	CreatedAt time.Time `bson:"created_at"`
+	UpdatedAt time.Time `bson:"updated_at"`
 }
 
-func NewUser(email string, password string, secretOTP *string) (*User, error) {
-	// put other validation
+func NewUser(email string, credentials *credentials.Credentials) (*User, error) {
 	if email == "" {
 		return nil, errors.WithMessage(ErrInvalidEmail, "should be not empty")
 	}
-	if password == "" {
-		return nil, errors.WithMessage(ErrInvalidPassword, "should be not empty")
-	}
-
 	return &User{
-		ID:           primitive.NewObjectID(),
-		Email:        email,
-		Password:     password,
-		Status:       "disable",
-		VerifyEmail:  false,
-		SecretOTPKey: secretOTP,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
+		ID:          primitive.NewObjectID(),
+		Email:       email,
+		Credentials: credentials,
+		Status:      Disabled,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}, nil
 }
 
-func NewDisableUser(email string, password string, oldUser *User) (*User, error) {
-	// put other validation
-	if email == "" {
-		return nil, errors.WithMessage(ErrInvalidEmail, "should be not empty")
-	}
-	if password == "" {
-		return nil, errors.WithMessage(ErrInvalidPassword, "should be not empty")
-	}
+func (u *User) IsActive() bool {
+	return u.Status == Active
+}
 
-	return &User{
-		ID:           oldUser.ID,
-		Email:        email,
-		Password:     password,
-		Status:       oldUser.Status,
-		VerifyEmail:  oldUser.VerifyEmail,
-		SecretOTPKey: oldUser.SecretOTPKey,
-		CreatedAt:    oldUser.CreatedAt,
-		UpdatedAt:    time.Now(),
-	}, nil
+func (u *User) SetToVerified() {
+	u.IsVerified = true
+	u.UpdatedAt = time.Now()
+}
+
+func (u *User) SetToActive() {
+	u.Status = Active
+	u.UpdatedAt = time.Now()
 }

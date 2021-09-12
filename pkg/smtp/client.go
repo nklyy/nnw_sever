@@ -26,6 +26,6 @@ func NewClient(smtpHost string, smtpPort int, userKey string, keyPass string) *C
 }
 
 // SendMail wraps smtp.SendMail
-func (s Client) SendMail(from string, to []string, msg []byte) error {
+func (s *Client) SendMail(from string, to []string, msg []byte) error {
 	return smtp.SendMail(s.host, s.auth, from, to, msg)
 }
