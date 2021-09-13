@@ -2,20 +2,19 @@ package auth
 
 import (
 	"context"
+	"nnw_s/internal/auth/jwt"
 	"nnw_s/internal/auth/mfa"
 	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/notificator"
 	"nnw_s/internal/user"
+	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
-const jwtExpiry = time.Second * 60
-
 //go:generate mockgen -source=service.go -destination=mocks/service_mock.go
-
 type Service interface {
 	Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error)
 	RegisterUser(ctx context.Context, dto *RegisterUserDTO) error
@@ -26,30 +25,29 @@ type Service interface {
 }
 
 type service struct {
-	authRepo        Repository
 	userSvc         user.Service
 	notificatorSvc  notificator.Service
 	verificationSvc verification.Service
 	mfaSvc          mfa.Service
+	jwtSvc          jwt.Service
+	credentialsSvc  credentials.Service
 
 	log         *logrus.Logger
 	emailSender string
 }
 
 type ServiceDeps struct {
-	AuthRepository      Repository
 	UserService         user.Service
 	NotificatorService  notificator.Service
 	VerificationService verification.Service
 	MFAService          mfa.Service
+	JWTService          jwt.Service
+	CredentialsService  credentials.Service
 }
 
 func NewService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (Service, error) {
 	if deps == nil {
 		return nil, errors.NewInternal("invalid service dependencies")
-	}
-	if deps.AuthRepository == nil {
-		return nil, errors.NewInternal("invalid auth service")
 	}
 	if deps.UserService == nil {
 		return nil, errors.NewInternal("invalid user service")
@@ -63,6 +61,12 @@ func NewService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (Serv
 	if deps.MFAService == nil {
 		return nil, errors.NewInternal("invalid MFA service")
 	}
+	if deps.JWTService == nil {
+		return nil, errors.NewInternal("invalid JWT service")
+	}
+	if deps.CredentialsService == nil {
+		return nil, errors.NewInternal("invalid credentials service")
+	}
 	if log == nil {
 		return nil, errors.NewInternal("invalid logger")
 	}
@@ -70,7 +74,6 @@ func NewService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (Serv
 		return nil, errors.NewInternal("invalid sender's email")
 	}
 	return &service{
-		authRepo:        deps.AuthRepository,
 		userSvc:         deps.UserService,
 		notificatorSvc:  deps.NotificatorService,
 		verificationSvc: deps.VerificationService,
@@ -79,7 +82,44 @@ func NewService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (Serv
 	}, nil
 }
 
-func (svc *service) Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error) {}
+func (svc *service) Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error) {
+	// find user
+	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
+	if err != nil {
+		return nil, errors.WithMessage(ErrPermissionDenied, err.Error())
+	}
+
+	// map dto to user
+	registeredUser, err := user.MapToEntity(userDTO)
+	if err != nil {
+		return nil, err
+	}
+
+	// if user does not active or not verified return ErrPermissionDenied
+	if !registeredUser.IsActive() || !registeredUser.IsVerified {
+		return nil, ErrPermissionDenied
+	}
+
+	// map from entity to credentials dto
+	credentialsDTO := credentials.MapToDTO(registeredUser.Credentials)
+
+	// check password
+	if err = svc.credentialsSvc.ValidatePassword(ctx, credentialsDTO, dto.Password); err != nil {
+		return nil, err
+	}
+
+	// check 2FA/MFA Code
+	if err = svc.mfaSvc.CheckMFACode(ctx, dto.Code, *registeredUser.Credentials.SecretOTP); err != nil {
+		return nil, err
+	}
+
+	// create JWT
+	jwtTokenDTO, err := svc.jwtSvc.CreateJWT(ctx, dto.Email)
+	if err != nil {
+		return nil, errors.WithMessage(ErrUnauthorized, err.Error())
+	}
+	return &TokenDTO{Token: jwtTokenDTO.Token, ExpireAt: jwtTokenDTO.ExpireAt}, nil
+}
 
 func (svc *service) RegisterUser(ctx context.Context, dto *RegisterUserDTO) error {
 	// create user if not exists
@@ -108,7 +148,7 @@ func (svc *service) RegisterUser(ctx context.Context, dto *RegisterUserDTO) erro
 	}
 
 	// send email to recipient
-	if err := svc.notificatorSvc.SendEmail(ctx, &emailData); err != nil {
+	if err = svc.notificatorSvc.SendEmail(ctx, &emailData); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to send email: %v", err)
 	}
 
@@ -123,7 +163,13 @@ func (svc *service) VerifyUser(ctx context.Context, dto *VerifyUserDTO) error {
 	}
 
 	// get not activated user
-	notActivatedUser, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
+	notActivatedUserDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
+	if err != nil {
+		return err
+	}
+
+	// mapping userDTO to user entity
+	notActivatedUser, err := user.MapToEntity(notActivatedUserDTO)
 	if err != nil {
 		return err
 	}
@@ -131,7 +177,11 @@ func (svc *service) VerifyUser(ctx context.Context, dto *VerifyUserDTO) error {
 	// activating user
 	notActivatedUser.SetToVerified()
 
-	if err = svc.userSvc.UpdateUser(ctx, notActivatedUser); err != nil {
+	// map back to dto
+	notActivatedUserDTO = user.MapToDTO(notActivatedUser)
+
+	// update user entity in storage
+	if err = svc.userSvc.UpdateUser(ctx, notActivatedUserDTO); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
 		return err
 	}
@@ -140,13 +190,27 @@ func (svc *service) VerifyUser(ctx context.Context, dto *VerifyUserDTO) error {
 	return nil
 }
 
-func (svc *service) ResendVerificationEmail(ctx context.Context, email string) error {}
+// todo
+func (svc *service) ResendVerificationEmail(ctx context.Context, email string) error {
+	return errors.NewInternal("not implemented yet")
+}
 
 func (svc *service) SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, error) {
-	// find disabled user
-	disabledUser, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
+	// find user
+	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
 		return nil, err
+	}
+
+	// map userDTO to user
+	disabledUser, err := user.MapToEntity(userDTO)
+	if err != nil {
+		return nil, err
+	}
+
+	// check if user is active or not verified, if yes - return ErrPermissionDenied
+	if disabledUser.IsActive() || !disabledUser.IsVerified {
+		return nil, ErrPermissionDenied
 	}
 
 	// generate 2FA/MFA Image
@@ -160,17 +224,32 @@ func (svc *service) SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, err
 	disabledUser.Credentials.SetSecretOTP(key)
 	disabledUser.UpdatedAt = time.Now()
 
-	if err = svc.userSvc.UpdateUser(ctx, disabledUser); err != nil {
+	// map to userDTO
+	userDTO = user.MapToDTO(disabledUser)
+
+	// update user in storage
+	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
 		return nil, err
 	}
 	return buffImg.Bytes(), nil
 }
 
 func (svc *service) ActivateUser(ctx context.Context, dto *ActivateUserDTO) error {
-	// find disable user
-	disabledUser, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
+	// find user
+	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
 		return err
+	}
+
+	// map userDTO to user
+	disabledUser, err := user.MapToEntity(userDTO)
+	if err != nil {
+		return err
+	}
+
+	// check if user is active or not verified, if yes - return ErrPermissionDenied
+	if disabledUser.IsActive() || !disabledUser.IsVerified {
+		return ErrPermissionDenied
 	}
 
 	// check 2FA/MFA Code
@@ -181,91 +260,14 @@ func (svc *service) ActivateUser(ctx context.Context, dto *ActivateUserDTO) erro
 	// activate user
 	disabledUser.SetToActive()
 
-	if err = svc.userSvc.UpdateUser(ctx, disabledUser); err != nil {
+	// map back to DTO
+	userDTO = user.MapToDTO(disabledUser)
+
+	// update user in storage
+	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
 		return err
 	}
 
 	svc.log.WithContext(ctx).Infof("user '%s' successfully activated MFA authentication", disabledUser.Email)
 	return nil
 }
-
-// func (s *service) CreateJWTToken(ctx context.Context, email string) (string, error) {
-// 	// Create JWT
-// 	payload := &Payload{
-// 		Email:     email,
-// 		IssuedAt:  time.Now(),
-// 		ExpiredAt: time.Now().Add(jwtExpiry),
-// 	}
-
-// 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
-// 	signedToken, err := jwtToken.SignedString([]byte(s.cfg.JwtSecretKey))
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	// Create JWT in DataBase
-// 	var jwtData JWT
-// 	jwtData.ID = primitive.NewObjectID()
-// 	jwtData.Jwt = signedToken
-// 	jwtData.CreatedAt = time.Now()
-// 	jwtData.UpdatedAt = time.Now()
-
-// 	id, err := s.authRepo.CreateJwt(ctx, jwtData)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return id, nil
-// }
-
-// func (s *service) VerifyJWTToken(ctx context.Context, id string) (string, error) {
-// 	// Get Jwt from DataBase
-// 	token, err := s.authRepo.GetJwt(ctx, id)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	// Verify JWT
-// 	keyFunc := func(token *jwt.Token) (interface{}, error) {
-// 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
-// 		if !ok {
-// 			return nil, errors.New("token is invalid")
-// 		}
-// 		return []byte(s.cfg.JwtSecretKey), nil
-// 	}
-
-// 	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc)
-// 	if err != nil {
-// 		ver, ok := err.(*jwt.ValidationError)
-// 		if ok && errors.Is(ver.Inner, errors.New("token has expired")) {
-// 			return "", errors.New("token has expired")
-// 		}
-// 		return "", errors.New("token is invalid")
-// 	}
-
-// 	payload, ok := jwtToken.Claims.(*Payload)
-// 	if !ok {
-// 		return "", errors.New("token is invalid")
-// 	}
-
-// 	dbUser, err := s.userRepo.GetUserByEmail(ctx, payload.Email, "active")
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return dbUser.Email, nil
-// }
-
-// func (s *service) CheckPassword(ctx context.Context, password string, hashPassword string) error {
-// 	decodePassword, err := helpers.CaesarShift(password, -s.cfg.Shift)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(decodePassword))
-// 	if err != nil {
-// 		return errors.New("password does not valid")
-// 	}
-
-// 	return nil
-// }

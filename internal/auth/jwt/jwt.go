@@ -1,4 +1,4 @@
-package auth
+package jwt
 
 import (
 	"time"
@@ -11,4 +11,13 @@ type JWT struct {
 	Jwt       string             `bson:"jwt"`
 	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at"`
+}
+
+func NewJWT(token string) *JWT {
+	return &JWT{
+		ID:        primitive.NewObjectID(),
+		Jwt:       token,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 }

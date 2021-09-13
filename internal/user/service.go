@@ -53,12 +53,17 @@ func (svc *service) GetUserByEmail(ctx context.Context, email string) (*DTO, err
 }
 
 func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error) {
-	userCredentials, err := svc.credentialsSvc.CreateCredentials(ctx, dto.Password, credentials.NilSecretOTP)
+	// create user creadentials
+	userCredentialsDTO, err := svc.credentialsSvc.CreateCredentials(ctx, dto.Password, credentials.NilSecretOTP)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create user credentials: %v", err)
 		return "", err
 	}
 
+	// map credentialsDTO to entity
+	userCredentials := credentials.MapToEntity(userCredentialsDTO)
+
+	// create user with new credentials
 	newUser, err := NewUser(dto.Email, userCredentials)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create user due to validation error: %v", err)
@@ -73,9 +78,15 @@ func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string,
 	return id, err
 }
 
-func (svc *service) UpdateUser(ctx context.Context, updateUser *DTO) error {
-	err := svc.repo.UpdateUser(ctx, updateUser)
+func (svc *service) UpdateUser(ctx context.Context, userDTO *DTO) error {
+	// map dto to user entity
+	updateUser, err := MapToEntity(userDTO)
 	if err != nil {
+		return err
+	}
+
+	// update user in storage by email
+	if err = svc.repo.UpdateUser(ctx, updateUser); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to save user in db: %v", err)
 		return err
 	}

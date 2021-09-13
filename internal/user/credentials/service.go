@@ -10,7 +10,8 @@ import (
 )
 
 type Service interface {
-	CreateCredentials(ctx context.Context, password string, secretOTP SecretOTP) (*Credentials, error)
+	CreateCredentials(ctx context.Context, password string, secretOTP SecretOTP) (*DTO, error)
+	ValidatePassword(ctx context.Context, credentialsDTO *DTO, password string) error
 }
 
 type service struct {
@@ -28,21 +29,34 @@ func NewService(log *logrus.Logger, shift, passwordSalt int) (Service, error) {
 
 // CreateCredentials decodes password, hashing it and creates Credentials struct
 // There you can also put encrypting logic of secretOTP
-func (svc *service) CreateCredentials(ctx context.Context, password string, secretOTP SecretOTP) (*Credentials, error) {
+func (svc *service) CreateCredentials(ctx context.Context, password string, secretOTP SecretOTP) (*DTO, error) {
 	decodedPassword, err := helpers.CaesarShift(password, -svc.shift)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to decode password: %v", err)
-		return nil, errors.NewInternal(err.Error())
+		return nil, ErrInvalidPassword
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(decodedPassword), svc.passwordSalt)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to hash user password: %v", err)
-		return nil, errors.NewInternal(err.Error())
+		return nil, errors.WithMessage(ErrInvalidPassword, err.Error())
 	}
 
-	return &Credentials{
+	return &DTO{
 		Password:  string(hashedPassword),
 		SecretOTP: secretOTP,
 	}, nil
+}
+
+func (svc *service) ValidatePassword(ctx context.Context, credentialsDTO *DTO, password string) error {
+	decodedPassword, err := helpers.CaesarShift(password, -svc.shift)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to decode password: %v", err)
+		return ErrInvalidPassword
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(credentialsDTO.Password), []byte(decodedPassword)); err != nil {
+		return ErrInvalidPassword
+	}
+	return nil
 }

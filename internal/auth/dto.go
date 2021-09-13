@@ -2,6 +2,7 @@ package auth
 
 import (
 	"nnw_s/pkg/errors"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -47,4 +48,17 @@ type ActivateUserDTO struct {
 	Code  string `json:"code" validate:"required"`
 
 	BaseValidator
+}
+
+type LoginDTO struct {
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	Code     string `json:"code" validate:"required"`
+
+	BaseValidator
+}
+
+type TokenDTO struct {
+	Token    string    `json:"token"`
+	ExpireAt time.Time `json:"expired_at"`
 }

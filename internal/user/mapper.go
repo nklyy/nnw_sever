@@ -1,6 +1,11 @@
 package user
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"nnw_s/internal/user/credentials"
+	"nnw_s/pkg/errors"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 func MapToDTO(u *User) *DTO {
 	return &DTO{
@@ -15,9 +20,22 @@ func MapToDTO(u *User) *DTO {
 	}
 }
 
-func MapToEntity(dto *DTO) *User {
-	// todo: can't convert string to primitive.ObjectID
-	return &User{
-		ID: primitive.ObjectID([12]byte(dto.ID)),
+func MapToEntity(dto *DTO) (*User, error) {
+	id, err := primitive.ObjectIDFromHex(dto.ID)
+	if err != nil {
+		return nil, errors.NewInternal(err.Error())
 	}
+
+	return &User{
+		ID:    id,
+		Email: dto.Email,
+		Credentials: &credentials.Credentials{
+			Password:  dto.Password,
+			SecretOTP: &dto.SecretOTP,
+		},
+		Status:     Status(dto.Status),
+		IsVerified: dto.IsVerified,
+		CreatedAt:  dto.CreatedAt,
+		UpdatedAt:  dto.UpdatedAt,
+	}, nil
 }

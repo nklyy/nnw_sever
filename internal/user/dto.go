@@ -10,7 +10,7 @@ type CreateUserDTO struct {
 }
 
 type DTO struct {
-	ID         string `json:"email"`
+	ID         string `json:"id"`
 	Email      string `json:"email"`
 	Password   string `json:"password"`
 	SecretOTP  string `json:"secret_otp"`
