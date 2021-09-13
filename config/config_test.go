@@ -78,8 +78,8 @@ func TestInit(t *testing.T) {
 
 				Secrets: Secrets{
 					JwtSecretKey: "123qwerty",
-					Shift:        "123",
-					PasswordSalt: "123",
+					Shift:        123,
+					PasswordSalt: 123,
 				},
 
 				MongoConfig: MongoConfig{

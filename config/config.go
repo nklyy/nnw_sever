@@ -8,9 +8,9 @@ import (
 )
 
 type Config struct {
-	PORT        string `default:"4000" envconfig:"PORT"`
-	Environment string `default:"development" envconfig:"APP_ENV"`
-	EmailFrom   string `envconfig:"EMAIL_FROM"`
+	PORT        string `required:"true" default:"4000" envconfig:"PORT"`
+	Environment string `required:"true" default:"development" envconfig:"APP_ENV"`
+	EmailFrom   string `required:"true" envconfig:"EMAIL_FROM"`
 
 	Secrets
 	MongoConfig
@@ -18,23 +18,23 @@ type Config struct {
 }
 
 type Secrets struct {
-	JwtSecretKey string `envconfig:"JWT_SECRET_KEY"`
-	Shift        int    `envconfig:"SHIFT"`
-	PasswordSalt int    `envconfig:"PASSWORD_SALT"`
+	JwtSecretKey string `required:"true" envconfig:"JWT_SECRET_KEY"`
+	Shift        int    `required:"true" envconfig:"SHIFT"`
+	PasswordSalt int    `required:"true" envconfig:"PASSWORD_SALT"`
 }
 
 type MongoConfig struct {
-	MongoDbName string `envconfig:"MONGO_DB_NAME"`
-	MongoDbUser string `envconfig:"MONGO_DB_USER"`
-	MongoDbPass string `envconfig:"MONGO_DB_PASS"`
-	MongoDbUrl  string `envconfig:"MONGO_DB_URL"`
+	MongoDbName string `required:"true" envconfig:"MONGO_DB_NAME"`
+	MongoDbUser string `required:"true" envconfig:"MONGO_DB_USER"`
+	MongoDbPass string `required:"true" envconfig:"MONGO_DB_PASS"`
+	MongoDbUrl  string `required:"true" envconfig:"MONGO_DB_URL"`
 }
 
 type SMTPConfig struct {
-	SmtpHost        string `envconfig:"SMTP_HOST"`
-	SmtpPort        string `envconfig:"SMTP_PORT"`
-	SmtpUserApiKey  string `envconfig:"SMTP_USER_API_KEY"`
-	SmtpPasswordKey string `envconfig:"SMTP_PASSWORD_KEY"`
+	SmtpHost        string `required:"true" envconfig:"SMTP_HOST"`
+	SmtpPort        string `required:"true" envconfig:"SMTP_PORT"`
+	SmtpUserApiKey  string `required:"true" envconfig:"SMTP_USER_API_KEY"`
+	SmtpPasswordKey string `required:"true" envconfig:"SMTP_PASSWORD_KEY"`
 }
 
 var (
