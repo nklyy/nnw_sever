@@ -10,6 +10,7 @@ import (
 	"github.com/pquerna/otp/totp"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 type Service interface {
 	GenerateMFAImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error)
 	CheckMFACode(ctx context.Context, code, secret string) error

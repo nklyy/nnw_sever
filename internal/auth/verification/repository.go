@@ -10,8 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const emailExpiry = 600
+const verificationCodeExpiry = 600
 
+//go:generate mockgen -source=repository.go -destination=mocks/repository_mock.go
 type Repository interface {
 	GetVerificationCode(ctx context.Context, email, code string) (*Code, error)
 	SaveVerificationCode(ctx context.Context, code *Code) error
@@ -35,7 +36,7 @@ func NewRepository(db *mongo.Database, log *logrus.Logger) (Repository, error) {
 func (repo *repository) SaveVerificationCode(ctx context.Context, code *Code) error {
 	mod := mongo.IndexModel{
 		Keys:    bson.M{"created_at": 1}, // index in ascending order or -1 for descending order
-		Options: options.Index().SetExpireAfterSeconds(emailExpiry),
+		Options: options.Index().SetExpireAfterSeconds(verificationCodeExpiry),
 	}
 
 	_, err := repo.db.Collection("verification_code").Indexes().CreateOne(ctx, mod)

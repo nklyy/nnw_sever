@@ -2,11 +2,9 @@ package auth
 
 import (
 	"context"
-	"nnw_s/internal/auth/jwt"
 	"nnw_s/internal/auth/mfa"
 	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/user"
-	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
 	"nnw_s/pkg/notificator"
 	"time"
@@ -14,9 +12,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate mockgen -source=service.go -destination=mocks/service_mock.go
-type Service interface {
-	Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error)
+//go:generate mockgen -source=registration_service.go -destination=mocks/registration_service_mock.go
+type RegistrationService interface {
 	RegisterUser(ctx context.Context, dto *RegisterUserDTO) error
 	VerifyUser(ctx context.Context, dto *VerifyUserDTO) error
 	ResendVerificationEmail(ctx context.Context, email string) error
@@ -24,28 +21,17 @@ type Service interface {
 	ActivateUser(ctx context.Context, dto *ActivateUserDTO) error
 }
 
-type service struct {
+type registrationSvc struct {
 	userSvc         user.Service
 	notificatorSvc  notificator.Service
 	verificationSvc verification.Service
 	mfaSvc          mfa.Service
-	jwtSvc          jwt.Service
-	credentialsSvc  credentials.Service
 
 	log         *logrus.Logger
 	emailSender string
 }
 
-type ServiceDeps struct {
-	UserService         user.Service
-	NotificatorService  notificator.Service
-	VerificationService verification.Service
-	MFAService          mfa.Service
-	JWTService          jwt.Service
-	CredentialsService  credentials.Service
-}
-
-func NewService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (Service, error) {
+func NewRegistrationService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (RegistrationService, error) {
 	if deps == nil {
 		return nil, errors.NewInternal("invalid service dependencies")
 	}
@@ -61,19 +47,13 @@ func NewService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (Serv
 	if deps.MFAService == nil {
 		return nil, errors.NewInternal("invalid MFA service")
 	}
-	if deps.JWTService == nil {
-		return nil, errors.NewInternal("invalid JWT service")
-	}
-	if deps.CredentialsService == nil {
-		return nil, errors.NewInternal("invalid credentials service")
-	}
 	if log == nil {
 		return nil, errors.NewInternal("invalid logger")
 	}
 	if emailSender == "" {
 		return nil, errors.NewInternal("invalid sender's email")
 	}
-	return &service{
+	return &registrationSvc{
 		userSvc:         deps.UserService,
 		notificatorSvc:  deps.NotificatorService,
 		verificationSvc: deps.VerificationService,
@@ -82,46 +62,7 @@ func NewService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (Serv
 	}, nil
 }
 
-func (svc *service) Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error) {
-	// find user
-	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
-	if err != nil {
-		return nil, errors.WithMessage(ErrPermissionDenied, err.Error())
-	}
-
-	// map dto to user
-	registeredUser, err := user.MapToEntity(userDTO)
-	if err != nil {
-		return nil, err
-	}
-
-	// if user does not active or not verified return ErrPermissionDenied
-	if !registeredUser.IsActive() || !registeredUser.IsVerified {
-		return nil, ErrPermissionDenied
-	}
-
-	// map from entity to credentials dto
-	credentialsDTO := credentials.MapToDTO(registeredUser.Credentials)
-
-	// check password
-	if err = svc.credentialsSvc.ValidatePassword(ctx, credentialsDTO, dto.Password); err != nil {
-		return nil, err
-	}
-
-	// check 2FA/MFA Code
-	if err = svc.mfaSvc.CheckMFACode(ctx, dto.Code, *registeredUser.Credentials.SecretOTP); err != nil {
-		return nil, err
-	}
-
-	// create JWT
-	jwtTokenDTO, err := svc.jwtSvc.CreateJWT(ctx, dto.Email)
-	if err != nil {
-		return nil, errors.WithMessage(ErrUnauthorized, err.Error())
-	}
-	return &TokenDTO{Token: jwtTokenDTO.Token, ExpireAt: jwtTokenDTO.ExpireAt}, nil
-}
-
-func (svc *service) RegisterUser(ctx context.Context, dto *RegisterUserDTO) error {
+func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserDTO) error {
 	// create user if not exists
 	_, err := svc.userSvc.CreateUser(ctx, &user.CreateUserDTO{Email: dto.Email,
 		Password: dto.Password})
@@ -156,7 +97,7 @@ func (svc *service) RegisterUser(ctx context.Context, dto *RegisterUserDTO) erro
 	return nil
 }
 
-func (svc *service) VerifyUser(ctx context.Context, dto *VerifyUserDTO) error {
+func (svc *registrationSvc) VerifyUser(ctx context.Context, dto *VerifyUserDTO) error {
 	// check if user's verification code is valid
 	if err := svc.verificationSvc.CheckVerificationCode(ctx, dto.Email, dto.Code); err != nil {
 		return err
@@ -190,7 +131,7 @@ func (svc *service) VerifyUser(ctx context.Context, dto *VerifyUserDTO) error {
 	return nil
 }
 
-func (svc *service) ResendVerificationEmail(ctx context.Context, email string) error {
+func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, email string) error {
 	// get not activated user
 	notActivatedUserDTO, err := svc.userSvc.GetUserByEmail(ctx, email)
 	if err != nil {
@@ -233,7 +174,7 @@ func (svc *service) ResendVerificationEmail(ctx context.Context, email string) e
 	return nil
 }
 
-func (svc *service) SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, error) {
+func (svc *registrationSvc) SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, error) {
 	// find user
 	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
@@ -272,7 +213,7 @@ func (svc *service) SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, err
 	return buffImg.Bytes(), nil
 }
 
-func (svc *service) ActivateUser(ctx context.Context, dto *ActivateUserDTO) error {
+func (svc *registrationSvc) ActivateUser(ctx context.Context, dto *ActivateUserDTO) error {
 	// find user
 	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {

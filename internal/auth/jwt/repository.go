@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+//go:generate mockgen -source=repository.go -destination=mocks/repository_mock.go
 type Repository interface {
 	GetJWT(ctx context.Context, id string) (*JWT, error)
 	SaveJWT(ctx context.Context, jwt *JWT) (string, error)

@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 type Service interface {
 	CheckVerificationCode(ctx context.Context, email, code string) error
 	CreateVerificationCode(ctx context.Context, email string) (string, error)

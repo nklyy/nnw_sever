@@ -10,6 +10,7 @@ import (
 
 const jwtExpiry = time.Second * 60
 
+//go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 type Service interface {
 	CreateJWT(ctx context.Context, email string) (*DTO, error)
 	VerifyJWT(ctx context.Context, id string) error

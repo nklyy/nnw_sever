@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 type Service interface {
 	CreateCredentials(ctx context.Context, password string, secretOTP SecretOTP) (*DTO, error)
 	ValidatePassword(ctx context.Context, credentialsDTO *DTO, password string) error
