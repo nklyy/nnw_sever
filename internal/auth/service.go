@@ -5,10 +5,10 @@ import (
 	"nnw_s/internal/auth/jwt"
 	"nnw_s/internal/auth/mfa"
 	"nnw_s/internal/auth/verification"
-	"nnw_s/internal/notificator"
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/notificator"
 	"time"
 
 	"github.com/sirupsen/logrus"
