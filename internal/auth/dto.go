@@ -89,7 +89,7 @@ type ActivateUserDTO struct {
 
 type LoginDTO struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required,password"`
 	Code     string `json:"code" validate:"required,len=6,numeric"`
 
 	BaseValidator
