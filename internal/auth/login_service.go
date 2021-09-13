@@ -37,7 +37,7 @@ type ServiceDeps struct {
 	CredentialsService  credentials.Service
 }
 
-func NewService(log *logrus.Logger, deps *ServiceDeps) (LoginService, error) {
+func NewLoginService(log *logrus.Logger, deps *ServiceDeps) (LoginService, error) {
 	if deps == nil {
 		return nil, errors.NewInternal("invalid service dependencies")
 	}

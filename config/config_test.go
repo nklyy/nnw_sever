@@ -91,7 +91,7 @@ func TestInit(t *testing.T) {
 
 				SMTPConfig: SMTPConfig{
 					SmtpHost:        "smtp.email.com",
-					SmtpPort:        "25",
+					SmtpPort:        25,
 					SmtpUserApiKey:  "key",
 					SmtpPasswordKey: "password",
 				},

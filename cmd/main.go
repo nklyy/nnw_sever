@@ -1,18 +1,21 @@
 package main
 
 import (
-	"fmt"
-	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
 	"nnw_s/config"
 	"nnw_s/internal/auth"
+	"nnw_s/internal/auth/jwt"
+	"nnw_s/internal/auth/mfa"
+	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/user"
+	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/mongodb"
+	"nnw_s/pkg/notificator"
 	"nnw_s/pkg/smtp"
-	"strconv"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/sirupsen/logrus"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -24,50 +27,88 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
+	// Init logger
+	logger := logrus.New()
+
 	// Create App
-	app := echo.New()
+	router := echo.New()
 
 	// Connection to DB
 	db, err := mongodb.NewConn(cfg)
 	if err != nil {
-		fmt.Printf("ERROR: %s \n", err)
-		return
+		logger.Fatalf("failed to connect to mongodb: %v", err)
 	}
 
 	// Init App Middleware
-	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
-	// Set-up SMTP
-	smtpPort, err := strconv.Atoi(cfg.SmtpPort)
+	// Init dependencies
+	userRepo := user.NewRepository(db, logger)
+	credentialsSvc, err := credentials.NewService(logger, cfg.Shift, cfg.PasswordSalt)
 	if err != nil {
-		fmt.Println("ERROR: Incorrect SMTP PORT!")
-		return
+		logger.Fatalf("failed to create credentials service: %v", err)
 	}
 
-	emailClient := smtp.NewClient(cfg.SmtpHost, smtpPort, cfg.SmtpUserApiKey, cfg.SmtpPasswordKey)
+	userSvc, err := user.NewService(userRepo, credentialsSvc, logger)
+	if err != nil {
+		logger.Fatalf("failed to create user service: %v", err)
+	}
 
-	// Set up validator
-	validate := validator.New()
+	smtpClient := smtp.NewClient(cfg.SmtpHost, cfg.SmtpPort, cfg.SmtpUserApiKey, cfg.SmtpPasswordKey)
+	notificatorSvc, err := notificator.NewService(logger, smtpClient)
+	if err != nil {
+		logger.Fatalf("failed to create user service: %v", err)
+	}
 
-	// Init logger
-	logger := logrus.New()
+	verificationRepo, err := verification.NewRepository(db, logger)
+	if err != nil {
+		logger.Fatalf("failed to create verification repo: %v", err)
+	}
 
-	// Init repositories
-	newAuthRepository := auth.NewRepository(db, *cfg)
-	newUserRepository := user.NewRepository(db, logger)
+	verificationSvc, err := verification.NewService(verificationRepo, logger)
+	if err != nil {
+		logger.Fatalf("failed to create verification service: %v", err)
+	}
 
-	// Init Services
-	newAuthService := auth.NewService(newAuthRepository, newUserRepository, *cfg, *emailClient)
-	newUserService, _ := user.NewService(newUserRepository, cfg, logger)
+	mfaSvc, err := mfa.NewService(cfg.MFAIssuer)
+	if err != nil {
+		logger.Fatalf("failed to create MFA service: %v", err)
+	}
 
-	// Init handlers
-	newAuthHandler := auth.NewHandler(newAuthService, newUserService, *cfg, validate)
+	jwtRepo, err := jwt.NewRepository(db)
+	if err != nil {
+		logger.Fatalf("failed to create JWT repo: %v", err)
+	}
 
-	// Init routes
-	newAuthHandler.InitialRoute(app)
+	jwtSvc, err := jwt.NewService(jwtRepo, cfg.JwtSecretKey)
+	if err != nil {
+		logger.Fatalf("failed to create JWT service: %v", err)
+	}
+
+	authDeps := auth.ServiceDeps{
+		UserService:         userSvc,
+		NotificatorService:  notificatorSvc,
+		VerificationService: verificationSvc,
+		MFAService:          mfaSvc,
+		JWTService:          jwtSvc,
+		CredentialsService:  credentialsSvc,
+	}
+
+	registrationSvc, err := auth.NewRegistrationService(logger, cfg.EmailFrom, &authDeps)
+	if err != nil {
+		logger.Fatalf("failed to create registration service: %v", err)
+	}
+
+	loginSvc, err := auth.NewLoginService(logger, &authDeps)
+	if err != nil {
+		logger.Fatalf("failed to connect login service: %v", err)
+	}
+
+	authHandler := auth.NewHandler(registrationSvc, loginSvc)
+	authHandler.SetupRoutes(router)
 
 	// NotFound Urls
 	echo.NotFoundHandler = func(c echo.Context) error {
@@ -80,9 +121,9 @@ func main() {
 	}
 
 	// Starting App
-	err = app.Start(":" + cfg.PORT)
-	if err != nil {
-		fmt.Printf("ERROR: %s \n", err)
+	logger.Info("starting NNW server at :%s...", cfg.PORT)
+	if err = router.Start(":" + cfg.PORT); err != nil {
+		logger.Errorf("failed to start HTTP server: %v", err)
 		return
 	}
 }

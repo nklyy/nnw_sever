@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"sync"
 
 	"github.com/joho/godotenv"
@@ -11,10 +12,16 @@ type Config struct {
 	PORT        string `required:"true" default:"4000" envconfig:"PORT"`
 	Environment string `required:"true" default:"development" envconfig:"APP_ENV"`
 	EmailFrom   string `required:"true" envconfig:"EMAIL_FROM"`
+	MFAIssuer   string `required:"true" envconfig:"MFA_ISSUER" default:"NNW"`
 
 	Secrets
 	MongoConfig
 	SMTPConfig
+}
+
+func (cfg Config) String() string {
+	buf, _ := json.MarshalIndent(&cfg, "", "	")
+	return string(buf)
 }
 
 type Secrets struct {
@@ -32,7 +39,7 @@ type MongoConfig struct {
 
 type SMTPConfig struct {
 	SmtpHost        string `required:"true" envconfig:"SMTP_HOST"`
-	SmtpPort        string `required:"true" envconfig:"SMTP_PORT"`
+	SmtpPort        int    `required:"true" envconfig:"SMTP_PORT"`
 	SmtpUserApiKey  string `required:"true" envconfig:"SMTP_USER_API_KEY"`
 	SmtpPasswordKey string `required:"true" envconfig:"SMTP_PASSWORD_KEY"`
 }
@@ -46,7 +53,7 @@ func Get() (*Config, error) {
 	var err error
 	once.Do(func() {
 		var cfg Config
-		_ = godotenv.Load("../.env")
+		_ = godotenv.Load(".env")
 
 		if err = envconfig.Process("", &cfg); err != nil {
 			return
