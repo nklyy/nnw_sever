@@ -20,9 +20,4 @@ var (
 	ErrInvalidRequest   = errors.New(codes.BadRequest, StatusInvalidRequest)
 	ErrPermissionDenied = errors.New(codes.Forbidden, StatusPermissionDenied)
 	ErrUnauthorized     = errors.New(codes.Unauthorized, StatusUnauthorized)
-
-	ErrInvalidCode = errors.New(codes.BadRequest, StatusInvalidCode)
-	ErrInvalidData = errors.New(codes.BadRequest, StatusInvalidData)
-	ErrInvalidJson = errors.New(codes.BadRequest, StatusInvalidJson)
-	ErrWrongToken  = errors.New(codes.BadRequest, StatusWrongToken)
 )

@@ -2,11 +2,13 @@ package auth
 
 import (
 	"nnw_s/pkg/errors"
-	"regexp"
 	"time"
+	"unicode"
 
 	"github.com/go-playground/validator/v10"
 )
+
+const passwordMinLength = 10
 
 type BaseValidator struct{}
 
@@ -30,11 +32,26 @@ func (v *BaseValidator) Validate() error {
 
 func (v *BaseValidator) validatePassword(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
+	if len(password) < passwordMinLength {
+		return false
+	}
 
-	// minimum eight and maximum 10 characters, at least one uppercase letter, one lowercase letter, one number and one special character
-	regex, _ := regexp.Compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,10}$")
-	result := regex.MatchString(password)
-	return !result
+	var (
+		containsUpper bool
+		containsLower bool
+		containsDigit bool
+	)
+
+	for _, char := range password {
+		if unicode.IsUpper(char) {
+			containsUpper = true
+		} else if unicode.IsLower(char) {
+			containsLower = true
+		} else if unicode.IsDigit(char) {
+			containsDigit = true
+		}
+	}
+	return containsUpper && containsLower && containsDigit
 }
 
 type RegisterUserDTO struct {
@@ -47,6 +64,12 @@ type RegisterUserDTO struct {
 type VerifyUserDTO struct {
 	Email string `json:"email" validate:"required,email"`
 	Code  string `json:"code" validate:"required,len=6,numeric"`
+
+	BaseValidator
+}
+
+type ResendActivationEmailDTO struct {
+	Email string `json:"email" validate:"required,email"`
 
 	BaseValidator
 }

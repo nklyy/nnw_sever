@@ -2,6 +2,7 @@ package errors
 
 import (
 	"fmt"
+	"net/http"
 	"nnw_s/pkg/codes"
 )
 
@@ -33,6 +34,14 @@ func WithMessage(target error, msg string, args ...interface{}) error {
 		Status:  err.Status,
 		Message: fmt.Sprintf(msg, args...),
 	}
+}
+
+func HTTPCode(target error) int {
+	err, ok := target.(*Error)
+	if !ok {
+		return http.StatusInternalServerError
+	}
+	return int(err.Code)
 }
 
 func NewInternal(msg string) error {

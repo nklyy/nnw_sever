@@ -16,7 +16,7 @@ import (
 type RegistrationService interface {
 	RegisterUser(ctx context.Context, dto *RegisterUserDTO) error
 	VerifyUser(ctx context.Context, dto *VerifyUserDTO) error
-	ResendVerificationEmail(ctx context.Context, email string) error
+	ResendVerificationEmail(ctx context.Context, dto *ResendActivationEmailDTO) error
 	SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, error)
 	ActivateUser(ctx context.Context, dto *ActivateUserDTO) error
 }
@@ -131,9 +131,9 @@ func (svc *registrationSvc) VerifyUser(ctx context.Context, dto *VerifyUserDTO) 
 	return nil
 }
 
-func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, email string) error {
+func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, dto *ResendActivationEmailDTO) error {
 	// get not activated user
-	notActivatedUserDTO, err := svc.userSvc.GetUserByEmail(ctx, email)
+	notActivatedUserDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, email s
 	}
 
 	// create verification code for further activation by email
-	newVerificationCode, err := svc.verificationSvc.CreateVerificationCode(ctx, email)
+	newVerificationCode, err := svc.verificationSvc.CreateVerificationCode(ctx, dto.Email)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create verification code: %v", err)
 		return err
@@ -158,7 +158,7 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, email s
 
 	emailData := notificator.Email{
 		Subject:   "Verify email.",
-		Recipient: email,
+		Recipient: dto.Email,
 		Sender:    svc.emailSender,
 		Data: map[string]interface{}{
 			"code": newVerificationCode,
@@ -170,7 +170,7 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, email s
 		svc.log.WithContext(ctx).Errorf("failed to send email: %v", err)
 	}
 
-	svc.log.WithContext(ctx).Infof("verification code successfully sent to: %s", email)
+	svc.log.WithContext(ctx).Infof("verification code successfully sent to: %s", dto.Email)
 	return nil
 }
 
