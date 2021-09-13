@@ -190,9 +190,47 @@ func (svc *service) VerifyUser(ctx context.Context, dto *VerifyUserDTO) error {
 	return nil
 }
 
-// todo
 func (svc *service) ResendVerificationEmail(ctx context.Context, email string) error {
-	return errors.NewInternal("not implemented yet")
+	// get not activated user
+	notActivatedUserDTO, err := svc.userSvc.GetUserByEmail(ctx, email)
+	if err != nil {
+		return err
+	}
+
+	// mapping userDTO to user entity
+	notActivatedUser, err := user.MapToEntity(notActivatedUserDTO)
+	if err != nil {
+		return err
+	}
+
+	// check if user not active and not verified
+	if !notActivatedUser.IsActive() && !notActivatedUser.IsVerified {
+		return ErrPermissionDenied
+	}
+
+	// create verification code for further activation by email
+	newVerificationCode, err := svc.verificationSvc.CreateVerificationCode(ctx, email)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to create verification code: %v", err)
+		return err
+	}
+
+	emailData := notificator.Email{
+		Subject:   "Verify email.",
+		Recipient: email,
+		Sender:    svc.emailSender,
+		Data: map[string]interface{}{
+			"code": newVerificationCode,
+		},
+	}
+
+	// send email to recipient
+	if err = svc.notificatorSvc.SendEmail(ctx, &emailData); err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to send email: %v", err)
+	}
+
+	svc.log.WithContext(ctx).Infof("verification code successfully sent to: %s", email)
+	return nil
 }
 
 func (svc *service) SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, error) {
