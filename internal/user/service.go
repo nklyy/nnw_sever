@@ -14,7 +14,10 @@ type Service interface {
 	GetUserByEmail(ctx context.Context, email string) (*DTO, error)
 
 	CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error)
+
 	UpdateUser(ctx context.Context, dto *DTO) error
+
+	DeleteUserByEmail(ctx context.Context, email string) error
 }
 
 type service struct {
@@ -53,7 +56,7 @@ func (svc *service) GetUserByEmail(ctx context.Context, email string) (*DTO, err
 }
 
 func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error) {
-	// create user creadentials
+	// create user credentials
 	userCredentialsDTO, err := svc.credentialsSvc.CreateCredentials(ctx, dto.Password, credentials.NilSecretOTP)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create user credentials: %v", err)
@@ -88,6 +91,14 @@ func (svc *service) UpdateUser(ctx context.Context, userDTO *DTO) error {
 	// update user in storage by email
 	if err = svc.repo.UpdateUser(ctx, updateUser); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to save user in db: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (svc *service) DeleteUserByEmail(ctx context.Context, email string) error {
+	err := svc.repo.DeleteUserByEmail(ctx, email)
+	if err != nil {
 		return err
 	}
 	return nil

@@ -40,52 +40,66 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 
 func (h *Handler) registerUser(ctx echo.Context) error {
 	var dto RegisterUserDTO
+
 	if err := ctx.Bind(&dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
+
 	if err := Validate(dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 	if err := h.registrationSvc.RegisterUser(ctx.Request().Context(), &dto); err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
+
 	return ctx.NoContent(200)
 }
 
 //todo: we should be able to verify user only once
 func (h *Handler) verifyUser(ctx echo.Context) error {
 	var dto VerifyUserDTO
+
 	if err := ctx.Bind(&dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
+
 	if err := Validate(dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
+
 	if err := h.registrationSvc.VerifyUser(ctx.Request().Context(), &dto); err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
+
 	return ctx.NoContent(200)
 }
 
 func (h *Handler) resendVerificationRegistrationEmail(ctx echo.Context) error {
 	var dto ResendActivationEmailDTO
+
 	if err := ctx.Bind(&dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
+
 	if err := Validate(dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
+
 	if err := h.registrationSvc.ResendVerificationEmail(ctx.Request().Context(), &dto); err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
+
 	return ctx.NoContent(200)
 }
 
 func (h *Handler) setupTwoFA(ctx echo.Context) error {
 	var dto SetupTwoFaDTO
+
 	if err := ctx.Bind(&dto); err != nil {
+
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
+
 	if err := Validate(dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
@@ -105,23 +119,29 @@ func (h *Handler) setupTwoFA(ctx echo.Context) error {
 
 func (h *Handler) activateUser(ctx echo.Context) error {
 	var dto ActivateUserDTO
+
 	if err := ctx.Bind(&dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
+
 	if err := Validate(dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
+
 	if err := h.registrationSvc.ActivateUser(ctx.Request().Context(), &dto); err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
+
 	return ctx.NoContent(http.StatusCreated)
 }
 
 func (h *Handler) login(ctx echo.Context) error {
 	var dto LoginDTO
+
 	if err := ctx.Bind(&dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
+
 	if err := Validate(dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
@@ -130,6 +150,7 @@ func (h *Handler) login(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
+
 	return ctx.JSON(http.StatusOK, tokenDTO)
 }
 

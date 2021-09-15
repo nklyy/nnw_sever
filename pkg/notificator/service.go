@@ -47,7 +47,7 @@ func (svc *service) SendEmail(ctx context.Context, email *Email) error {
 
 	root := filepath.Dir(dir)
 
-	t, err := template.ParseFiles(path.Join(root, "templates/verifyTemplate.html"))
+	t, err := template.ParseFiles(path.Join(root, "templates/"+email.Template))
 	if err != nil {
 		return errors.NewInternal(err.Error())
 	}

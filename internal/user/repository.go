@@ -17,6 +17,7 @@ type Repository interface {
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	SaveUser(ctx context.Context, user *User) (string, error)
 	UpdateUser(ctx context.Context, user *User) error
+	DeleteUserByEmail(ctx context.Context, email string) error
 }
 
 type repository struct {
@@ -95,5 +96,14 @@ func (repo *repository) UpdateUser(ctx context.Context, user *User) error {
 	if err != nil {
 		return errors.NewInternal(err.Error())
 	}
+	return nil
+}
+
+func (repo *repository) DeleteUserByEmail(ctx context.Context, email string) error {
+	_, err := repo.db.Collection("user").DeleteOne(ctx, bson.M{"email": email})
+	if err != nil {
+		return errors.NewInternal(err.Error())
+	}
+
 	return nil
 }

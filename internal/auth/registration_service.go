@@ -64,13 +64,29 @@ func NewRegistrationService(log *logrus.Logger, emailSender string, deps *Servic
 }
 
 func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserDTO) error {
-	// create user if not exists
-	_, err := svc.userSvc.CreateUser(ctx, &user.CreateUserDTO{Email: dto.Email,
-		Password: dto.Password})
+	userDTO, _ := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 
-	if err != nil {
-		svc.log.WithContext(ctx).Errorf("failed to register user: %v", err)
-		return err
+	if userDTO == nil {
+		_, err := svc.userSvc.CreateUser(ctx, &user.CreateUserDTO{Email: dto.Email, Password: dto.Password})
+		if err != nil {
+			svc.log.WithContext(ctx).Errorf("failed to register user: %v", err)
+			return err
+		}
+	} else if userDTO != nil && userDTO.Status == "disabled" {
+		err := svc.userSvc.DeleteUserByEmail(ctx, dto.Email)
+		if err != nil {
+			svc.log.WithContext(ctx).Errorf("failed to delete user: %v", err)
+			return err
+		}
+
+		_, err = svc.userSvc.CreateUser(ctx, &user.CreateUserDTO{Email: dto.Email, Password: dto.Password})
+		if err != nil {
+			svc.log.WithContext(ctx).Errorf("failed to register user: %v", err)
+			return err
+		}
+	} else {
+		svc.log.WithContext(ctx).Errorf("failed to register user %v: user already exists", dto.Email)
+		return user.ErrAlreadyExists
 	}
 
 	// create verification code for further activation by email
@@ -162,6 +178,7 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, dto *Re
 		Subject:   "Verify email.",
 		Recipient: dto.Email,
 		Sender:    svc.emailSender,
+		Template:  "verifyTemplate.html",
 		Data: map[string]interface{}{
 			"code": newVerificationCode,
 		},
