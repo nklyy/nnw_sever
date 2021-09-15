@@ -59,6 +59,7 @@ func NewRegistrationService(log *logrus.Logger, emailSender string, deps *Servic
 		verificationSvc: deps.VerificationService,
 		log:             log,
 		emailSender:     emailSender,
+		mfaSvc:          deps.MFAService,
 	}, nil
 }
 
@@ -168,6 +169,7 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, dto *Re
 	// send email to recipient
 	if err = svc.notificatorSvc.SendEmail(ctx, &emailData); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to send email: %v", err)
+		return err
 	}
 
 	svc.log.WithContext(ctx).Infof("verification code successfully sent to: %s", dto.Email)

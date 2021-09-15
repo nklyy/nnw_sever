@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"nnw_s/pkg/errors"
 	"nnw_s/pkg/smtp"
-	"os"
 	"path"
-	"path/filepath"
 	"text/template"
 	"time"
 
@@ -25,30 +23,28 @@ type Service interface {
 }
 
 type service struct {
-	log        *logrus.Logger
-	smtpClient *smtp.Client
+	log             *logrus.Logger
+	smtpClient      *smtp.Client
+	templateDirPath string
 }
 
-func NewService(log *logrus.Logger, smtpClient *smtp.Client) (Service, error) {
+func NewService(log *logrus.Logger, smtpClient *smtp.Client, templateDirPath string) (Service, error) {
 	if log == nil {
 		return nil, errors.NewInternal("invalid logger")
 	}
 	if smtpClient == nil {
 		return nil, errors.NewInternal("invalid SMTP client")
 	}
-	return &service{log: log, smtpClient: smtpClient}, nil
+	if templateDirPath == "" {
+		return nil, errors.NewInternal("invalid template dir")
+	}
+	return &service{log: log, smtpClient: smtpClient, templateDirPath: templateDirPath}, nil
 }
 
 func (svc *service) SendEmail(ctx context.Context, email *Email) error {
-	dir, err := os.Getwd()
+	t, err := template.ParseFiles(path.Join(svc.templateDirPath, "verifyTemplate.html"))
 	if err != nil {
-		return err
-	}
-
-	root := filepath.Dir(dir)
-	t, err := template.ParseFiles(path.Join(root, "templates/verifyTemplate.html"))
-	if err != nil {
-		return err
+		return errors.NewInternal(err.Error())
 	}
 
 	var body bytes.Buffer

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/helpers"
 	"time"
 	"unicode"
 
@@ -14,7 +15,12 @@ func Validate(dto interface{}) error {
 	validate := validator.New()
 	_ = validate.RegisterValidation("password", func(fl validator.FieldLevel) bool {
 		password := fl.Field().String()
-		if len(password) < passwordMinLength {
+
+		decodedPassword, err := helpers.CaesarShift(password, -15)
+		if err != nil {
+			return false
+		}
+		if len(decodedPassword) < passwordMinLength {
 			return false
 		}
 
@@ -24,7 +30,7 @@ func Validate(dto interface{}) error {
 			containsDigit bool
 		)
 
-		for _, char := range password {
+		for _, char := range decodedPassword {
 			if unicode.IsUpper(char) {
 				containsUpper = true
 			} else if unicode.IsLower(char) {
@@ -57,7 +63,7 @@ type RegisterUserDTO struct {
 
 type VerifyUserDTO struct {
 	Email string `json:"email" validate:"required,email"`
-	Code  string `json:"code" validate:"required,len=6,numeric"`
+	Code  string `json:"code" validate:"required,len=6"`
 }
 
 type ResendActivationEmailDTO struct {
@@ -70,13 +76,13 @@ type SetupMfaDTO struct {
 
 type ActivateUserDTO struct {
 	Email string `json:"email" validate:"required,email"`
-	Code  string `json:"code" validate:"required,len=6,numeric"`
+	Code  string `json:"code" validate:"required,len=6"`
 }
 
 type LoginDTO struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,password"`
-	Code     string `json:"code" validate:"required,len=6,numeric"`
+	Code     string `json:"code" validate:"required,len=6"`
 }
 
 type TokenDTO struct {

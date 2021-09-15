@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	StatusPasswordsDoesNotMatch errors.Status = "passwords_does_not_match"
+	StatusInvalidPassword errors.Status = "invalid_password"
 )
 
 var (
-	ErrInvalidPassword = errors.New(codes.Unauthorized, StatusPasswordsDoesNotMatch)
+	ErrInvalidPassword = errors.New(codes.Unauthorized, StatusInvalidPassword)
 )

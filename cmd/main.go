@@ -58,7 +58,7 @@ func main() {
 	}
 
 	smtpClient := smtp.NewClient(cfg.SmtpHost, cfg.SmtpPort, cfg.SmtpUserApiKey, cfg.SmtpPasswordKey)
-	notificatorSvc, err := notificator.NewService(logger, smtpClient)
+	notificatorSvc, err := notificator.NewService(logger, smtpClient, cfg.TemplateDir)
 	if err != nil {
 		logger.Fatalf("failed to create user service: %v", err)
 	}
