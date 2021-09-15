@@ -12,8 +12,8 @@ type Config struct {
 	PORT        string `required:"true" default:"4000" envconfig:"PORT"`
 	Environment string `required:"true" default:"development" envconfig:"APP_ENV"`
 	EmailFrom   string `required:"true" envconfig:"EMAIL_FROM"`
-	MFAIssuer   string `required:"true" envconfig:"MFA_ISSUER" default:"NNW"`
-	TemplateDir string `required:"true" envconfig:"TEMPLATE_DIR"`
+	TwoFAIssuer string `required:"true" envconfig:"TWO_FA_ISSUER" default:"NNW"`
+	//TemplateDir string `required:"true" envconfig:"TEMPLATE_DIR"`
 
 	Secrets
 	MongoConfig
@@ -54,7 +54,7 @@ func Get() (*Config, error) {
 	var err error
 	once.Do(func() {
 		var cfg Config
-		_ = godotenv.Load(".env")
+		_ = godotenv.Load("../.env")
 
 		if err = envconfig.Process("", &cfg); err != nil {
 			return

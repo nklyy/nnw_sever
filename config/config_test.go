@@ -22,6 +22,7 @@ func TestInit(t *testing.T) {
 		smtpPort        string
 		smtpUserApiKey  string
 		smtpPasswordKey string
+		twoFaIssuer     string
 	}
 
 	type args struct {
@@ -43,6 +44,7 @@ func TestInit(t *testing.T) {
 		os.Setenv("SMTP_PORT", env.smtpPort)
 		os.Setenv("SMTP_USER_API_KEY", env.smtpUserApiKey)
 		os.Setenv("SMTP_PASSWORD_KEY", env.smtpPasswordKey)
+		os.Setenv("TWO_FA_ISSUER", env.twoFaIssuer)
 	}
 
 	tests := []struct {
@@ -69,12 +71,14 @@ func TestInit(t *testing.T) {
 					smtpPort:        "25",
 					smtpUserApiKey:  "key",
 					smtpPasswordKey: "password",
+					twoFaIssuer:     "Example",
 				},
 			},
 			want: &Config{
 				PORT:        "4000",
 				Environment: "development",
 				EmailFrom:   "example@example.com",
+				TwoFAIssuer: "Example",
 
 				Secrets: Secrets{
 					JwtSecretKey: "123qwerty",

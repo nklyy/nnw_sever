@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"nnw_s/internal/auth/jwt"
-	"nnw_s/internal/auth/mfa"
+	"nnw_s/internal/auth/twofa"
 	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
@@ -21,7 +21,7 @@ type LoginService interface {
 
 type loginSvc struct {
 	userSvc        user.Service
-	mfaSvc         mfa.Service
+	twoFaSvc       twofa.Service
 	jwtSvc         jwt.Service
 	credentialsSvc credentials.Service
 
@@ -32,7 +32,7 @@ type ServiceDeps struct {
 	UserService         user.Service
 	NotificatorService  notificator.Service
 	VerificationService verification.Service
-	MFAService          mfa.Service
+	TwoFAService        twofa.Service
 	JWTService          jwt.Service
 	CredentialsService  credentials.Service
 }
@@ -44,8 +44,8 @@ func NewLoginService(log *logrus.Logger, deps *ServiceDeps) (LoginService, error
 	if deps.UserService == nil {
 		return nil, errors.NewInternal("invalid user service")
 	}
-	if deps.MFAService == nil {
-		return nil, errors.NewInternal("invalid MFA service")
+	if deps.TwoFAService == nil {
+		return nil, errors.NewInternal("invalid TwoFA service")
 	}
 	if deps.JWTService == nil {
 		return nil, errors.NewInternal("invalid JWT service")
@@ -58,7 +58,7 @@ func NewLoginService(log *logrus.Logger, deps *ServiceDeps) (LoginService, error
 	}
 	return &loginSvc{
 		userSvc:        deps.UserService,
-		mfaSvc:         deps.MFAService,
+		twoFaSvc:       deps.TwoFAService,
 		credentialsSvc: deps.CredentialsService,
 		jwtSvc:         deps.JWTService,
 		log:            log,
@@ -91,8 +91,8 @@ func (svc *loginSvc) Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error
 		return nil, err
 	}
 
-	// check 2FA/MFA Code
-	if err = svc.mfaSvc.CheckMFACode(ctx, dto.Code, *registeredUser.Credentials.SecretOTP); err != nil {
+	// check TwoFA Code
+	if err = svc.twoFaSvc.CheckTwoFACode(ctx, dto.Code, *registeredUser.Credentials.SecretOTP); err != nil {
 		return nil, err
 	}
 

@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"nnw_s/internal/auth/mfa"
+	"nnw_s/internal/auth/twofa"
 	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/user"
 	"nnw_s/pkg/errors"
@@ -17,7 +17,7 @@ type RegistrationService interface {
 	RegisterUser(ctx context.Context, dto *RegisterUserDTO) error
 	VerifyUser(ctx context.Context, dto *VerifyUserDTO) error
 	ResendVerificationEmail(ctx context.Context, dto *ResendActivationEmailDTO) error
-	SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, error)
+	SetupTwoFA(ctx context.Context, dto *SetupTwoFaDTO) ([]byte, error)
 	ActivateUser(ctx context.Context, dto *ActivateUserDTO) error
 }
 
@@ -25,7 +25,7 @@ type registrationSvc struct {
 	userSvc         user.Service
 	notificatorSvc  notificator.Service
 	verificationSvc verification.Service
-	mfaSvc          mfa.Service
+	twoFaSvc        twofa.Service
 
 	log         *logrus.Logger
 	emailSender string
@@ -44,8 +44,8 @@ func NewRegistrationService(log *logrus.Logger, emailSender string, deps *Servic
 	if deps.VerificationService == nil {
 		return nil, errors.NewInternal("invalid verification service")
 	}
-	if deps.MFAService == nil {
-		return nil, errors.NewInternal("invalid MFA service")
+	if deps.TwoFAService == nil {
+		return nil, errors.NewInternal("invalid TwoFA service")
 	}
 	if log == nil {
 		return nil, errors.NewInternal("invalid logger")
@@ -59,7 +59,7 @@ func NewRegistrationService(log *logrus.Logger, emailSender string, deps *Servic
 		verificationSvc: deps.VerificationService,
 		log:             log,
 		emailSender:     emailSender,
-		mfaSvc:          deps.MFAService,
+		twoFaSvc:        deps.TwoFAService,
 	}, nil
 }
 
@@ -92,6 +92,7 @@ func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserD
 	// send email to recipient
 	if err = svc.notificatorSvc.SendEmail(ctx, &emailData); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to send email: %v", err)
+		return err
 	}
 
 	svc.log.WithContext(ctx).Infof("verification code successfully sent to: %s", dto.Email)
@@ -176,7 +177,7 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, dto *Re
 	return nil
 }
 
-func (svc *registrationSvc) SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]byte, error) {
+func (svc *registrationSvc) SetupTwoFA(ctx context.Context, dto *SetupTwoFaDTO) ([]byte, error) {
 	// find user
 	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
@@ -194,10 +195,10 @@ func (svc *registrationSvc) SetupMFA(ctx context.Context, dto *SetupMfaDTO) ([]b
 		return nil, ErrPermissionDenied
 	}
 
-	// generate 2FA/MFA Image
-	buffImg, key, err := svc.mfaSvc.GenerateMFAImage(ctx, dto.Email)
+	// generate TwoFa Image
+	buffImg, key, err := svc.twoFaSvc.GenerateTwoFAImage(ctx, dto.Email)
 	if err != nil {
-		svc.log.WithContext(ctx).Errorf("failed to create MFA image for '%s': %v", dto.Email, err)
+		svc.log.WithContext(ctx).Errorf("failed to create TwoFA image for '%s': %v", dto.Email, err)
 		return nil, err
 	}
 
@@ -233,8 +234,8 @@ func (svc *registrationSvc) ActivateUser(ctx context.Context, dto *ActivateUserD
 		return ErrPermissionDenied
 	}
 
-	// check 2FA/MFA Code
-	if err = svc.mfaSvc.CheckMFACode(ctx, dto.Code, *disabledUser.Credentials.SecretOTP); err != nil {
+	// check TwoFA Code
+	if err = svc.twoFaSvc.CheckTwoFACode(ctx, dto.Code, *disabledUser.Credentials.SecretOTP); err != nil {
 		return err
 	}
 
@@ -249,6 +250,6 @@ func (svc *registrationSvc) ActivateUser(ctx context.Context, dto *ActivateUserD
 		return err
 	}
 
-	svc.log.WithContext(ctx).Infof("user '%s' successfully activated MFA authentication", disabledUser.Email)
+	svc.log.WithContext(ctx).Infof("user '%s' successfully activated TwoFA authentication", disabledUser.Email)
 	return nil
 }

@@ -70,7 +70,7 @@ type ResendActivationEmailDTO struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
-type SetupMfaDTO struct {
+type SetupTwoFaDTO struct {
 	Email string `json:"email" validate:"required,email"`
 }
 

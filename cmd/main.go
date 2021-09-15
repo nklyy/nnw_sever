@@ -6,7 +6,7 @@ import (
 	"nnw_s/config"
 	"nnw_s/internal/auth"
 	"nnw_s/internal/auth/jwt"
-	"nnw_s/internal/auth/mfa"
+	"nnw_s/internal/auth/twofa"
 	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
@@ -58,7 +58,7 @@ func main() {
 	}
 
 	smtpClient := smtp.NewClient(cfg.SmtpHost, cfg.SmtpPort, cfg.SmtpUserApiKey, cfg.SmtpPasswordKey)
-	notificatorSvc, err := notificator.NewService(logger, smtpClient, cfg.TemplateDir)
+	notificatorSvc, err := notificator.NewService(logger, smtpClient)
 	if err != nil {
 		logger.Fatalf("failed to create user service: %v", err)
 	}
@@ -73,9 +73,9 @@ func main() {
 		logger.Fatalf("failed to create verification service: %v", err)
 	}
 
-	mfaSvc, err := mfa.NewService(cfg.MFAIssuer)
+	twoFaSvc, err := twofa.NewService(cfg.TwoFAIssuer)
 	if err != nil {
-		logger.Fatalf("failed to create MFA service: %v", err)
+		logger.Fatalf("failed to create TwoFA service: %v", err)
 	}
 
 	jwtRepo, err := jwt.NewRepository(db)
@@ -92,7 +92,7 @@ func main() {
 		UserService:         userSvc,
 		NotificatorService:  notificatorSvc,
 		VerificationService: verificationSvc,
-		MFAService:          mfaSvc,
+		TwoFAService:        twoFaSvc,
 		JWTService:          jwtSvc,
 		CredentialsService:  credentialsSvc,
 	}

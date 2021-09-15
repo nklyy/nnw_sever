@@ -1,4 +1,4 @@
-package mfa
+package twofa
 
 import (
 	"bytes"
@@ -12,8 +12,8 @@ import (
 
 //go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 type Service interface {
-	GenerateMFAImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error)
-	CheckMFACode(ctx context.Context, code, secret string) error
+	GenerateTwoFAImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error)
+	CheckTwoFACode(ctx context.Context, code, secret string) error
 }
 
 type service struct {
@@ -27,7 +27,7 @@ func NewService(issuer string) (Service, error) {
 	return &service{issuer: issuer}, nil
 }
 
-func (svc *service) GenerateMFAImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error) {
+func (svc *service) GenerateTwoFAImage(ctx context.Context, email string) (*bytes.Buffer, *otp.Key, error) {
 	// Generate 2FA Image
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      svc.issuer,
@@ -51,9 +51,9 @@ func (svc *service) GenerateMFAImage(ctx context.Context, email string) (*bytes.
 	return &bufImage, key, nil
 }
 
-func (svc *service) CheckMFACode(ctx context.Context, code, secret string) error {
+func (svc *service) CheckTwoFACode(ctx context.Context, code, secret string) error {
 	if !totp.Validate(code, secret) {
-		return ErrInvalidMFACode
+		return ErrInvalidTwoFACode
 	}
 	return nil
 }

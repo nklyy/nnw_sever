@@ -25,8 +25,8 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 	// Registration and Verify Email
 	v1.POST("/register-user", h.registerUser)
 	v1.POST("/verify-user", h.verifyUser)
-	v1.POST("/resend-verification-email", h.resendVerifycationRegistrationEmail)
-	v1.POST("/setup-mfa", h.setupMFA)
+	v1.POST("/resend-verification-email", h.resendVerificationRegistrationEmail)
+	v1.POST("/setup-twoFa", h.setupTwoFA)
 	v1.POST("/activate-user", h.activateUser)
 
 	// Login
@@ -67,7 +67,7 @@ func (h *Handler) verifyUser(ctx echo.Context) error {
 	return ctx.NoContent(200)
 }
 
-func (h *Handler) resendVerifycationRegistrationEmail(ctx echo.Context) error {
+func (h *Handler) resendVerificationRegistrationEmail(ctx echo.Context) error {
 	var dto ResendActivationEmailDTO
 	if err := ctx.Bind(&dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
@@ -81,8 +81,8 @@ func (h *Handler) resendVerifycationRegistrationEmail(ctx echo.Context) error {
 	return ctx.NoContent(200)
 }
 
-func (h *Handler) setupMFA(ctx echo.Context) error {
-	var dto SetupMfaDTO
+func (h *Handler) setupTwoFA(ctx echo.Context) error {
+	var dto SetupTwoFaDTO
 	if err := ctx.Bind(&dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
@@ -90,7 +90,7 @@ func (h *Handler) setupMFA(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
-	buf, err := h.registrationSvc.SetupMFA(ctx.Request().Context(), &dto)
+	buf, err := h.registrationSvc.SetupTwoFA(ctx.Request().Context(), &dto)
 	if err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
