@@ -100,6 +100,7 @@ func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserD
 		Subject:   "Verify email.",
 		Recipient: dto.Email,
 		Sender:    svc.emailSender,
+		Template:  "verifyTemplate.html",
 		Data: map[string]interface{}{
 			"code": newVerificationCode,
 		},
