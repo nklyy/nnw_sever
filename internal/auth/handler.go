@@ -55,7 +55,6 @@ func (h *Handler) registerUser(ctx echo.Context) error {
 	return ctx.NoContent(200)
 }
 
-//todo: we should be able to verify user only once
 func (h *Handler) verifyUser(ctx echo.Context) error {
 	var dto VerifyUserDTO
 

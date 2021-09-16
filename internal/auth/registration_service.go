@@ -128,6 +128,11 @@ func (svc *registrationSvc) VerifyUser(ctx context.Context, dto *VerifyUserDTO) 
 		return err
 	}
 
+	if notActivatedUserDTO.IsVerified == true {
+		svc.log.WithContext(ctx).Errorf("user %v, already verify", dto.Email)
+		return ErrAlreadyVerify
+	}
+
 	// mapping userDTO to user entity
 	notActivatedUser, err := user.MapToEntity(notActivatedUserDTO)
 	if err != nil {
