@@ -10,12 +10,14 @@ import (
 type Handler struct {
 	registrationSvc RegistrationService
 	loginSvc        LoginService
+	shift           int
 }
 
-func NewHandler(registrationSvc RegistrationService, loginSvc LoginService) *Handler {
+func NewHandler(registrationSvc RegistrationService, loginSvc LoginService, shift int) *Handler {
 	return &Handler{
 		registrationSvc: registrationSvc,
 		loginSvc:        loginSvc,
+		shift:           shift,
 	}
 }
 
@@ -46,7 +48,7 @@ func (h *Handler) registerUser(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
-	if err := Validate(dto); err != nil {
+	if err := Validate(dto, h.shift); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 	if err := h.registrationSvc.RegisterUser(ctx.Request().Context(), &dto); err != nil {
@@ -63,7 +65,7 @@ func (h *Handler) verifyUser(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
-	if err := Validate(dto); err != nil {
+	if err := Validate(dto, h.shift); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
@@ -81,7 +83,7 @@ func (h *Handler) resendVerificationRegistrationEmail(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
-	if err := Validate(dto); err != nil {
+	if err := Validate(dto, h.shift); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
@@ -100,7 +102,7 @@ func (h *Handler) setupTwoFA(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
-	if err := Validate(dto); err != nil {
+	if err := Validate(dto, h.shift); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
@@ -124,7 +126,7 @@ func (h *Handler) activateUser(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
-	if err := Validate(dto); err != nil {
+	if err := Validate(dto, h.shift); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
@@ -142,7 +144,7 @@ func (h *Handler) login(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
-	if err := Validate(dto); err != nil {
+	if err := Validate(dto, h.shift); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
@@ -161,7 +163,7 @@ func (h *Handler) loginCode(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
-	if err := Validate(dto); err != nil {
+	if err := Validate(dto, h.shift); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 

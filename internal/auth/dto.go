@@ -11,17 +11,18 @@ import (
 
 const passwordMinLength = 8
 
-func Validate(dto interface{}) error {
+func Validate(dto interface{}, shift int) error {
 	validate := validator.New()
 	_ = validate.RegisterValidation("password", func(fl validator.FieldLevel) bool {
 		password := fl.Field().String()
 
-		decodedPassword, err := helpers.CaesarShift(password, -15)
+		decodedPassword, err := helpers.CaesarShift(password, -shift)
 		if err != nil {
 			return false
 		}
-		if len(decodedPassword) < passwordMinLength {
-			return false
+
+		if len(decodedPassword) >= passwordMinLength {
+			return true
 		}
 
 		var (
