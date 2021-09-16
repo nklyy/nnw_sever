@@ -31,6 +31,13 @@ type registrationSvc struct {
 	emailSender string
 }
 
+const (
+	emailVerificationSubject      = "Verification email."
+	emailVerificationTopic        = "Verification email."
+	emailVerificationMessage      = "You're receiving this e-mail because you requested a verify your email for your NoName Wallet account."
+	emailVerificationTemplateName = "authTemplate.html"
+)
+
 func NewRegistrationService(log *logrus.Logger, emailSender string, deps *ServiceDeps) (RegistrationService, error) {
 	if deps == nil {
 		return nil, errors.NewInternal("invalid service dependencies")
@@ -97,12 +104,14 @@ func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserD
 	}
 
 	emailData := notificator.Email{
-		Subject:   "Verify email.",
+		Subject:   emailVerificationSubject,
 		Recipient: dto.Email,
 		Sender:    svc.emailSender,
-		Template:  "verifyTemplate.html",
+		Template:  emailVerificationTemplateName,
 		Data: map[string]interface{}{
-			"code": newVerificationCode,
+			"topic":   emailVerificationTopic,
+			"message": emailVerificationMessage,
+			"code":    newVerificationCode,
 		},
 	}
 
@@ -181,12 +190,14 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, dto *Re
 	}
 
 	emailData := notificator.Email{
-		Subject:   "Verify email.",
+		Subject:   emailVerificationSubject,
 		Recipient: dto.Email,
 		Sender:    svc.emailSender,
-		Template:  "verifyTemplate.html",
+		Template:  emailVerificationTemplateName,
 		Data: map[string]interface{}{
-			"code": newVerificationCode,
+			"topic":   emailVerificationTopic,
+			"message": emailVerificationMessage,
+			"code":    newVerificationCode,
 		},
 	}
 
