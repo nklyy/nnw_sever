@@ -41,7 +41,7 @@ func main() {
 
 	// Init App Middleware
 	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
+		AllowOrigins: []string{cfg.CorsOrigin.DevOrigin, cfg.CorsOrigin.ProdOrigin},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 

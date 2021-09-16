@@ -23,6 +23,8 @@ func TestInit(t *testing.T) {
 		smtpUserApiKey  string
 		smtpPasswordKey string
 		twoFaIssuer     string
+		devOrigin       string
+		prodOrigin      string
 	}
 
 	type args struct {
@@ -45,6 +47,8 @@ func TestInit(t *testing.T) {
 		os.Setenv("SMTP_USER_API_KEY", env.smtpUserApiKey)
 		os.Setenv("SMTP_PASSWORD_KEY", env.smtpPasswordKey)
 		os.Setenv("TWO_FA_ISSUER", env.twoFaIssuer)
+		os.Setenv("DEV_ORIGIN", env.devOrigin)
+		os.Setenv("PROD_ORIGIN", env.prodOrigin)
 	}
 
 	tests := []struct {
@@ -59,10 +63,10 @@ func TestInit(t *testing.T) {
 				env: env{
 					port:            "4000",
 					environment:     "development",
-					mongoDbName:     "databaseName",
+					mongoDbUrl:      "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
 					mongoDbUser:     "admin",
 					mongoDbPass:     "qwerty",
-					mongoDbUrl:      "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
+					mongoDbName:     "databaseName",
 					jwtSecretKey:    "123qwerty",
 					shift:           "123",
 					passwordSalt:    "123",
@@ -72,6 +76,8 @@ func TestInit(t *testing.T) {
 					smtpUserApiKey:  "key",
 					smtpPasswordKey: "password",
 					twoFaIssuer:     "Example",
+					devOrigin:       "http://localhost:3000",
+					prodOrigin:      "https://example.com",
 				},
 			},
 			want: &Config{
@@ -98,6 +104,11 @@ func TestInit(t *testing.T) {
 					SmtpPort:        25,
 					SmtpUserApiKey:  "key",
 					SmtpPasswordKey: "password",
+				},
+
+				CorsOrigin: CorsOrigin{
+					DevOrigin:  "http://localhost:3000",
+					ProdOrigin: "https://example.com",
 				},
 			},
 		},

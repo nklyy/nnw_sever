@@ -13,11 +13,11 @@ type Config struct {
 	Environment string `required:"true" default:"development" envconfig:"APP_ENV"`
 	EmailFrom   string `required:"true" envconfig:"EMAIL_FROM"`
 	TwoFAIssuer string `required:"true" envconfig:"TWO_FA_ISSUER" default:"NNW"`
-	//TemplateDir string `required:"true" envconfig:"TEMPLATE_DIR"`
 
 	Secrets
 	MongoConfig
 	SMTPConfig
+	CorsOrigin
 }
 
 func (cfg Config) String() string {
@@ -43,6 +43,11 @@ type SMTPConfig struct {
 	SmtpPort        int    `required:"true" envconfig:"SMTP_PORT"`
 	SmtpUserApiKey  string `required:"true" envconfig:"SMTP_USER_API_KEY"`
 	SmtpPasswordKey string `required:"true" envconfig:"SMTP_PASSWORD_KEY"`
+}
+
+type CorsOrigin struct {
+	DevOrigin  string `required:"true" envconfig:"DEV_ORIGIN"`
+	ProdOrigin string `required:"true" envconfig:"PROD_ORIGIN"`
 }
 
 var (
