@@ -17,6 +17,7 @@ import (
 type LoginService interface {
 	Login(ctx context.Context, dto *LoginDTO) error
 	CheckCode(ctx context.Context, dto *LoginCodeDTO) (*TokenDTO, error)
+
 	Logout(ctx context.Context, email string) error
 }
 
@@ -118,7 +119,7 @@ func (svc *loginSvc) CheckCode(ctx context.Context, dto *LoginCodeDTO) (*TokenDT
 	if err != nil {
 		return nil, errors.WithMessage(ErrUnauthorized, err.Error())
 	}
-	return &TokenDTO{Token: jwtTokenDTO.Token, ExpireAt: jwtTokenDTO.ExpireAt}, nil
+	return &TokenDTO{TokenID: jwtTokenDTO.ID, ExpireAt: jwtTokenDTO.ExpireAt}, nil
 }
 
 // todo: find then delete or diacttivate jwt token

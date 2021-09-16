@@ -13,7 +13,7 @@ const jwtExpiry = time.Second * 60
 //go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 type Service interface {
 	CreateJWT(ctx context.Context, email string) (*DTO, error)
-	VerifyJWT(ctx context.Context, id string) error
+	VerifyJWT(ctx context.Context, id string) (*Payload, error)
 }
 
 type service struct {
@@ -61,11 +61,11 @@ func (svc *service) CreateJWT(ctx context.Context, email string) (*DTO, error) {
 	}, nil
 }
 
-func (svc *service) VerifyJWT(ctx context.Context, id string) error {
+func (svc *service) VerifyJWT(ctx context.Context, id string) (*Payload, error) {
 	// get JWT from storage
 	token, err := svc.repo.GetJWT(ctx, id)
 	if err != nil {
-		return ErrTokenDoesNotValid
+		return nil, ErrTokenDoesNotValid
 	}
 
 	// verify JWT
@@ -80,14 +80,14 @@ func (svc *service) VerifyJWT(ctx context.Context, id string) error {
 	jwtToken, err := jwt.ParseWithClaims(token.Jwt, &Payload{}, keyFunc)
 	if err != nil {
 		if _, ok := err.(*jwt.ValidationError); ok {
-			return ErrTokenHasBeenExpired
+			return nil, ErrTokenHasBeenExpired
 		}
-		return ErrTokenDoesNotValid
+		return nil, ErrTokenDoesNotValid
 	}
 
-	_, ok := jwtToken.Claims.(*Payload)
+	payload, ok := jwtToken.Claims.(*Payload)
 	if !ok {
-		return ErrTokenDoesNotValid
+		return nil, ErrTokenDoesNotValid
 	}
-	return nil
+	return payload, nil
 }

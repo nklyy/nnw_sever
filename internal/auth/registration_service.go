@@ -178,8 +178,8 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, dto *Re
 	}
 
 	// check if user not active and not verified
-	if !notActivatedUser.IsActive() && !notActivatedUser.IsVerified {
-		return ErrPermissionDenied
+	if notActivatedUser.IsActive() && notActivatedUser.IsVerified {
+		return ErrAlreadyVerify
 	}
 
 	// create verification code for further activation by email

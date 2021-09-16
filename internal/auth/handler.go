@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"nnw_s/internal/auth/jwt"
 	"nnw_s/pkg/errors"
 
 	"github.com/labstack/echo/v4"
@@ -10,13 +11,15 @@ import (
 type Handler struct {
 	registrationSvc RegistrationService
 	loginSvc        LoginService
+	jwtSvc          jwt.Service
 	shift           int
 }
 
-func NewHandler(registrationSvc RegistrationService, loginSvc LoginService, shift int) *Handler {
+func NewHandler(registrationSvc RegistrationService, loginSvc LoginService, jwtSvc jwt.Service, shift int) *Handler {
 	return &Handler{
 		registrationSvc: registrationSvc,
 		loginSvc:        loginSvc,
+		jwtSvc:          jwtSvc,
 		shift:           shift,
 	}
 }
@@ -31,10 +34,13 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 	v1.POST("/setup-twoFa", h.setupTwoFA)
 	v1.POST("/activate-user", h.activateUser)
 
-	// Login
+	// Login and Logout
 	v1.POST("/login", h.login)
 	v1.POST("/login-code", h.loginCode)
 	v1.POST("/logout", h.logout)
+
+	// Validate JWT Token
+	v1.POST("/validate-token", h.validateToken)
 
 	router.GET("/ping", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "OK")
@@ -173,6 +179,25 @@ func (h *Handler) loginCode(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, tokenDTO)
+}
+
+func (h *Handler) validateToken(ctx echo.Context) error {
+	var dto ValidateTokenDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	_, err := h.jwtSvc.VerifyJWT(ctx.Request().Context(), dto.TokenID)
+	if err != nil {
+		return ctx.JSON(errors.HTTPCode(err), err)
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
 // todo: implement

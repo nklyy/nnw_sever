@@ -107,7 +107,7 @@ func main() {
 		logger.Fatalf("failed to connect login service: %v", err)
 	}
 
-	authHandler := auth.NewHandler(registrationSvc, loginSvc, cfg.Shift)
+	authHandler := auth.NewHandler(registrationSvc, loginSvc, jwtSvc, cfg.Shift)
 	authHandler.SetupRoutes(router)
 
 	// NotFound Urls
