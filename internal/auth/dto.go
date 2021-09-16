@@ -82,7 +82,11 @@ type ActivateUserDTO struct {
 type LoginDTO struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,password"`
-	Code     string `json:"code" validate:"required,len=6"`
+}
+
+type LoginCodeDTO struct {
+	Email string `json:"email" validate:"required,email"`
+	Code  string `json:"code" validate:"required,len=6"`
 }
 
 type TokenDTO struct {

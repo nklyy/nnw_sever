@@ -15,7 +15,8 @@ import (
 
 //go:generate mockgen -source=login_service.go -destination=mocks/login_service_mock.go
 type LoginService interface {
-	Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error)
+	Login(ctx context.Context, dto *LoginDTO) error
+	CheckCode(ctx context.Context, dto *LoginCodeDTO) (*TokenDTO, error)
 	Logout(ctx context.Context, email string) error
 }
 
@@ -65,7 +66,36 @@ func NewLoginService(log *logrus.Logger, deps *ServiceDeps) (LoginService, error
 	}, nil
 }
 
-func (svc *loginSvc) Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error) {
+func (svc *loginSvc) Login(ctx context.Context, dto *LoginDTO) error {
+	// find user
+	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
+	if err != nil {
+		return errors.WithMessage(ErrPermissionDenied, err.Error())
+	}
+
+	// map dto to user
+	registeredUser, err := user.MapToEntity(userDTO)
+	if err != nil {
+		return err
+	}
+
+	// if user does not active or not verified return ErrPermissionDenied
+	if !registeredUser.IsActive() || !registeredUser.IsVerified {
+		return ErrPermissionDenied
+	}
+
+	// map from entity to credentials dto
+	credentialsDTO := credentials.MapToDTO(registeredUser.Credentials)
+
+	// check password
+	if err = svc.credentialsSvc.ValidatePassword(ctx, credentialsDTO, dto.Password); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (svc *loginSvc) CheckCode(ctx context.Context, dto *LoginCodeDTO) (*TokenDTO, error) {
 	// find user
 	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
@@ -78,21 +108,8 @@ func (svc *loginSvc) Login(ctx context.Context, dto *LoginDTO) (*TokenDTO, error
 		return nil, err
 	}
 
-	// if user does not active or not verified return ErrPermissionDenied
-	if !registeredUser.IsActive() || !registeredUser.IsVerified {
-		return nil, ErrPermissionDenied
-	}
-
-	// map from entity to credentials dto
-	credentialsDTO := credentials.MapToDTO(registeredUser.Credentials)
-
-	// check password
-	if err = svc.credentialsSvc.ValidatePassword(ctx, credentialsDTO, dto.Password); err != nil {
-		return nil, err
-	}
-
 	// check TwoFA Code
-	if err = svc.twoFaSvc.CheckTwoFACode(ctx, dto.Code, *registeredUser.Credentials.SecretOTP); err != nil {
+	if err := svc.twoFaSvc.CheckTwoFACode(ctx, dto.Code, *registeredUser.Credentials.SecretOTP); err != nil {
 		return nil, err
 	}
 

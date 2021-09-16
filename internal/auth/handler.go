@@ -31,6 +31,7 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 
 	// Login
 	v1.POST("/login", h.login)
+	v1.POST("/login-code", h.loginCode)
 	v1.POST("/logout", h.logout)
 
 	router.GET("/ping", func(c echo.Context) error {
@@ -145,7 +146,26 @@ func (h *Handler) login(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
-	tokenDTO, err := h.loginSvc.Login(ctx.Request().Context(), &dto)
+	err := h.loginSvc.Login(ctx.Request().Context(), &dto)
+	if err != nil {
+		return ctx.JSON(errors.HTTPCode(err), err)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+func (h *Handler) loginCode(ctx echo.Context) error {
+	var dto LoginCodeDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	tokenDTO, err := h.loginSvc.CheckCode(ctx.Request().Context(), &dto)
 	if err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
