@@ -93,13 +93,14 @@ func TestGetUserByID(t *testing.T) {
 
 	service, _ := user.NewService(mockRepo, mockCred, log)
 	testUser, _ := user.NewUser("some@mail.com", &testCred)
+	userDto := user.MapToDTO(testUser)
 
 	tests := []struct {
 		name   string
 		ctx    context.Context
 		userID string
 		setup  func(context.Context, string)
-		expect func(*testing.T, *user.User, error)
+		expect func(*testing.T, *user.DTO, error)
 	}{
 		{
 			name:   "should return test user",
@@ -108,10 +109,10 @@ func TestGetUserByID(t *testing.T) {
 			setup: func(ctx context.Context, userID string) {
 				mockRepo.EXPECT().GetUserByID(ctx, userID).Return(testUser, nil)
 			},
-			expect: func(t *testing.T, u *user.User, err error) {
+			expect: func(t *testing.T, u *user.DTO, err error) {
 				assert.NotNil(t, u)
 				assert.Nil(t, err)
-				assert.Equal(t, testUser, u)
+				assert.Equal(t, userDto, u)
 			},
 		},
 		{
@@ -121,7 +122,7 @@ func TestGetUserByID(t *testing.T) {
 			setup: func(ctx context.Context, userID string) {
 				mockRepo.EXPECT().GetUserByID(ctx, userID).Return(nil, user.ErrNotFound)
 			},
-			expect: func(t *testing.T, u *user.User, err error) {
+			expect: func(t *testing.T, u *user.DTO, err error) {
 				assert.Nil(t, u)
 				assert.Equal(t, user.ErrNotFound, err)
 			},
@@ -129,11 +130,11 @@ func TestGetUserByID(t *testing.T) {
 		{
 			name:   "should return 'internal error' error",
 			ctx:    context.Background(),
-			userID: testUser.ID.Hex(),
+			userID: userDto.ID,
 			setup: func(ctx context.Context, userID string) {
 				mockRepo.EXPECT().GetUserByID(ctx, userID).Return(nil, errors.NewInternal("internal error"))
 			},
-			expect: func(t *testing.T, u *user.User, err error) {
+			expect: func(t *testing.T, u *user.DTO, err error) {
 				assert.Nil(t, u)
 				assert.Equal(t, errors.NewInternal("internal error"), err)
 			},
@@ -144,8 +145,7 @@ func TestGetUserByID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.setup(tc.ctx, tc.userID)
 			u, err := service.GetUserByID(tc.ctx, tc.userID)
-			userEntity, _ := user.MapToEntity(u)
-			tc.expect(t, userEntity, err)
+			tc.expect(t, u, err)
 		})
 	}
 }
@@ -233,7 +233,7 @@ func TestCreateUser(t *testing.T) {
 
 	secretKey := "secret"
 	var testCred credentials.Credentials
-	testCred.Password = "$2a$05$gNX0NIYmmC/1rPGEclZrVeBR9DZmt4l2ydNn8tM5XNfFJxlL8ObXq"
+	testCred.Password = "==WvZitmZDgzSHgAWvKs"
 	testCred.SecretOTP = &secretKey
 
 	service, _ := user.NewService(mockRepo, mockCred, log)
@@ -256,11 +256,9 @@ func TestCreateUser(t *testing.T) {
 				Password: encodedPass,
 			},
 			setup: func(ctx context.Context, dto *user.CreateUserDTO) {
-				var credDTO credentials.DTO
-				credDTO.Password = userDTO.Password
-				credDTO.SecretOTP = &userDTO.SecretOTP
+				credDTO := credentials.MapToDTO(&testCred)
 
-				mockCred.EXPECT().CreateCredentials(ctx, encodedPass, secretKey).Return(credDTO, nil)
+				mockCred.EXPECT().CreateCredentials(ctx, encodedPass, credentials.NilSecretOTP).Return(credDTO, nil)
 				mockRepo.EXPECT().SaveUser(ctx, gomock.Any()).Return(testUser.ID.Hex(), nil)
 			},
 			expect: func(t *testing.T, id string, err error) {
@@ -269,47 +267,57 @@ func TestCreateUser(t *testing.T) {
 				assert.Equal(t, id, userDTO.ID)
 			},
 		},
-		//{
-		//	name: "should return decode error",
-		//	ctx:  context.Background(),
-		//	dto: &user.CreateUserDTO{
-		//		Email:    userDTO.Email,
-		//		Password: userDTO.Password,
-		//	},
-		//	setup: func(ctx context.Context, dto *user.CreateUserDTO) {},
-		//	expect: func(t *testing.T, id string, err error) {
-		//		assert.Empty(t, id)
-		//		assert.NotNil(t, err)
-		//	},
-		//},
-		//{
-		//	name: "should return error while saving user is db",
-		//	ctx:  context.Background(),
-		//	dto: &user.CreateUserDTO{
-		//		Email:    userDTO.Email,
-		//		Password: encodedPass,
-		//	},
-		//	setup: func(ctx context.Context, dto *user.CreateUserDTO) {
-		//		mockRepo.EXPECT().SaveUser(ctx, gomock.Any()).Return("", user.ErrAlreadyExists)
-		//	},
-		//	expect: func(t *testing.T, id string, err error) {
-		//		assert.Empty(t, id)
-		//		assert.Equal(t, user.ErrAlreadyExists, err)
-		//	},
-		//},
-		//{
-		//	name: "should return error while creating a new user",
-		//	ctx:  context.Background(),
-		//	dto: &user.CreateUserDTO{
-		//		Email:    "",
-		//		Password: encodedPass,
-		//	},
-		//	setup: func(ctx context.Context, dto *user.CreateUserDTO) {},
-		//	expect: func(t *testing.T, id string, err error) {
-		//		assert.Empty(t, id)
-		//		assert.Equal(t, errors.WithMessage(user.ErrInvalidEmail, "should be not empty"), err)
-		//	},
-		//},
+		{
+			name: "should return decode error",
+			ctx:  context.Background(),
+			dto: &user.CreateUserDTO{
+				Email:    userDTO.Email,
+				Password: userDTO.Password,
+			},
+			setup: func(ctx context.Context, dto *user.CreateUserDTO) {
+				mockCred.EXPECT().CreateCredentials(ctx, encodedPass, credentials.NilSecretOTP).Return(nil, errors.NewInternal("failed to decode password"))
+			},
+			expect: func(t *testing.T, id string, err error) {
+				assert.Empty(t, id)
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("failed to decode password"), err)
+			},
+		},
+		{
+			name: "should return error while saving user is db",
+			ctx:  context.Background(),
+			dto: &user.CreateUserDTO{
+				Email:    userDTO.Email,
+				Password: encodedPass,
+			},
+			setup: func(ctx context.Context, dto *user.CreateUserDTO) {
+				credDTO := credentials.MapToDTO(&testCred)
+
+				mockCred.EXPECT().CreateCredentials(ctx, encodedPass, credentials.NilSecretOTP).Return(credDTO, nil)
+				mockRepo.EXPECT().SaveUser(ctx, gomock.Any()).Return("", user.ErrAlreadyExists)
+			},
+			expect: func(t *testing.T, id string, err error) {
+				assert.Empty(t, id)
+				assert.Equal(t, user.ErrAlreadyExists, err)
+			},
+		},
+		{
+			name: "should return error while creating a new user",
+			ctx:  context.Background(),
+			dto: &user.CreateUserDTO{
+				Email:    "",
+				Password: encodedPass,
+			},
+			setup: func(ctx context.Context, dto *user.CreateUserDTO) {
+				credDTO := credentials.MapToDTO(&testCred)
+
+				mockCred.EXPECT().CreateCredentials(ctx, encodedPass, credentials.NilSecretOTP).Return(credDTO, nil)
+			},
+			expect: func(t *testing.T, id string, err error) {
+				assert.Empty(t, id)
+				assert.Equal(t, errors.WithMessage(user.ErrInvalidEmail, "should be not empty"), err)
+			},
+		},
 	}
 
 	for _, tc := range tests {
