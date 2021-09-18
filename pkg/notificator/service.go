@@ -15,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 const (
 	mimeHeaders      = "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	sendEmailTimeout = 5 * time.Second
