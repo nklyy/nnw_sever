@@ -12,6 +12,7 @@ import (
 	"nnw_s/internal/user/credentials"
 	mock_credentials "nnw_s/internal/user/credentials/mocks"
 	mock_user "nnw_s/internal/user/mocks"
+	"nnw_s/pkg/errors"
 	mock_notificator "nnw_s/pkg/notificator/mocks"
 	"testing"
 )
@@ -203,16 +204,29 @@ func TestLoginSvc_Login(t *testing.T) {
 	loginUserDTO.Email = "some@mail.com"
 	loginUserDTO.Password = "==WvZitmZDgzSHgAWvKs"
 
+	// Cred
 	secretKey := "secret"
 	var testCred credentials.Credentials
 	testCred.Password = "==WvZitmZDgzSHgAWvKs"
 	testCred.SecretOTP = &secretKey
 	credDTO := credentials.MapToDTO(&testCred)
 
+	// Verify user
 	testActiveUser, _ := user.NewUser("some@mail.com", &testCred)
 	testActiveUser.SetToActive()
 	testActiveUser.SetToVerified()
 	activeUserDTO := user.MapToDTO(testActiveUser)
+
+	// Disable user
+	testDisableUser, _ := user.NewUser("some@mail.com", &testCred)
+	disableUserDTO := user.MapToDTO(testDisableUser)
+
+	// User with wrong id
+	testWrongUser, _ := user.NewUser("some@mail.com", &testCred)
+	testWrongUser.SetToActive()
+	testWrongUser.SetToVerified()
+	wrongUserDTO := user.MapToDTO(testWrongUser)
+	wrongUserDTO.ID = "example"
 
 	tests := []struct {
 		name   string
@@ -231,6 +245,55 @@ func TestLoginSvc_Login(t *testing.T) {
 			},
 			expect: func(t *testing.T, err error) {
 				assert.Nil(t, err)
+			},
+		},
+		{
+			name: "should permission_denied by getUserByEmail",
+			ctx:  context.Background(),
+			dto:  &loginUserDTO,
+			setup: func(ctx context.Context, dto *LoginDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(nil, ErrPermissionDenied)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.WithMessage(ErrPermissionDenied, "code: 403; status: permission_denied"), err)
+			},
+		},
+		{
+			name: "should permission_denied disable user",
+			ctx:  context.Background(),
+			dto:  &loginUserDTO,
+			setup: func(ctx context.Context, dto *LoginDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(disableUserDTO, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, ErrPermissionDenied, err)
+			},
+		},
+		{
+			name: "should invalid_user_password",
+			ctx:  context.Background(),
+			dto:  &loginUserDTO,
+			setup: func(ctx context.Context, dto *LoginDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(activeUserDTO, nil)
+				mockCredSvc.EXPECT().ValidatePassword(ctx, credDTO, dto.Password).Return(user.ErrInvalidPassword)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, user.ErrInvalidPassword, err)
+			},
+		},
+		{
+			name: "should invalid_user_password",
+			ctx:  context.Background(),
+			dto:  &loginUserDTO,
+			setup: func(ctx context.Context, dto *LoginDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(wrongUserDTO, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("the provided hex string is not a valid ObjectID"), err)
 			},
 		},
 	}
