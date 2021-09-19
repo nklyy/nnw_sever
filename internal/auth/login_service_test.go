@@ -186,18 +186,18 @@ func TestLoginSvc_Login(t *testing.T) {
 	defer controller.Finish()
 
 	log := logrus.New()
+	mockUserSvc := mock_user.NewMockService(controller)
+	mockCredSvc := mock_credentials.NewMockService(controller)
 	deps := &ServiceDeps{
-		UserService:         mock_user.NewMockService(controller),
+		UserService:         mockUserSvc,
 		NotificatorService:  mock_notificator.NewMockService(controller),
 		VerificationService: mock_verification.NewMockService(controller),
 		TwoFAService:        mock_twofa.NewMockService(controller),
 		JWTService:          mock_jwt.NewMockService(controller),
-		CredentialsService:  mock_credentials.NewMockService(controller),
+		CredentialsService:  mockCredSvc,
 	}
 
 	service, _ := NewLoginService(log, deps)
-	mockUserSvc := mock_user.NewMockService(controller)
-	mockCredSvc := mock_credentials.NewMockService(controller)
 
 	var loginUserDTO LoginDTO
 	loginUserDTO.Email = "some@mail.com"
@@ -209,8 +209,10 @@ func TestLoginSvc_Login(t *testing.T) {
 	testCred.SecretOTP = &secretKey
 	credDTO := credentials.MapToDTO(&testCred)
 
-	testUser, _ := user.NewUser("some@mail.com", &testCred)
-	userDTO := user.MapToDTO(testUser)
+	testActiveUser, _ := user.NewUser("some@mail.com", &testCred)
+	testActiveUser.SetToActive()
+	testActiveUser.SetToVerified()
+	activeUserDTO := user.MapToDTO(testActiveUser)
 
 	tests := []struct {
 		name   string
@@ -224,7 +226,7 @@ func TestLoginSvc_Login(t *testing.T) {
 			ctx:  context.Background(),
 			dto:  &loginUserDTO,
 			setup: func(ctx context.Context, dto *LoginDTO) {
-				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(userDTO, nil)
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(activeUserDTO, nil)
 				mockCredSvc.EXPECT().ValidatePassword(ctx, credDTO, dto.Password).Return(nil)
 			},
 			expect: func(t *testing.T, err error) {
