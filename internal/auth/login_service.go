@@ -115,6 +115,11 @@ func (svc *loginSvc) CheckCode(ctx context.Context, dto *LoginCodeDTO) (*TokenDT
 		return nil, err
 	}
 
+	// if user does not active or not verified return ErrPermissionDenied
+	if !registeredUser.IsActive() || !registeredUser.IsVerified {
+		return nil, ErrPermissionDenied
+	}
+
 	// check TwoFA Code
 	if err := svc.twoFaSvc.CheckTwoFACode(ctx, dto.Code, *registeredUser.Credentials.SecretOTP); err != nil {
 		return nil, err
