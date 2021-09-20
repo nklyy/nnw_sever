@@ -125,7 +125,7 @@ func (svc *loginSvc) CheckCode(ctx context.Context, dto *LoginCodeDTO) (*TokenDT
 	if err != nil {
 		return nil, errors.WithMessage(ErrUnauthorized, err.Error())
 	}
-	return &TokenDTO{TokenID: jwtTokenDTO.ID, ExpireAt: jwtTokenDTO.ExpireAt}, nil
+	return &TokenDTO{Token: jwtTokenDTO.Token, ExpireAt: jwtTokenDTO.ExpireAt}, nil
 }
 
 // todo: find then delete or diacttivate jwt token

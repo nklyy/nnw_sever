@@ -91,10 +91,10 @@ type LoginCodeDTO struct {
 }
 
 type TokenDTO struct {
-	TokenID  string    `json:"token_id"`
+	Token    string    `json:"token"`
 	ExpireAt time.Time `json:"expired_at"`
 }
 
 type ValidateTokenDTO struct {
-	TokenID string `json:"token_id" validate:"required"`
+	Token string `json:"token" validate:"required"`
 }

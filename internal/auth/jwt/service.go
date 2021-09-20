@@ -61,9 +61,9 @@ func (svc *service) CreateJWT(ctx context.Context, email string) (*DTO, error) {
 	}, nil
 }
 
-func (svc *service) VerifyJWT(ctx context.Context, id string) (*Payload, error) {
+func (svc *service) VerifyJWT(ctx context.Context, token string) (*Payload, error) {
 	// get JWT from storage
-	token, err := svc.repo.GetJWT(ctx, id)
+	tokenDTO, err := svc.repo.GetJWT(ctx, token)
 	if err != nil {
 		return nil, ErrTokenDoesNotValid
 	}
@@ -77,7 +77,7 @@ func (svc *service) VerifyJWT(ctx context.Context, id string) (*Payload, error) 
 		return []byte(svc.secretKey), nil
 	}
 
-	jwtToken, err := jwt.ParseWithClaims(token.Jwt, &Payload{}, keyFunc)
+	jwtToken, err := jwt.ParseWithClaims(tokenDTO.Jwt, &Payload{}, keyFunc)
 	if err != nil {
 		if _, ok := err.(*jwt.ValidationError); ok {
 			return nil, ErrTokenHasBeenExpired

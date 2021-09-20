@@ -192,7 +192,7 @@ func (h *Handler) validateToken(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
-	_, err := h.jwtSvc.VerifyJWT(ctx.Request().Context(), dto.TokenID)
+	_, err := h.jwtSvc.VerifyJWT(ctx.Request().Context(), dto.Token)
 	if err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
