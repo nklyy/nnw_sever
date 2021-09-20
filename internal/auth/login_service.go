@@ -46,6 +46,12 @@ func NewLoginService(log *logrus.Logger, deps *ServiceDeps) (LoginService, error
 	if deps.UserService == nil {
 		return nil, errors.NewInternal("invalid user service")
 	}
+	if deps.NotificatorService == nil {
+		return nil, errors.NewInternal("invalid notification service")
+	}
+	if deps.VerificationService == nil {
+		return nil, errors.NewInternal("invalid verification service")
+	}
 	if deps.TwoFAService == nil {
 		return nil, errors.NewInternal("invalid TwoFA service")
 	}
