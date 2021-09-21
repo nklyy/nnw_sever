@@ -98,3 +98,21 @@ type TokenDTO struct {
 type ValidateTokenDTO struct {
 	Token string `json:"token" validate:"required"`
 }
+
+type ResetPasswordDTO struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type ResendResetPasswordDTO struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type ResetPasswordCodedDTO struct {
+	Email string `json:"email" validate:"required,email"`
+	Code  string `json:"code" validate:"required,len=6"`
+}
+
+type SetupNewPasswordDTO struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,password"`
+}

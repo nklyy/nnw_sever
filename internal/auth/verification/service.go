@@ -11,6 +11,9 @@ import (
 type Service interface {
 	CheckVerificationCode(ctx context.Context, email, code string) error
 	CreateVerificationCode(ctx context.Context, email string) (string, error)
+
+	CheckResetPasswordCode(ctx context.Context, email, code string) error
+	CreateResetPasswordCode(ctx context.Context, email string) (string, error)
 }
 
 type service struct {
@@ -50,4 +53,28 @@ func (svc *service) CheckVerificationCode(ctx context.Context, email, code strin
 		return err
 	}
 	return nil
+}
+
+func (svc *service) CheckResetPasswordCode(ctx context.Context, email, code string) error {
+	_, err := svc.repo.GetResetPasswordCode(ctx, email, code)
+	if err != nil {
+		if err == ErrCodeNotFound {
+			return ErrInvalidCode
+		}
+		return err
+	}
+	return nil
+}
+
+func (svc *service) CreateResetPasswordCode(ctx context.Context, email string) (string, error) {
+	newCode, err := NewCode(email)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to create reset password code: %v", err)
+		return "", err
+	}
+	if err := svc.repo.SaveResetPasswordCode(ctx, newCode); err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to save reset password code in db: %v", err)
+		return "", err
+	}
+	return newCode.Code, nil
 }
