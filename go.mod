@@ -4,13 +4,14 @@ module nnw_s
 go 1.16
 
 require (
+	github.com/ethereum/go-ethereum v1.10.8 // indirect
+	github.com/gagliardetto/solana-go v0.5.0 // indirect
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/klauspost/compress v1.12.2 // indirect
 	github.com/labstack/echo/v4 v4.5.0
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/pquerna/otp v1.3.0
