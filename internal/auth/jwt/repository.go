@@ -40,7 +40,7 @@ func (repo *repository) GetJWT(ctx context.Context, token string) (*JWT, error) 
 func (repo *repository) SaveJWT(ctx context.Context, jwt *JWT) (string, error) {
 	mod := mongo.IndexModel{
 		Keys:    bson.M{"created_at": 1}, // index in ascending order or -1 for descending order
-		Options: options.Index().SetExpireAfterSeconds(60),
+		Options: options.Index().SetExpireAfterSeconds(600),
 	}
 
 	_, err := repo.db.Collection("jwt").Indexes().CreateOne(ctx, mod)
