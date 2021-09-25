@@ -1,0 +1,227 @@
+{
+	"info": {
+		"_postman_id": "059a8bb8-1887-47e5-b82d-cd099a497199",
+		"name": "NNW",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\" : \"adminn\",\r\n    \"password\": \"==WvZitmZDgzSHgAWvKs\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/login",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login-code",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"asd@c.c\",\r\n    \"code\" : \"123123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/login-code",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"login-code"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Registration",
+			"item": [
+				{
+					"name": "register-user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\" : \"adminn\",\r\n    \"password\": \"==WvZitmZDgzSHgAWvKs\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/register-user",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"register-user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verify-user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"asd@c.c\",\r\n    \"code\" : \"123123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/verify-user",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"verify-user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "resend-verification-email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"asd@c.c\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/resend-verification-email",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"resend-verification-email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setup-twoFa",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"asd@c.c\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/setup-twoFa",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"setup-twoFa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "activate-user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"adminn\",\r\n    \"code\" : \"123123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/activate-user",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"activate-user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "validate-token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"token_id\": \"61436ce71f4dbf9eaff5daf5\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{local_url}}/validate-token",
+					"host": [
+						"{{local_url}}"
+					],
+					"path": [
+						"validate-token"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

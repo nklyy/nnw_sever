@@ -1,62 +1,73 @@
 package config
 
 import (
-	"github.com/spf13/viper"
-	"os"
+	"encoding/json"
+	"sync"
+
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
 
-type Configurations struct {
-	PORT string `mapstructure:"PORT"`
+type Config struct {
+	PORT        string `required:"true" default:"4000" envconfig:"PORT"`
+	Environment string `required:"true" default:"development" envconfig:"APP_ENV"`
+	EmailFrom   string `required:"true" envconfig:"EMAIL_FROM"`
+	TwoFAIssuer string `required:"true" envconfig:"TWO_FA_ISSUER" default:"NNW"`
 
-	MongoDbName  string `mapstructure:"MONGO_DB_NAME"`
-	MongoDbUser  string `mapstructure:"MONGO_DB_USER"`
-	MongoDbPass  string `mapstructure:"MONGO_DB_PASS"`
-	MongoDbUrl   string `mapstructure:"MONGO_DB_URL"`
-	JwtSecretKey string `mapstructure:"JWT_SECRET_KEY"`
-	Shift        string `mapstructure:"SHIFT"`
-	PasswordSalt string `mapstructure:"PASSWORD_SALT"`
+	Secrets
+	MongoConfig
+	SMTPConfig
+	CorsOrigin
 }
 
-func InitConfig(path string, env string) (*Configurations, error) {
-	var configuration Configurations
-
-	if env == "PRODUCTION" {
-		setFromEnv(&configuration)
-		return &configuration, nil
-	}
-
-	viper.AddConfigPath(path)
-
-	viper.SetConfigName(".env")
-
-	viper.SetConfigType("env")
-
-	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	err = viper.Unmarshal(&configuration)
-	if err != nil {
-		//fmt.Printf("Unable to decode into struct, %v", err)
-		return nil, err
-	}
-
-	return &configuration, nil
+func (cfg Config) String() string {
+	buf, _ := json.MarshalIndent(&cfg, "", "	")
+	return string(buf)
 }
 
-func setFromEnv(cfg *Configurations) {
-	cfg.MongoDbName = os.Getenv("MONGO_DB_NAME")
-	cfg.MongoDbUser = os.Getenv("MONGO_DB_USER")
-	cfg.MongoDbPass = os.Getenv("MONGO_DB_PASS")
-	cfg.MongoDbUrl = os.Getenv("MONGO_DB_URL")
+type Secrets struct {
+	JwtSecretKey string `required:"true" envconfig:"JWT_SECRET_KEY"`
+	Shift        int    `required:"true" envconfig:"SHIFT"`
+	PasswordSalt int    `required:"true" envconfig:"PASSWORD_SALT"`
+}
 
-	cfg.JwtSecretKey = os.Getenv("JWT_SECRET_KEY")
+type MongoConfig struct {
+	MongoDbName string `required:"true" envconfig:"MONGO_DB_NAME"`
+	MongoDbUser string `required:"true" envconfig:"MONGO_DB_USER"`
+	MongoDbPass string `required:"true" envconfig:"MONGO_DB_PASS"`
+	MongoDbUrl  string `required:"true" envconfig:"MONGO_DB_URL"`
+}
 
-	cfg.Shift = os.Getenv("SHIFT")
-	cfg.PasswordSalt = os.Getenv("PASSWORD_SALT")
+type SMTPConfig struct {
+	SmtpHost        string `required:"true" envconfig:"SMTP_HOST"`
+	SmtpPort        int    `required:"true" envconfig:"SMTP_PORT"`
+	SmtpUserApiKey  string `required:"true" envconfig:"SMTP_USER_API_KEY"`
+	SmtpPasswordKey string `required:"true" envconfig:"SMTP_PASSWORD_KEY"`
+}
 
-	cfg.PORT = os.Getenv("PORT")
+type CorsOrigin struct {
+	DevOrigin  string `required:"true" envconfig:"DEV_ORIGIN"`
+	ProdOrigin string `required:"true" envconfig:"PROD_ORIGIN"`
+}
+
+var (
+	once   sync.Once
+	config *Config
+)
+
+func Get() (*Config, error) {
+	var err error
+	once.Do(func() {
+		var cfg Config
+		// If you run it locally and through terminal please set up this in Load function (../.env)
+		_ = godotenv.Load(".env")
+
+		if err = envconfig.Process("", &cfg); err != nil {
+			return
+		}
+
+		config = &cfg
+	})
+
+	return config, err
 }
