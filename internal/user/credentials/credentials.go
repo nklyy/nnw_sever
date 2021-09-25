@@ -14,6 +14,10 @@ func (credentials *Credentials) SetSecretOTP(key *otp.Key) {
 	credentials.SecretOTP = &secretOtp
 }
 
+func (credentials *Credentials) SetNewPassword(password string) {
+	credentials.Password = password
+}
+
 type SecretOTP *string
 
 var NilSecretOTP SecretOTP = nil

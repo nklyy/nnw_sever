@@ -9,18 +9,20 @@ import (
 )
 
 type Handler struct {
-	registrationSvc RegistrationService
-	loginSvc        LoginService
-	jwtSvc          jwt.Service
-	shift           int
+	registrationSvc  RegistrationService
+	loginSvc         LoginService
+	resetPasswordSvc ResetPasswordService
+	jwtSvc           jwt.Service
+	shift            int
 }
 
-func NewHandler(registrationSvc RegistrationService, loginSvc LoginService, jwtSvc jwt.Service, shift int) *Handler {
+func NewHandler(registrationSvc RegistrationService, loginSvc LoginService, resetPasswordSvc ResetPasswordService, jwtSvc jwt.Service, shift int) *Handler {
 	return &Handler{
-		registrationSvc: registrationSvc,
-		loginSvc:        loginSvc,
-		jwtSvc:          jwtSvc,
-		shift:           shift,
+		registrationSvc:  registrationSvc,
+		loginSvc:         loginSvc,
+		resetPasswordSvc: resetPasswordSvc,
+		jwtSvc:           jwtSvc,
+		shift:            shift,
 	}
 }
 
@@ -38,6 +40,12 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 	v1.POST("/login", h.login)
 	v1.POST("/login-code", h.loginCode)
 	v1.POST("/logout", h.logout)
+
+	// Reset password
+	v1.POST("/reset-password", h.resetPassword)
+	v1.POST("/resend-reset-password-email", h.resendResetPasswordEmail)
+	v1.POST("/reset-password-code", h.resetPasswordCode)
+	v1.POST("/setup-new-password", h.setupNewPassword)
 
 	// Validate JWT Token
 	v1.POST("/validate-token", h.validateToken)
@@ -203,4 +211,78 @@ func (h *Handler) validateToken(ctx echo.Context) error {
 // todo: implement
 func (h *Handler) logout(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNotImplemented)
+}
+
+func (h *Handler) resetPassword(ctx echo.Context) error {
+	var dto ResetPasswordDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	//
+	err := h.resetPasswordSvc.ResetPassword(ctx.Request().Context(), &dto)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
+
+func (h *Handler) resendResetPasswordEmail(ctx echo.Context) error {
+	var dto ResendResetPasswordDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	if err := h.resetPasswordSvc.ResendResetPasswordEmail(ctx.Request().Context(), &dto); err != nil {
+		return ctx.JSON(errors.HTTPCode(err), err)
+	}
+
+	return ctx.NoContent(200)
+}
+
+func (h *Handler) resetPasswordCode(ctx echo.Context) error {
+	var dto ResetPasswordCodedDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	if err := h.resetPasswordSvc.ResetPasswordCode(ctx.Request().Context(), &dto); err != nil {
+		return ctx.JSON(errors.HTTPCode(err), err)
+	}
+
+	return ctx.NoContent(200)
+}
+
+func (h *Handler) setupNewPassword(ctx echo.Context) error {
+	var dto SetupNewPasswordDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	if err := h.resetPasswordSvc.SetupNewPassword(ctx.Request().Context(), &dto); err != nil {
+		return ctx.JSON(errors.HTTPCode(err), err)
+	}
+
+	return ctx.NoContent(200)
 }

@@ -107,7 +107,12 @@ func main() {
 		logger.Fatalf("failed to connect login service: %v", err)
 	}
 
-	authHandler := auth.NewHandler(registrationSvc, loginSvc, jwtSvc, cfg.Shift)
+	resetPasswordSvc, err := auth.NewResetPasswordService(logger, cfg.EmailFrom, &authDeps)
+	if err != nil {
+		logger.Fatalf("failed to connect reset password service: %v", err)
+	}
+
+	authHandler := auth.NewHandler(registrationSvc, loginSvc, resetPasswordSvc, jwtSvc, cfg.Shift)
 	authHandler.SetupRoutes(router)
 
 	// NotFound Urls
