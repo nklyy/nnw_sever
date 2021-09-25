@@ -34,6 +34,20 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
+// CheckResetPasswordCode mocks base method.
+func (m *MockService) CheckResetPasswordCode(ctx context.Context, email, code string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckResetPasswordCode", ctx, email, code)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckResetPasswordCode indicates an expected call of CheckResetPasswordCode.
+func (mr *MockServiceMockRecorder) CheckResetPasswordCode(ctx, email, code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckResetPasswordCode", reflect.TypeOf((*MockService)(nil).CheckResetPasswordCode), ctx, email, code)
+}
+
 // CheckVerificationCode mocks base method.
 func (m *MockService) CheckVerificationCode(ctx context.Context, email, code string) error {
 	m.ctrl.T.Helper()
@@ -46,6 +60,21 @@ func (m *MockService) CheckVerificationCode(ctx context.Context, email, code str
 func (mr *MockServiceMockRecorder) CheckVerificationCode(ctx, email, code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckVerificationCode", reflect.TypeOf((*MockService)(nil).CheckVerificationCode), ctx, email, code)
+}
+
+// CreateResetPasswordCode mocks base method.
+func (m *MockService) CreateResetPasswordCode(ctx context.Context, email string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateResetPasswordCode", ctx, email)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateResetPasswordCode indicates an expected call of CreateResetPasswordCode.
+func (mr *MockServiceMockRecorder) CreateResetPasswordCode(ctx, email interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateResetPasswordCode", reflect.TypeOf((*MockService)(nil).CreateResetPasswordCode), ctx, email)
 }
 
 // CreateVerificationCode mocks base method.

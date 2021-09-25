@@ -35,6 +35,21 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// GetResetPasswordCode mocks base method.
+func (m *MockRepository) GetResetPasswordCode(ctx context.Context, email, code string) (*verification.Code, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetResetPasswordCode", ctx, email, code)
+	ret0, _ := ret[0].(*verification.Code)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResetPasswordCode indicates an expected call of GetResetPasswordCode.
+func (mr *MockRepositoryMockRecorder) GetResetPasswordCode(ctx, email, code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResetPasswordCode", reflect.TypeOf((*MockRepository)(nil).GetResetPasswordCode), ctx, email, code)
+}
+
 // GetVerificationCode mocks base method.
 func (m *MockRepository) GetVerificationCode(ctx context.Context, email, code string) (*verification.Code, error) {
 	m.ctrl.T.Helper()
@@ -48,6 +63,20 @@ func (m *MockRepository) GetVerificationCode(ctx context.Context, email, code st
 func (mr *MockRepositoryMockRecorder) GetVerificationCode(ctx, email, code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVerificationCode", reflect.TypeOf((*MockRepository)(nil).GetVerificationCode), ctx, email, code)
+}
+
+// SaveResetPasswordCode mocks base method.
+func (m *MockRepository) SaveResetPasswordCode(ctx context.Context, code *verification.Code) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveResetPasswordCode", ctx, code)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveResetPasswordCode indicates an expected call of SaveResetPasswordCode.
+func (mr *MockRepositoryMockRecorder) SaveResetPasswordCode(ctx, code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveResetPasswordCode", reflect.TypeOf((*MockRepository)(nil).SaveResetPasswordCode), ctx, code)
 }
 
 // SaveVerificationCode mocks base method.

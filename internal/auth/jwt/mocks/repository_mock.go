@@ -36,18 +36,18 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // GetJWT mocks base method.
-func (m *MockRepository) GetJWT(ctx context.Context, id string) (*jwt.JWT, error) {
+func (m *MockRepository) GetJWT(ctx context.Context, token string) (*jwt.JWT, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetJWT", ctx, id)
+	ret := m.ctrl.Call(m, "GetJWT", ctx, token)
 	ret0, _ := ret[0].(*jwt.JWT)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetJWT indicates an expected call of GetJWT.
-func (mr *MockRepositoryMockRecorder) GetJWT(ctx, id interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetJWT(ctx, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJWT", reflect.TypeOf((*MockRepository)(nil).GetJWT), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJWT", reflect.TypeOf((*MockRepository)(nil).GetJWT), ctx, token)
 }
 
 // SaveJWT mocks base method.
