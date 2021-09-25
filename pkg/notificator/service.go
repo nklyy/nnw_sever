@@ -8,7 +8,6 @@ import (
 	"nnw_s/pkg/smtp"
 	"os"
 	"path"
-	"path/filepath"
 	"text/template"
 	"time"
 
@@ -46,9 +45,11 @@ func (svc *service) SendEmail(ctx context.Context, email *Email) error {
 		return err
 	}
 
-	root := filepath.Dir(dir)
+	// If you run it locally and through terminal please uncomment this and comment 52 line.
+	//root := filepath.Dir(dir)
+	//t, err := template.ParseFiles(path.Join(root, "templates/"+email.Template))
 
-	t, err := template.ParseFiles(path.Join(root, "templates/"+email.Template))
+	t, err := template.ParseFiles(path.Join(dir, "templates/"+email.Template))
 	if err != nil {
 		return errors.NewInternal(err.Error())
 	}

@@ -59,7 +59,8 @@ func Get() (*Config, error) {
 	var err error
 	once.Do(func() {
 		var cfg Config
-		_ = godotenv.Load("../.env")
+		// If you run it locally and through terminal please set up this in Load function (../.env)
+		_ = godotenv.Load(".env")
 
 		if err = envconfig.Process("", &cfg); err != nil {
 			return
