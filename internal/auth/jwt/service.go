@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-const jwtExpiry = time.Second * 60
+const jwtExpiry = time.Second * 600
 
 //go:generate mockgen -source=service.go -destination=mocks/service_mock.go
 type Service interface {
