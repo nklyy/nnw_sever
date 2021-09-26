@@ -18,6 +18,7 @@ const (
 // wallet type from bip44
 const (
 	BTC = ZeroQuote + 0
+	LTC = ZeroQuote + 2
 	ETH = ZeroQuote + 60
 
 	// btc token

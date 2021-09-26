@@ -40,3 +40,19 @@ func TestGenerateEthHDWallet(t *testing.T) {
 	ethAddress, _ := ethWallet.GetAddress()
 	fmt.Println("ETH Address: ", ethAddress)
 }
+
+func TestGenerateLTCHDWallet(t *testing.T) {
+	mnemonicWords, _ := NewMnemonic(12, English)
+	fmt.Println(mnemonicWords)
+
+	master, err := NewKey(
+		Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
+	)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	ltcWallet, _ := master.GetWallet(CoinType(LTC))
+	ethAddress, _ := ltcWallet.GetAddress()
+	fmt.Println("LTC Address: ", ethAddress)
+}
