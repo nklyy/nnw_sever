@@ -1,4 +1,4 @@
-package wallet
+package test_wallet
 
 import (
 	"github.com/tyler-smith/go-bip32"
