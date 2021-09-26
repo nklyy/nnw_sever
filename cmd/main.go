@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
 	"nnw_s/config"
@@ -14,38 +14,12 @@ import (
 	"nnw_s/pkg/mongodb"
 	"nnw_s/pkg/notificator"
 	"nnw_s/pkg/smtp"
-	"nnw_s/pkg/wallet"
-
-	"github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	/////
-	mnemonicWords, _ := wallet.NewMnemonic(12, wallet.English)
-	fmt.Println(mnemonicWords)
-
-	master, err := wallet.NewKey(
-		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	btcWallet, _ := master.GetWallet(wallet.CoinType(wallet.BTC), wallet.AddressIndex(1))
-	btcAddress, _ := btcWallet.GetAddress()
-	fmt.Println("ADDDDD", btcAddress)
-	addressP2WPKH, _ := btcWallet.GetKey().AddressP2WPKH()
-	addressP2WPKHInP2SH, _ := btcWallet.GetKey().AddressP2WPKHInP2SH()
-	fmt.Println("BTC: ", btcAddress, addressP2WPKH, addressP2WPKHInP2SH)
-
-	ethWallet, _ := master.GetWallet(wallet.CoinType(wallet.ETH))
-	ethAddress, _ := ethWallet.GetAddress()
-	fmt.Println("ETH: ", ethAddress)
-	/////
-
 	// Init config
 	cfg, err := config.Get()
 	if err != nil {

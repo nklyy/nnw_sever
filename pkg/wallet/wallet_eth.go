@@ -1,5 +1,7 @@
 package wallet
 
+import "github.com/ethereum/go-ethereum/crypto"
+
 func init() {
 	Coins[ETH] = newETH
 }
