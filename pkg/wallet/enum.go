@@ -20,6 +20,7 @@ const (
 	BTC = ZeroQuote + 0
 	LTC = ZeroQuote + 2
 	ETH = ZeroQuote + 60
+	SOL = ZeroQuote + 501
 
 	// btc token
 	USDT = BTCToken + 1
