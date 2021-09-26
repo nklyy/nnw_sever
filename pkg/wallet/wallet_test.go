@@ -6,9 +6,6 @@ import (
 )
 
 func TestCrateBtcHDWallet(t *testing.T) {
-	mnemonicWords, _ := NewMnemonic(12, English)
-	fmt.Println(mnemonicWords)
-
 	master, err := NewKey(
 		Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
 	)
@@ -26,9 +23,6 @@ func TestCrateBtcHDWallet(t *testing.T) {
 }
 
 func TestGenerateEthHDWallet(t *testing.T) {
-	mnemonicWords, _ := NewMnemonic(12, English)
-	fmt.Println(mnemonicWords)
-
 	master, err := NewKey(
 		Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
 	)
@@ -42,9 +36,6 @@ func TestGenerateEthHDWallet(t *testing.T) {
 }
 
 func TestGenerateLTCHDWallet(t *testing.T) {
-	mnemonicWords, _ := NewMnemonic(12, English)
-	fmt.Println(mnemonicWords)
-
 	master, err := NewKey(
 		Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
 	)
