@@ -13,6 +13,7 @@ import (
 type Repository interface {
 	GetJWT(ctx context.Context, token string) (*JWT, error)
 	SaveJWT(ctx context.Context, jwt *JWT) (string, error)
+	DeleteJWT(ctx context.Context, token string) error
 }
 
 type repository struct {
@@ -56,4 +57,13 @@ func (repo *repository) SaveJWT(ctx context.Context, jwt *JWT) (string, error) {
 		return "", errors.NewInternal(err.Error())
 	}
 	return jwt.ID.Hex(), nil
+}
+
+func (repo *repository) DeleteJWT(ctx context.Context, token string) error {
+	_, err := repo.db.Collection("jwt").DeleteOne(ctx, bson.M{"jwt": token})
+	if err != nil {
+		return errors.NewInternal(err.Error())
+	}
+
+	return nil
 }

@@ -208,9 +208,23 @@ func (h *Handler) validateToken(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-// todo: implement
 func (h *Handler) logout(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	var dto LogoutCodeDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	err := h.jwtSvc.DeleteJWT(ctx.Request().Context(), dto.Token)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
 func (h *Handler) resetPassword(ctx echo.Context) error {

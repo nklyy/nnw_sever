@@ -50,6 +50,20 @@ func (mr *MockServiceMockRecorder) CreateJWT(ctx, email interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateJWT", reflect.TypeOf((*MockService)(nil).CreateJWT), ctx, email)
 }
 
+// DeleteJWT mocks base method.
+func (m *MockService) DeleteJWT(ctx context.Context, token string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteJWT", ctx, token)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteJWT indicates an expected call of DeleteJWT.
+func (mr *MockServiceMockRecorder) DeleteJWT(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteJWT", reflect.TypeOf((*MockService)(nil).DeleteJWT), ctx, token)
+}
+
 // VerifyJWT mocks base method.
 func (m *MockService) VerifyJWT(ctx context.Context, id string) (*jwt.Payload, error) {
 	m.ctrl.T.Helper()
