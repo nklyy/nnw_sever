@@ -1,5 +1,9 @@
 package wallet
 
+import (
+	"fmt"
+)
+
 func init() {
 	Coins[SOL] = newSolana
 }
@@ -38,6 +42,7 @@ func (c *solana) GetKey() *Key {
 }
 
 func (c *solana) GetAddress() (string, error) {
+	fmt.Println(*c.key.Public.ToECDSA())
 	//return crypto.PubkeyToAddress(*c.key.PublicECDSA).Hex(), nil
 	return "", nil
 }
