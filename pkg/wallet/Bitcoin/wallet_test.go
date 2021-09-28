@@ -56,7 +56,7 @@ func TestCrateBtcTestHDWalletAndCreateTransaction(t *testing.T) {
 
 	//msMu3XdXCH3Gdu1tXvkSF38yjF1obruk4Y
 	rawTx, err := CreateTx("5JVeg3qeHcqhhHLApgt6RLXDum7nejkrLV8DDVAfXni783PcqYp",
-		"msMu3XdXCH3Gdu1tXvkSF38yjF1obruk4Y", 10000)
+		"mqJ8FALtYnxvLgwTUWQ2shNkdiLuU7tkPR", 10000)
 
 	if err != nil {
 		t.Error(err.Error())
