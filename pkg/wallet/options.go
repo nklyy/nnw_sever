@@ -8,7 +8,7 @@ import (
 
 // default options
 var (
-	DefaultParams = &BTCParams
+	DefaultParams = &chaincfg.MainNetParams
 
 	// master key options
 	DefaultPassword = ""
@@ -16,7 +16,7 @@ var (
 
 	// child key options
 	DefaultPurpose      = ZeroQuote + 44
-	DefaultCoinType     = BTC
+	DefaultCoinType     = BtcType
 	DefaultAccount      = ZeroQuote
 	DefaultChange       = Zero
 	DefaultAddressIndex = Zero
