@@ -103,11 +103,11 @@ func RunTX() {
 	key := getWallet.GetKey()
 
 	senders := []*utxo{
-		{key: key, hash: "4ef4e638013922605091d53e2164864ef602ce665926697f3082168ccb2eb16d", index: 0, amount: 990000},
+		{key: key, hash: "76a9146b4428029941da125aff4995e71a034fe861daea88ac", index: 0, amount: 100000},
 	}
 
 	receivers := []*receiver{
-		{net: key.Opt.Params, address: "mz5otQWaaPmWEydGw9gjfaHxSKhHX6Fgj5", amount: 990000},
+		{net: key.Opt.Params, address: "mz5otQWaaPmWEydGw9gjfaHxSKhHX6Fgj5", amount: 100000},
 	}
 
 	tx := wire.NewMsgTx(wire.TxVersion)

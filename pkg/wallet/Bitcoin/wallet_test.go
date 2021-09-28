@@ -25,6 +25,19 @@ func TestCrateBtcHDWallet(t *testing.T) {
 
 func TestCrateBtcTestHDWallet(t *testing.T) {
 	master, err := wallet.NewKey(
+		wallet.Mnemonic("tiger rent slam skin fiscal zebra unfold major dune giggle paper axis"),
+	)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	btcTestWallet, _ := master.GetWallet(wallet.CoinType(wallet.BtcTestNetType), wallet.AddressIndex(1))
+	btcTestAddress, _ := btcTestWallet.GetAddress()
+	fmt.Println("Bitcoin Address:", btcTestAddress)
+}
+
+func TestCrateBtcTestHDWalletAndCreateTransaction(t *testing.T) {
+	master, err := wallet.NewKey(
 		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
 	)
 	if err != nil {
@@ -34,6 +47,24 @@ func TestCrateBtcTestHDWallet(t *testing.T) {
 	btcTestWallet, _ := master.GetWallet(wallet.CoinType(wallet.BtcTestNetType), wallet.AddressIndex(1))
 	btcTestAddress, _ := btcTestWallet.GetAddress()
 	fmt.Println("Bitcoin Address:", btcTestAddress)
+
+	//wif, err := master.PrivateWIF(false)
+	//if err != nil {
+	//	t.Error(err.Error())
+	//}
+	//fmt.Println(wif)
+
+	//msMu3XdXCH3Gdu1tXvkSF38yjF1obruk4Y
+	rawTx, err := CreateTx("5JVeg3qeHcqhhHLApgt6RLXDum7nejkrLV8DDVAfXni783PcqYp",
+		"msMu3XdXCH3Gdu1tXvkSF38yjF1obruk4Y", 10000)
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	fmt.Println("raw signed transaction is: ", rawTx)
+
+	//tiger rent slam skin fiscal zebra unfold major dune giggle paper axis
 }
 
 func TestGenerateLTCHDWallet(t *testing.T) {
@@ -60,8 +91,4 @@ func TestGenerateDOGEHDWallet(t *testing.T) {
 	dogeWallet, _ := master.GetWallet(wallet.CoinType(wallet.DogeType))
 	dogeAddress, _ := dogeWallet.GetAddress()
 	fmt.Println("DOGE Address: ", dogeAddress)
-}
-
-func TestRunTX(t *testing.T) {
-	RunTX()
 }
