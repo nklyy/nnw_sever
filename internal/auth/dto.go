@@ -90,9 +90,13 @@ type LoginCodeDTO struct {
 	Code  string `json:"code" validate:"required,len=6"`
 }
 
+type LogoutCodeDTO struct {
+	Token string `json:"token" validate:"required"`
+}
+
 type TokenDTO struct {
-	Token    string    `json:"token"`
-	ExpireAt time.Time `json:"expired_at"`
+	Token    string    `json:"token" validate:"required"`
+	ExpireAt time.Time `json:"expired_at" validate:"required"`
 }
 
 type ValidateTokenDTO struct {

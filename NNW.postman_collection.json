@@ -15,7 +15,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\" : \"adminn\",\r\n    \"password\": \"==WvZitmZDgzSHgAWvKs\"\r\n}",
+							"raw": "{\r\n    \"email\" : \"adminn@c.c\",\r\n    \"password\": \"==WvZitmZDgzSHgAWvKs\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -55,6 +55,32 @@
 							],
 							"path": [
 								"login-code"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\": \"token\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/login",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"login"
 							]
 						}
 					},
@@ -190,6 +216,115 @@
 							],
 							"path": [
 								"activate-user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reset Password",
+			"item": [
+				{
+					"name": "reset-password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"email@email.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/reset-password",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "resend-reset-password-email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"email@email.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/resend-reset-password-email",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"resend-reset-password-email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reset-password-code",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"code\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/reset-password-code",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"reset-password-code"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "setup-new-password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\" : \"adminn@c.c\",\r\n    \"password\": \"==WvZitmZDgzSHgAWvKs\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_url}}/setup-new-password",
+							"host": [
+								"{{local_url}}"
+							],
+							"path": [
+								"setup-new-password"
 							]
 						}
 					},

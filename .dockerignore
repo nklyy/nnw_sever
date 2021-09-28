@@ -1,0 +1,6 @@
+# Env
+.env
+example.env
+
+# Go
+vendor/
