@@ -21,6 +21,28 @@ func GetUTXO(address string) (string, int64, string, error) {
 	// Provide your url to get UTXOs, read the response
 	// unmarshal it, and extract necessary data
 
+	// Provide your url to get UTXOs, read the response
+	// unmarshal it, and extract necessary data
+	// newURL := fmt.Sprintf("https://your.favorite.block-explorer/%s", address)
+
+	//response, err := http.Get(newURL)
+	//if err != nil {
+	// fmt.Println("error in GetUTXO, http.Get")
+	// return nil, 0, "", err
+	//}
+	//defer response.Body.Close()
+	//body, err := ioutil.ReadAll(response.Body)
+
+	// based on the response you get, should define a struct
+	// so before unmarshaling check your JSON response model
+
+	//var blockChairResp = model.BlockChairResp{}
+	//err = json.Unmarshal(body, &blockChairResp)
+	//if err != nil {
+	// fmt.Println("error in GetUTXO, json.Unmarshal")
+	// return  nil, 0, "", err
+	//}
+
 	var previousTxid = "c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5"
 	var balance int64 = 100000
 	var pubKeyScript = "76a9146b4428029941da125aff4995e71a034fe861daea88ac"
