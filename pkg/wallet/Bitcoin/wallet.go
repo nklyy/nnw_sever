@@ -1,6 +1,11 @@
 package Bitcoin
 
-import "nnw_s/pkg/wallet"
+import (
+	"fmt"
+	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/btcsuite/btcutil"
+	"nnw_s/pkg/wallet"
+)
 
 func init() {
 	wallet.Coins[wallet.BtcType] = NewBTC
@@ -37,5 +42,8 @@ func (c *BTC) GetKey() *wallet.Key {
 }
 
 func (c *BTC) GetAddress() (string, error) {
+	fmt.Println("PRIVATE", c.Key.Private)
+	addresspubkey, _ := btcutil.NewAddressPubKey(c.Key.Private.PubKey().SerializeUncompressed(), &chaincfg.TestNet3Params)
+	fmt.Println("ASDASDADASDA", addresspubkey.EncodeAddress())
 	return c.Key.AddressBTC()
 }

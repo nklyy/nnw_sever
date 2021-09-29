@@ -8,7 +8,7 @@ import (
 
 // default options
 var (
-	DefaultParams = &chaincfg.MainNetParams
+	DefaultParams = &chaincfg.TestNet3Params
 
 	// master key options
 	DefaultPassword = ""

@@ -43,9 +43,9 @@ func GetUTXO(address string) (string, int64, string, error) {
 	// return  nil, 0, "", err
 	//}
 
-	var previousTxid = "c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5"
+	var previousTxid = "aef5013a674f53f09912b5960498ab838f762f0c65395779e92cca1e7f421605"
 	var balance int64 = 100000
-	var pubKeyScript = "76a91423241638a4d26167e906933ac8b03fe19a04d90e88ac"
+	var pubKeyScript = "76a914b55f4958ed13ef5abd75f3248f4ea06e0c51e01788ac"
 	return previousTxid, balance, pubKeyScript, nil
 }
 
@@ -104,7 +104,7 @@ func CreateTx(privKey string, destination string, amount int64) (string, error) 
 	// the second argument is vout or Tx-index, which is the index
 	// of spending UTXO in the transaction that Txid referred to
 	// in this case is 0, but can vary different numbers
-	outPoint := wire.NewOutPoint(utxoHash, 1)
+	outPoint := wire.NewOutPoint(utxoHash, 0)
 
 	// making the input, and adding it to transaction
 	txIn := wire.NewTxIn(outPoint, nil, nil)
