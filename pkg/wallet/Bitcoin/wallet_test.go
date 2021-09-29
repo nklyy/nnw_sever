@@ -2,6 +2,8 @@ package Bitcoin
 
 import (
 	"fmt"
+	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/btcsuite/btcutil"
 	"nnw_s/pkg/wallet"
 	"testing"
 )
@@ -48,15 +50,15 @@ func TestCrateBtcTestHDWalletAndCreateTransaction(t *testing.T) {
 	btcTestAddress, _ := btcTestWallet.GetAddress()
 	fmt.Println("Bitcoin Address:", btcTestAddress)
 
-	//wif, err := master.PrivateWIF(false)
-	//if err != nil {
-	//	t.Error(err.Error())
-	//}
-	//fmt.Println(wif)
+	wif, err := master.PrivateWIF(false)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	fmt.Println(wif)
 
 	//msMu3XdXCH3Gdu1tXvkSF38yjF1obruk4Y
-	rawTx, err := CreateTx("5JVeg3qeHcqhhHLApgt6RLXDum7nejkrLV8DDVAfXni783PcqYp",
-		"mqJ8FALtYnxvLgwTUWQ2shNkdiLuU7tkPR", 10000)
+	rawTx, err := CreateTx(wif,
+		"miimB868qTQ3y8bnwjLUq4Av3e63HZy7nt", 10000)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -64,6 +66,11 @@ func TestCrateBtcTestHDWalletAndCreateTransaction(t *testing.T) {
 
 	fmt.Println("raw signed transaction is: ", rawTx)
 
+	tx, err := CreateTransaction("5JVeg3qeHcqhhHLApgt6RLXDum7nejkrLV8DDVAfXni783PcqYp", "miimB868qTQ3y8bnwjLUq4Av3e63HZy7nt", 10000, "c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5")
+	fmt.Println("raw signed transaction is: ", tx)
+
+	addresspubkey, _ := btcutil.NewAddressPubKey(master.Private.PubKey().SerializeUncompressed(), &chaincfg.TestNet3Params)
+	fmt.Println("ASDASDADASDA", addresspubkey)
 	//tiger rent slam skin fiscal zebra unfold major dune giggle paper axis
 }
 
