@@ -43,9 +43,9 @@ func GetUTXO(address string) (string, int64, string, error) {
 	// return  nil, 0, "", err
 	//}
 
-	var previousTxid = "aef5013a674f53f09912b5960498ab838f762f0c65395779e92cca1e7f421605"
+	var previousTxid = "c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5"
 	var balance int64 = 100000
-	var pubKeyScript = "76a914b55f4958ed13ef5abd75f3248f4ea06e0c51e01788ac"
+	var pubKeyScript = "76a9146b4428029941da125aff4995e71a034fe861daea88ac"
 	return previousTxid, balance, pubKeyScript, nil
 }
 
@@ -58,7 +58,7 @@ func CreateTx(privKey string, destination string, amount int64) (string, error) 
 
 	// use TestNet3Params for interacting with bitcoin testnet
 	// if we want to interact with main net should use MainNetParams
-	addrPubKey, err := btcutil.NewAddressPubKey(wif.PrivKey.PubKey().SerializeUncompressed(), &chaincfg.TestNet3Params)
+	addrPubKey, err := btcutil.NewAddressPubKey(wif.PrivKey.PubKey().SerializeCompressed(), &chaincfg.TestNet3Params)
 	if err != nil {
 		return "", err
 	}
@@ -67,7 +67,6 @@ func CreateTx(privKey string, destination string, amount int64) (string, error) 
 	if err != nil {
 		return "", err
 	}
-
 	/*
 	 * 1 or unit-amount in Bitcoin is equal to 1 satoshi and 1 Bitcoin = 100000000 satoshi
 	 */
@@ -104,7 +103,7 @@ func CreateTx(privKey string, destination string, amount int64) (string, error) 
 	// the second argument is vout or Tx-index, which is the index
 	// of spending UTXO in the transaction that Txid referred to
 	// in this case is 0, but can vary different numbers
-	outPoint := wire.NewOutPoint(utxoHash, 0)
+	outPoint := wire.NewOutPoint(utxoHash, 1)
 
 	// making the input, and adding it to transaction
 	txIn := wire.NewTxIn(outPoint, nil, nil)
@@ -136,7 +135,7 @@ func SignTx(privKey string, pkScript string, redeemTx *wire.MsgTx) (string, erro
 	// since there is only one input in our transaction
 	// we use 0 as second argument, if the transaction
 	// has more args, should pass related index
-	signature, err := txscript.SignatureScript(redeemTx, 0, sourcePKScript, txscript.SigHashAll, wif.PrivKey, false)
+	signature, err := txscript.SignatureScript(redeemTx, 0, sourcePKScript, txscript.SigHashAll, wif.PrivKey, true)
 	if err != nil {
 		return "", nil
 	}

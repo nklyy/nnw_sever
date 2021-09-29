@@ -22,18 +22,18 @@ type Transaction struct {
 
 func CreateTransaction(secret string, destination string, amount int64, txHash string) (Transaction, error) {
 	var transaction Transaction
-	wif, err := btcutil.DecodeWIF("Kwer8jcK9BqqkeriwvjaBMQAQyPVRhtBhtaPyHFYd6RDMyAyTaH8")
+	wif, err := btcutil.DecodeWIF(secret)
 	if err != nil {
 		return Transaction{}, err
 	}
 
-	addresspubkey, _ := btcutil.NewAddressPubKey(wif.PrivKey.PubKey().SerializeUncompressed(), &chaincfg.TestNet3Params)
+	addresspubkey, _ := btcutil.NewAddressPubKey(wif.PrivKey.PubKey().SerializeCompressed(), &chaincfg.TestNet3Params)
 
 	sourceTx := wire.NewMsgTx(wire.TxVersion)
 
 	sourceUtxoHash, _ := chainhash.NewHashFromStr(txHash)
 
-	sourceUtxo := wire.NewOutPoint(sourceUtxoHash, 0)
+	sourceUtxo := wire.NewOutPoint(sourceUtxoHash, 1)
 
 	sourceTxIn := wire.NewTxIn(sourceUtxo, nil, nil)
 
@@ -43,7 +43,6 @@ func CreateTransaction(secret string, destination string, amount int64, txHash s
 	if err != nil {
 		return Transaction{}, err
 	}
-	fmt.Println("ADRRRRRRRRRRRRR", addresspubkey.EncodeAddress())
 
 	destinationPkScript, _ := txscript.PayToAddrScript(destinationAddress)
 
@@ -59,7 +58,7 @@ func CreateTransaction(secret string, destination string, amount int64, txHash s
 
 	redeemTx := wire.NewMsgTx(wire.TxVersion)
 
-	prevOut := wire.NewOutPoint(&sourceTxHash, 0)
+	prevOut := wire.NewOutPoint(&sourceTxHash, 1)
 
 	redeemTxIn := wire.NewTxIn(prevOut, nil, nil)
 
@@ -69,7 +68,7 @@ func CreateTransaction(secret string, destination string, amount int64, txHash s
 
 	redeemTx.AddTxOut(redeemTxOut)
 
-	sigScript, err := txscript.SignatureScript(redeemTx, 0, sourceTx.TxOut[0].PkScript, txscript.SigHashAll, wif.PrivKey, false)
+	sigScript, err := txscript.SignatureScript(redeemTx, 0, sourceTx.TxOut[0].PkScript, txscript.SigHashAll, wif.PrivKey, true)
 	if err != nil {
 		return Transaction{}, err
 	}
@@ -81,6 +80,7 @@ func CreateTransaction(secret string, destination string, amount int64, txHash s
 		return Transaction{}, err
 	}
 	if err := vm.Execute(); err != nil {
+		fmt.Println(err)
 		return Transaction{}, err
 	}
 

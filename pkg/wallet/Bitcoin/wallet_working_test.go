@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestWallet_V2(t *testing.T) {
+func TestWalletAndTransaction(t *testing.T) {
 	//fmt.Printf("\n%-34s %-52s %-42s %s\n", "Bitcoin Address", "WIF(Wallet Import Format)", "SegWit(bech32)", "SegWit(nested)")
 	//fmt.Println(strings.Repeat("-", 165))
 	//
@@ -46,6 +46,23 @@ func TestWallet_V2(t *testing.T) {
 		t.Error(err)
 	}
 
+	//cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo
+	//n2S2ZgSsnabmDooyAHN429cdxs3CCCo6Eq, n2S2ZgSsnabmDooyAHN429cdxs3CCCo6Eq
 	//mrR75k6L2vHafqamjhj7535XTFGwwsWwdK cPe1P7WzHyZpQURUGP2QMrpdyvCCWckQX1auhQpVeZbLtSDee8pL
 	fmt.Printf("%-18s %-34s %s\n", key.GetPath(), address, wif)
+
+	// Transaction
+	rawTx, err := CreateTx("cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo",
+		"miimB868qTQ3y8bnwjLUq4Av3e63HZy7nt", 1000)
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	fmt.Println(strings.Repeat("-", 106))
+	fmt.Printf("%-18s %s\n", "Transactio:", rawTx)
+
+	//tx, err := CreateTransaction("cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo", "miimB868qTQ3y8bnwjLUq4Av3e63HZy7nt", 1000, "c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5")
+	//fmt.Println("raw signed transaction is: ", tx)
+	//tiger rent slam skin fiscal zebra unfold major dune giggle paper axis
 }
