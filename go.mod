@@ -4,7 +4,7 @@ module nnw_s
 go 1.16
 
 require (
-	github.com/blockcypher/gobcy v2.0.1+incompatible // indirect
+	github.com/blockcypher/gobcy v2.0.1+incompatible
 	github.com/btcsuite/btcd v0.22.0-beta
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/ethereum/go-ethereum v1.10.8

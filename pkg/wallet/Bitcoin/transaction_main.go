@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/blockcypher/gobcy"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
@@ -11,95 +12,94 @@ import (
 	"github.com/btcsuite/btcutil"
 )
 
-func RunTransactionV3() error {
-	privWif := "cUNyvH5eyeVsw7eXsGRqis3joYBveXBQQRMF8pybWdjSNwszUTDP"
-	txHash := "2ad8223b1869853d37ce0df681d5840f306de8b56b8bd401bff137d412946e63"
-	destination := "mrMb6DZLJG9fXafGAB53Gs9GDS4CNerP5t"
-	amount := int64(10000)
-	txFee := int64(200)
+func CreateTransaction(privWif string, txHash string, destination string, amount int64, txFee int64, balance int64) (string, error) {
 	sourceUTXOIndex := uint32(1)
 	chainParams := &chaincfg.TestNet3Params
 
 	decodedWif, err := btcutil.DecodeWIF(privWif)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Printf("Decoded WIF: %v\n", decodedWif) // Decoded WIF: cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo
+	fmt.Printf("%-18s %v\n", "Decoded WIF: ", decodedWif) // Decoded WIF: cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo
 
 	addressPubKey, err := btcutil.NewAddressPubKey(decodedWif.PrivKey.PubKey().SerializeCompressed(), chainParams)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	sourceUTXOHash, err := chainhash.NewHashFromStr(txHash)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Printf("UTXO hash: %s\n", sourceUTXOHash) // utxo hash: c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5
+	fmt.Printf("%-18s %s\n", "UTXO hash: ", sourceUTXOHash) // utxo hash: c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5
 
 	sourceUTXO := wire.NewOutPoint(sourceUTXOHash, sourceUTXOIndex)
 	sourceTxIn := wire.NewTxIn(sourceUTXO, nil, nil)
 	destinationAddress, err := btcutil.DecodeAddress(destination, chainParams)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	sourceAddress, err := btcutil.DecodeAddress(addressPubKey.EncodeAddress(), chainParams)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Printf("Source Address: %s\n", sourceAddress) // Source Address: mqJ8FALtYnxvLgwTUWQ2shNkdiLuU7tkPR
+	fmt.Printf("%-18s %s\n", "Source Address: ", sourceAddress) // Source Address: mqJ8FALtYnxvLgwTUWQ2shNkdiLuU7tkPR
 
 	destinationPkScript, err := txscript.PayToAddrScript(destinationAddress)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	sourcePkScript, err := txscript.PayToAddrScript(sourceAddress)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	sourceTxOut := wire.NewTxOut(amount, sourcePkScript)
 
 	redeemTx := wire.NewMsgTx(wire.TxVersion)
 	redeemTx.AddTxIn(sourceTxIn)
-	redeemTxOut := wire.NewTxOut((amount - txFee), destinationPkScript)
+
+	redeemTxOut := wire.NewTxOut(amount, destinationPkScript)
+	redeemTx.AddTxOut(redeemTxOut)
+
+	redeemTxOut = wire.NewTxOut(balance-amount-txFee, sourcePkScript)
 	redeemTx.AddTxOut(redeemTxOut)
 
 	sigScript, err := txscript.SignatureScript(redeemTx, 0, sourceTxOut.PkScript, txscript.SigHashAll, decodedWif.PrivKey, true)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	redeemTx.TxIn[0].SignatureScript = sigScript
-	fmt.Printf("Signature Script: %v\n", hex.EncodeToString(sigScript)) // Signature Script: 473...b67
+	fmt.Printf("%-18s %v\n", "Signature Script: ", hex.EncodeToString(sigScript)) // Signature Script: 473...b67
 
 	// validate signature
 	flags := txscript.StandardVerifyFlags
 	vm, err := txscript.NewEngine(sourceTxOut.PkScript, redeemTx, 0, flags, nil, nil, amount)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if err := vm.Execute(); err != nil {
-		return err
+		return "", err
 	}
 
 	buf := bytes.NewBuffer(make([]byte, 0, redeemTx.SerializeSize()))
 	redeemTx.Serialize(buf)
 
-	fmt.Printf("Redeem Tx: %v\n", hex.EncodeToString(buf.Bytes())) // redeem Tx: 01000000011efc...5bb88ac00000000
+	fmt.Printf("%-18s %v\n", "Redeem Tx: ", hex.EncodeToString(buf.Bytes())) // redeem Tx: 01000000011efc...5bb88ac00000000
 
-	//bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
-	//skel, err := bcy.PushTX(hex.EncodeToString(buf.Bytes()))
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Printf("%+v\n", skel)
+	bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
+	skel, err := bcy.PushTX(hex.EncodeToString(buf.Bytes()))
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%+v\n", skel)
 
-	return nil
+	return hex.EncodeToString(buf.Bytes()), err
 }

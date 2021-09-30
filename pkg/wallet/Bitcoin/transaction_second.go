@@ -43,13 +43,14 @@ func GetUTXO(address string) (string, int64, string, error) {
 	// return  nil, 0, "", err
 	//}
 
-	var previousTxid = "ea4448fb33aefa83e067c621c4b5dc056692b00c55d101b9554e6f501956bba5"
+	var previousTxid = "d30777a4c097757d640bac82ef2eb9ff4e089e65e3080e63a873ce49eff53c28"
 	var balance int64 = 100000
-	var pubKeyScript = "76a91476e3f08f86abc23b67e958f7b5bfa6354c5cb61a88ac"
+	var pubKeyScript = "76a914690cd6356789d30b99063632e0651a8d0c206c7f88ac"
 	return previousTxid, balance, pubKeyScript, nil
 }
 
 func CreateTx(privKey string, destination string, amount int64) (string, error) {
+	txFee := int64(200)
 
 	wif, err := btcutil.DecodeWIF(privKey)
 	if err != nil {
@@ -87,6 +88,16 @@ func CreateTx(privKey string, destination string, amount int64) (string, error) 
 		return "", err
 	}
 
+	myAddress, err := btcutil.DecodeAddress("mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU", &chaincfg.TestNet3Params)
+	if err != nil {
+		return "", err
+	}
+
+	myAddressByte, err := txscript.PayToAddrScript(myAddress)
+	if err != nil {
+		return "", err
+	}
+
 	// creating a new bitcoin transaction, different sections of the tx, including
 	// input list (contain UTXOs) and outputlist (contain destination address and usually our address)
 	// in next steps, sections will be field and pass to sign
@@ -112,6 +123,9 @@ func CreateTx(privKey string, destination string, amount int64) (string, error) 
 	// adding the destination address and the amount to
 	// the transaction as output
 	redeemTxOut := wire.NewTxOut(amount, destinationAddrByte)
+	redeemTx.AddTxOut(redeemTxOut)
+
+	redeemTxOut = wire.NewTxOut(balance-amount-txFee, myAddressByte)
 	redeemTx.AddTxOut(redeemTxOut)
 
 	// now sign the transaction
