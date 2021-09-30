@@ -1,4 +1,4 @@
-package Bitcoin
+package not_working
 
 import (
 	"nnw_s/pkg/wallet"

@@ -17,7 +17,10 @@ func TestWalletAndTransaction(t *testing.T) {
 	//fmt.Printf("%-34s %s %s %s\n", address, wif, segwitBech32, segwitNested)
 
 	//miy8nyGCWm3jFVD5uJPDPtXw4zDCavdcHS
-	km, err := NewKeyManager(128, "", "chair column reveal income inside soul blade concert series syrup ivory bulb")
+	//tiger rent slam skin fiscal zebra unfold major dune giggle paper axis
+	//indicate drama magic eagle window network jungle stable erode family tuna enact
+	//chair column reveal income inside soul blade concert series syrup ivory bulb
+	km, err := NewKeyManager(128, "", "tiger rent slam skin fiscal zebra unfold major dune giggle paper axis")
 	if err != nil {
 		t.Error(err)
 	}
@@ -46,23 +49,27 @@ func TestWalletAndTransaction(t *testing.T) {
 		t.Error(err)
 	}
 
-	//cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo
-	//n2S2ZgSsnabmDooyAHN429cdxs3CCCo6Eq, n2S2ZgSsnabmDooyAHN429cdxs3CCCo6Eq
-	//mrR75k6L2vHafqamjhj7535XTFGwwsWwdK cPe1P7WzHyZpQURUGP2QMrpdyvCCWckQX1auhQpVeZbLtSDee8pL
 	fmt.Printf("%-18s %-34s %s\n", key.GetPath(), address, wif)
 
 	// Transaction
-	rawTx, err := CreateTx("cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo",
-		"miimB868qTQ3y8bnwjLUq4Av3e63HZy7nt", 1000)
+	//cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo
+	rawTx, err := CreateTx("cReoLGqUKXSuqqJdYeCN7MYDynVQt2zKAZBLG98nhaEuoQiHT4Wt",
+		"miimB868qTQ3y8bnwjLUq4Av3e63HZy7nt", 10000)
 
 	if err != nil {
 		t.Error(err.Error())
 	}
-
+	//
 	fmt.Println(strings.Repeat("-", 106))
 	fmt.Printf("%-18s %s\n", "Transactio:", rawTx)
-
+	//
+	//bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
+	//skel, err := bcy.PushTX(rawTx)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	t.Error(err.Error())
+	//}
+	//fmt.Printf("%+v\n", skel)
 	//tx, err := CreateTransaction("cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo", "miimB868qTQ3y8bnwjLUq4Av3e63HZy7nt", 1000, "c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5")
 	//fmt.Println("raw signed transaction is: ", tx)
-	//tiger rent slam skin fiscal zebra unfold major dune giggle paper axis
 }

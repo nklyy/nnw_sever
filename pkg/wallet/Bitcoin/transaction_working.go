@@ -43,9 +43,9 @@ func GetUTXO(address string) (string, int64, string, error) {
 	// return  nil, 0, "", err
 	//}
 
-	var previousTxid = "c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5"
+	var previousTxid = "ea4448fb33aefa83e067c621c4b5dc056692b00c55d101b9554e6f501956bba5"
 	var balance int64 = 100000
-	var pubKeyScript = "76a9146b4428029941da125aff4995e71a034fe861daea88ac"
+	var pubKeyScript = "76a91476e3f08f86abc23b67e958f7b5bfa6354c5cb61a88ac"
 	return previousTxid, balance, pubKeyScript, nil
 }
 

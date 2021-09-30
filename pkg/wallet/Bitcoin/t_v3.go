@@ -12,10 +12,10 @@ import (
 )
 
 func RunTransactionV3() error {
-	privWif := "cTujmQgVdGYzmZEfhq5gVDpd2EAHF1sZahPmkDnRHmPDEVRYz6eo"
-	txHash := "c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5"
-	destination := "miimB868qTQ3y8bnwjLUq4Av3e63HZy7nt"
-	amount := int64(1000)
+	privWif := "cUNyvH5eyeVsw7eXsGRqis3joYBveXBQQRMF8pybWdjSNwszUTDP"
+	txHash := "2ad8223b1869853d37ce0df681d5840f306de8b56b8bd401bff137d412946e63"
+	destination := "mrMb6DZLJG9fXafGAB53Gs9GDS4CNerP5t"
+	amount := int64(10000)
 	txFee := int64(200)
 	sourceUTXOIndex := uint32(1)
 	chainParams := &chaincfg.TestNet3Params
@@ -93,6 +93,13 @@ func RunTransactionV3() error {
 	redeemTx.Serialize(buf)
 
 	fmt.Printf("Redeem Tx: %v\n", hex.EncodeToString(buf.Bytes())) // redeem Tx: 01000000011efc...5bb88ac00000000
+
+	//bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
+	//skel, err := bcy.PushTX(hex.EncodeToString(buf.Bytes()))
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Printf("%+v\n", skel)
 
 	return nil
 }
