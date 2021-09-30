@@ -62,6 +62,8 @@ func TestWalletAndTransaction(t *testing.T) {
 	}
 
 	fmt.Printf("%-18s %-34s %s\n", key.GetPath(), address, wif)
+	fmt.Println(strings.Repeat("-", 106))
+	fmt.Printf("\t\t\t\t\t\t%s \n\n", "Create Transaction")
 
 	// Transaction
 	privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
