@@ -62,6 +62,7 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	sourceTxOut := wire.NewTxOut(amount, sourcePkScript)
 
 	redeemTx := wire.NewMsgTx(wire.TxVersion)
+	//redeemTx.LockTime = 2097025
 	redeemTx.AddTxIn(sourceTxIn)
 
 	redeemTxOut := wire.NewTxOut(amount, destinationPkScript)
@@ -94,6 +95,7 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 
 	fmt.Printf("%-18s %v\n", "Redeem Tx: ", hex.EncodeToString(buf.Bytes())) // redeem Tx: 01000000011efc...5bb88ac00000000
 
+	// Push Transaction
 	bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
 	skel, err := bcy.PushTX(hex.EncodeToString(buf.Bytes()))
 	if err != nil {

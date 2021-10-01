@@ -67,11 +67,11 @@ func TestWalletAndTransaction(t *testing.T) {
 
 	// Transaction
 	privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
-	txHash := "d30777a4c097757d640bac82ef2eb9ff4e089e65e3080e63a873ce49eff53c28"
+	txHash := "9733285947b666571cc826b0243650393b0b9d635a6088736b9b2a7e73a5c862"
 	destination := "mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u"
-	amount := int64(10000)
-	txFee := int64(500)
-	balance := int64(99800)
+	amount := int64(40000)
+	txFee := int64(10000)
+	balance := int64(18300)
 
 	tx, err := CreateTransaction(privWif, txHash, destination, amount, txFee, balance)
 	if err != nil {
