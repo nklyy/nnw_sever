@@ -2,7 +2,6 @@ package feature
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -16,6 +15,7 @@ import (
 	"log"
 	"math/big"
 	"math/rand"
+	"net"
 	"sort"
 	"time"
 )
@@ -34,7 +34,7 @@ func sendMsg(req, res interface{}) {
 	//serverAddr := "testnet.qtornado.com:51002" // testnet
 	//serverAddr := "testnet1.bauerj.eu:50002" // testnet
 	//serverAddr := "testnet.hsmiths.com:53012" // testnet
-	serverAddr := "electrum.blockstream.info:60001"
+	serverAddr := "testnet.aranguren.org:51001" // testnet
 
 	//certBytes, err := ioutil.ReadFile("certs/example.com.cert")
 	//if err != nil {
@@ -51,9 +51,10 @@ func sendMsg(req, res interface{}) {
 	//}
 
 	fmt.Printf("dialing to server: %s\n", serverAddr)
-	conn, err := tls.Dial("tcp", serverAddr, &tls.Config{
-		InsecureSkipVerify: true,
-	})
+	//conn, err := tls.Dial("tcp", serverAddr, &tls.Config{
+	//	InsecureSkipVerify: false,
+	//})
+	conn, err := net.Dial("tcp", serverAddr)
 	if err != nil {
 		fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
 		log.Fatal(err)
@@ -110,7 +111,7 @@ func StartProcess() {
 	//chainParams := &chaincfg.MainNetParams
 	chainParams := &chaincfg.TestNet3Params
 
-	amountToSend := big.NewInt(10000) // amount to send in satoshis (0.01 btc)
+	amountToSend := big.NewInt(50000) // amount to send in satoshis (0.01 btc)
 
 	feeRate, err := GetCurrentFeeRate()
 	log.Printf("current fee rate: %v", feeRate)
