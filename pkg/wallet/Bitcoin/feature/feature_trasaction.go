@@ -34,7 +34,8 @@ func sendMsg(req, res interface{}) {
 	//serverAddr := "testnet.qtornado.com:51002" // testnet
 	//serverAddr := "testnet1.bauerj.eu:50002" // testnet
 	//serverAddr := "testnet.hsmiths.com:53012" // testnet
-	serverAddr := "testnet.aranguren.org:51001" // testnet
+	//serverAddr := "testnet.aranguren.org:51001" // testnet
+	serverAddr := "82.194.153.233:8333" // testnet
 
 	//certBytes, err := ioutil.ReadFile("certs/example.com.cert")
 	//if err != nil {

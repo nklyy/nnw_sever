@@ -67,11 +67,11 @@ func TestWalletAndTransaction(t *testing.T) {
 
 	// Transaction
 	privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
-	txHash := "9733285947b666571cc826b0243650393b0b9d635a6088736b9b2a7e73a5c862"
+	txHash := "d4383b94a271b83a84a235acc9adb2c98401ea5a844f532a35cb9bf4b91bc7eb"
 	destination := "mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u"
-	amount := int64(40000)
-	txFee := int64(10000)
-	balance := int64(18300)
+	amount := int64(8000)
+	txFee := int64(300)
+	balance := int64(9000)
 
 	tx, err := CreateTransaction(privWif, txHash, destination, amount, txFee, balance)
 	if err != nil {
@@ -80,5 +80,5 @@ func TestWalletAndTransaction(t *testing.T) {
 
 	fmt.Println(strings.Repeat("-", 106))
 	fmt.Printf("%-18s %s\n", "Transaction:", tx)
-	// https://live.blockcypher.com/btc-testnet/tx/60f1fb9392121300ecfa1025fe40cb20992ea3fa987ec3c08ef0a6f75f161506/?__cf_chl_jschl_tk__=pmd_d7xmEfC0vuVHctIFgpnwVdUHwDS8Z94xL0I1ZDfiB_U-1633025670-0-gqNtZGzNAmWjcnBszQi9
+	//https://live.blockcypher.com/btc-testnet/tx/b494bb411e3bddb8c00bb0a84786146e6d0a03c85efa8b677883901c11cbad3c/
 }

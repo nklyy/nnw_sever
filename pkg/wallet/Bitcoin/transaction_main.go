@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/blockcypher/gobcy"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"io/ioutil"
-	"net/http"
 )
 
 func CreateTransaction(privWif string, txHash string, destination string, amount int64, txFee int64, balance int64) (string, error) {
@@ -97,28 +96,37 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	fmt.Printf("%-18s %v\n", "Redeem Tx: ", hex.EncodeToString(buf.Bytes())) // redeem Tx: 01000000011efc...5bb88ac00000000
 
 	// Push Transaction
-	//bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
-	//skel, err := bcy.PushTX(hex.EncodeToString(buf.Bytes()))
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Printf("%+v\n", skel)
+	bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
+	skel, err := bcy.PushTX(hex.EncodeToString(buf.Bytes()))
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%+v\n", skel)
 
 	// Make POST request
-	respAccess, err := http.Post("https://blockchain.info/rawtx/"+hex.EncodeToString(buf.Bytes()), "application/json", nil)
-	if err != nil {
-		return "", err
-	}
-
-	defer respAccess.Body.Close()
-
-	// Read access body
-	body, err := ioutil.ReadAll(respAccess.Body)
-	if err != nil {
-		return "", err
-	}
-
-	fmt.Println(string(body))
+	//url := "https://chain.so/api/v2/send_tx/BTCTEST"
+	//url := "https://mempool.space/testnet/api/tx"
+	//
+	//postBody, _ := json.Marshal(map[string]string{
+	//	//"network": "BTCTEST",
+	//	//"tx_hex":  hex.EncodeToString(buf.Bytes()),
+	//	"txHex": hex.EncodeToString(buf.Bytes()),
+	//})
+	//responseBody := bytes.NewBuffer(postBody)
+	//respAccess, err := http.Post(url, "application/json", responseBody)
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//defer respAccess.Body.Close()
+	//
+	//// Read access body
+	//body, err := ioutil.ReadAll(respAccess.Body)
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//fmt.Println(string(body))
 
 	return hex.EncodeToString(buf.Bytes()), err
 }
