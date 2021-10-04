@@ -1,0 +1,10 @@
+# Env
+.env
+example.env
+
+# Go
+vendor/
+
+# ignore or exclude build directory
+*/build*
+*/*/build*
