@@ -1,40 +1,36 @@
-version: '3.3'
+version: "3.3"
 services:
-  node1:
-    build: ""
-    cap_add:
-      - ALL
-    command: bitcoind -regtest -server -addnode=10.7.0.12:12345 -addnode=10.7.0.13:12345 -addnode=10.7.0.14:12345 -rpcuser=rpc -rpcpassword=xxx -rpcport=10340  --datadir=/root/bitcoind-simnet/ -port=12345
-    networks:
-      vpcbr:
-        ipv4_address: 10.7.0.11
-  node2:
-    build: ""
-    cap_add:
-      - ALL
-    command: bitcoind -regtest -server -addnode=10.7.0.11:12345 -addnode=10.7.0.13:12345 -addnode=10.7.0.14:12345 -rpcuser=rpc -rpcpassword=xxx -rpcport=10340  --datadir=/root/bitcoind-simnet/ -port=12345
-    networks:
-      vpcbr:
-        ipv4_address: 10.7.0.12
-  node3:
-    build: ""
-    cap_add:
-      - ALL
-    command: bitcoind -regtest -server -addnode=10.7.0.12:12345 -addnode=10.7.0.11:12345 -addnode=10.7.0.14:12345 -rpcuser=rpc -rpcpassword=xxx -rpcport=10340  --datadir=/root/bitcoind-simnet/ -port=12345
-    networks:
-      vpcbr:
-        ipv4_address: 10.7.0.13
-  node4:
-    build: ""
-    cap_add:
-      - ALL
-    command: bitcoind -regtest -server -addnode=10.7.0.11:12345 -addnode=10.7.0.13:12345 -addnode=10.7.0.12:12345 -rpcuser=rpc -rpcpassword=xxx -rpcport=10340  --datadir=/root/bitcoind-simnet/ -port=12345
-    networks:
-      vpcbr:
-        ipv4_address: 10.7.0.14
-networks:
-  vpcbr:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.7.0.0/16
+
+  bitcoind-test:
+    image: kylemanna/bitcoind
+    restart: always
+    expose:
+      - "8332"
+    ports:
+      - "8333:8333"
+    volumes:
+      - ./data/btc/test/coind:/bitcoin/.bitcoin
+    environment:
+      - RPCUSER=u
+      - RPCPASSWORD=p
+      - RPCALLOWIP=0.0.0.0/0
+    command: -rpcport=8332 -server -rpcallowip='0.0.0.0/0' -testnet -txindex
+
+#  btc-middleware-cpp-test:
+#    image: vtc-wallet-middleware
+#    environment:
+#      - COIND_HOST=bitcoind-test
+#    expose:
+#      - "8888"
+#    depends_on:
+#      - bitcoind-test
+#    volumes:
+#      - ./data/btc/test/coind/testnet3/blocks:/blocks
+#      - ./data/btc/test/index:/index
+#      - ./coins:/coins
+#    command: --coinParams=/coins/bitcoin-testnet.json
+#
+#networks:
+#  default:
+#    external:
+#      name: blockchain-indexer

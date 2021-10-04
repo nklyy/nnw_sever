@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/blockcypher/gobcy"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
+	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
@@ -95,13 +95,40 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 
 	fmt.Printf("%-18s %v\n", "Redeem Tx: ", hex.EncodeToString(buf.Bytes())) // redeem Tx: 01000000011efc...5bb88ac00000000
 
-	// Push Transaction
-	bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
-	skel, err := bcy.PushTX(hex.EncodeToString(buf.Bytes()))
-	if err != nil {
-		fmt.Println(err)
+	//execute transaction
+	connConfig := &rpcclient.ConnConfig{
+		HTTPPostMode: true,
+		DisableTLS:   true,
+		Host:         "127.0.0.1:8332",
+		User:         "user",
+		Pass:         "password",
 	}
-	fmt.Printf("%+v\n", skel)
+	bitcoinClient, err := rpcclient.New(connConfig, nil)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("CONNECTED")
+
+	asd, err := bitcoinClient.ListAccounts()
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(asd)
+
+	//hash, err := bitcoinClient.SendRawTransaction(redeemTx, false)
+	//if err != nil {
+	//	return "", err
+	//}
+	//println("hash:", hash.String())
+
+	// Push Transaction
+	//bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}
+	//skel, err := bcy.PushTX(hex.EncodeToString(buf.Bytes()))
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Printf("%+v\n", skel)
 
 	// Make POST request
 	//url := "https://chain.so/api/v2/send_tx/BTCTEST"
