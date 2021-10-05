@@ -96,12 +96,13 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	fmt.Printf("%-18s %v\n", "Redeem Tx: ", hex.EncodeToString(buf.Bytes())) // redeem Tx: 01000000011efc...5bb88ac00000000
 
 	//execute transaction
+	//curl -v --digest -X POST 127.0.0.1:8332 -d "{\"jsonrpc\":\"2.0\",\"id\":\"0\",\"method\":\"getblockchaininfo\"}"-H 'Content-Type:application/json'
 	connConfig := &rpcclient.ConnConfig{
 		HTTPPostMode: true,
 		DisableTLS:   true,
 		Host:         "127.0.0.1:8332",
-		User:         "user",
-		Pass:         "password",
+		User:         "uuuset",
+		Pass:         "password123123",
 	}
 	bitcoinClient, err := rpcclient.New(connConfig, nil)
 	if err != nil {
@@ -109,9 +110,11 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	}
 
 	fmt.Println("CONNECTED")
+	fmt.Println(bitcoinClient.Ping())
 
-	asd, err := bitcoinClient.ListAccounts()
+	asd, err := bitcoinClient.GetBlockChainInfo()
 	if err != nil {
+		fmt.Println("ERRRRRRR")
 		return "", err
 	}
 	fmt.Println(asd)

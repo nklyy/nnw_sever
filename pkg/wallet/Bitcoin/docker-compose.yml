@@ -1,20 +1,15 @@
 version: "3.3"
 services:
-
-  bitcoind-test:
+  bitcoind-node:
     image: kylemanna/bitcoind
     restart: always
     expose:
       - "8332"
     ports:
       - "8333:8333"
+      - "127.0.0.1:8332:8332"
     volumes:
       - ./data/btc/test/coind:/bitcoin/.bitcoin
-    environment:
-      - RPCUSER=u
-      - RPCPASSWORD=p
-      - RPCALLOWIP=0.0.0.0/0
-    command: -rpcport=8332 -server -rpcallowip='0.0.0.0/0' -testnet -txindex
 
 #  btc-middleware-cpp-test:
 #    image: vtc-wallet-middleware
