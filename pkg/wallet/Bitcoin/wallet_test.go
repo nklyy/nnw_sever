@@ -81,4 +81,5 @@ func TestWalletAndTransaction(t *testing.T) {
 	fmt.Println(strings.Repeat("-", 106))
 	fmt.Printf("%-18s %s\n", "Transaction:", tx)
 	//https://live.blockcypher.com/btc-testnet/tx/b494bb411e3bddb8c00bb0a84786146e6d0a03c85efa8b677883901c11cbad3c/
+	//curl -v --user uuuset --data-binary '{"jsonrpc": "2.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
 }
