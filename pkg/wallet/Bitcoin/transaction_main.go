@@ -110,8 +110,6 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	}
 
 	fmt.Println("CONNECTED")
-	fmt.Println(bitcoinClient.Ping())
-
 	asd, err := bitcoinClient.GetBlockChainInfo()
 	if err != nil {
 		fmt.Println("ERRRRRRR")
@@ -119,11 +117,20 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	}
 	fmt.Println(asd)
 
+	decode, err := bitcoinClient.DecodeRawTransaction(buf.Bytes())
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("DECODE", decode)
+
 	//hash, err := bitcoinClient.SendRawTransaction(redeemTx, false)
 	//if err != nil {
 	//	return "", err
 	//}
 	//println("hash:", hash.String())
+
+	w, err := bitcoinClient.GetAccount(sourceAddress)
+	fmt.Println(w)
 
 	// Push Transaction
 	//bcy := gobcy.API{"55f0c359f95b4bc5a1c6e949c8c74731", "btc", "test3"}

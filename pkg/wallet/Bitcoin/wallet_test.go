@@ -66,12 +66,12 @@ func TestWalletAndTransaction(t *testing.T) {
 	fmt.Printf("\t\t\t\t\t\t%s \n\n", "Create Transaction")
 
 	// Transaction
-	privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
+	privWif := "cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb"
 	txHash := "d4383b94a271b83a84a235acc9adb2c98401ea5a844f532a35cb9bf4b91bc7eb"
-	destination := "mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u"
+	destination := "mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU"
 	amount := int64(8000)
 	txFee := int64(300)
-	balance := int64(9000)
+	balance := int64(88000)
 
 	tx, err := CreateTransaction(privWif, txHash, destination, amount, txFee, balance)
 	if err != nil {

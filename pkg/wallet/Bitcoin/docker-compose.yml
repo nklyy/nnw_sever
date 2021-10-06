@@ -1,31 +1,16 @@
 version: "3.3"
 services:
   bitcoind-node:
+    container_name: bitcoind-node
     image: kylemanna/bitcoind
     restart: always
     expose:
       - "8332"
+      - "18332"
     ports:
       - "8333:8333"
       - "127.0.0.1:8332:8332"
+      - "127.0.0.1:18332:18332"
     volumes:
       - ./data/btc/test/coind:/bitcoin/.bitcoin
-
-#  btc-middleware-cpp-test:
-#    image: vtc-wallet-middleware
-#    environment:
-#      - COIND_HOST=bitcoind-test
-#    expose:
-#      - "8888"
-#    depends_on:
-#      - bitcoind-test
-#    volumes:
-#      - ./data/btc/test/coind/testnet3/blocks:/blocks
-#      - ./data/btc/test/index:/index
-#      - ./coins:/coins
-#    command: --coinParams=/coins/bitcoin-testnet.json
-#
-#networks:
-#  default:
-#    external:
-#      name: blockchain-indexer
+      - ./bitcoin.conf:/bitcoin/.bitcoin/bitcoin.conf
