@@ -71,7 +71,7 @@ func TestWalletAndTransaction(t *testing.T) {
 	destination := "mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU"
 	amount := int64(8000)
 	txFee := int64(300)
-	balance := int64(88000)
+	balance := int64(100700)
 
 	tx, err := CreateTransaction(privWif, txHash, destination, amount, txFee, balance)
 	if err != nil {

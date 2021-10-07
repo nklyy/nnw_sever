@@ -1,0 +1,396 @@
+{
+	"info": {
+		"_postman_id": "b6082465-225f-4128-8cc0-5920b000517f",
+		"name": "BTC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get BTC Raw Transaction",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getrawtransaction\",\n  \"params\": [\"c6950f355835c361dce2e9d6eb511cf56972b67cb34dad5d1fd9f9bc796711a5\", true]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Status node",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getblockchaininfo\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate BTC address",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"validateaddress\",\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Decode BTC script",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"decodescript\",\n  \"params\": [\"76a914690cd6356789d30b99063632e0651a8d0c206c7f88ac\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Decode BTC Raw Transaction",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"decoderawtransaction\",\n  \"params\": [\"02000000016c803c496ecf5a094b677b08f4b7cceea1ca0370561ac443750f23b56e5ef8510000000000ffffffff02401f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac6c650100000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create BTC Raw Transaction",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createrawtransaction\",\n  \"params\": [\n      [{\"txid\": \"51f85e6eb5230f7543c41a567003caa1eeccb7f4087b674b095acf6e493c806c\", \"vout\": 0}], \n      [{\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\": 0.00008000}, {\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\": 0.00091500}]\n      ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send BTC Raw Transaction",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"sendrawtransaction\",\n  \"params\": [\"02000000016c803c496ecf5a094b677b08f4b7cceea1ca0370561ac443750f23b56e5ef8510100000000ffffffff02401f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac6c650100000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fund BTC Raw Transaction",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"fundrawtransaction\",\n  \"params\": [\"02000000016c803c496ecf5a094b677b08f4b7cceea1ca0370561ac443750f23b56e5ef8510100000000ffffffff02401f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac6c650100000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sign BTC Raw Transaction with key",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"signrawtransactionwithkey\",\n  \"params\": [\"02000000016c803c496ecf5a094b677b08f4b7cceea1ca0370561ac443750f23b56e5ef8510000000000ffffffff02401f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac6c650100000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\", [{\"txid\": \"51f85e6eb5230f7543c41a567003caa1eeccb7f4087b674b095acf6e493c806c\", \"vout\": 0, \"scriptPubKey\": \"76a914690cd6356789d30b99063632e0651a8d0c206c7f88ac\"}] ,[\"cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb\"], \"ALL\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		}
+	]
+}
