@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
-	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
@@ -65,10 +64,10 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	//redeemTx.LockTime = 2097025
 	redeemTx.AddTxIn(sourceTxIn)
 
-	redeemTxOut := wire.NewTxOut(amount, destinationPkScript)
+	redeemTxOut := wire.NewTxOut(8000, destinationPkScript)
 	redeemTx.AddTxOut(redeemTxOut)
 
-	redeemTxOut = wire.NewTxOut(balance-amount-txFee, sourcePkScript)
+	redeemTxOut = wire.NewTxOut(91500, sourcePkScript)
 	redeemTx.AddTxOut(redeemTxOut)
 
 	sigScript, err := txscript.SignatureScript(redeemTx, 0, sourceTxOut.PkScript, txscript.SigHashAll, decodedWif.PrivKey, true)
@@ -97,37 +96,60 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 
 	//execute transaction
 	//curl -v --digest -X POST 127.0.0.1:8332 -d "{\"jsonrpc\":\"2.0\",\"id\":\"0\",\"method\":\"getblockchaininfo\"}"-H 'Content-Type:application/json'
-	connConfig := &rpcclient.ConnConfig{
-		HTTPPostMode: true,
-		DisableTLS:   true,
-		Host:         "127.0.0.1:8332",
-		User:         "uuuset",
-		Pass:         "password123123",
-	}
-	bitcoinClient, err := rpcclient.New(connConfig, nil)
-	if err != nil {
-		return "", err
-	}
+	//connConfig := &rpcclient.ConnConfig{
+	//	HTTPPostMode: true,
+	//	DisableTLS:   true,
+	//	Host:         "127.0.0.1:8332",
+	//	User:         "uuuset",
+	//	Pass:         "password123123",
+	//}
+	//bitcoinClient, err := rpcclient.New(connConfig, nil)
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//fmt.Println("CONNECTED")
+	//asd, err := bitcoinClient.GetBlockChainInfo()
+	//if err != nil {
+	//	fmt.Println("ERRRRRRR")
+	//	return "", err
+	//}
+	//fmt.Println(asd)
 
-	fmt.Println("CONNECTED")
-	asd, err := bitcoinClient.GetBlockChainInfo()
-	if err != nil {
-		fmt.Println("ERRRRRRR")
-		return "", err
-	}
-	fmt.Println(asd)
+	//a := btcjson.TransactionInput{
+	//	Txid: "92ddc3ab2b148e1c8a180070fc8d4c49496c88eea565a78d54907a3848fcf786",
+	//	Vout: 0,
+	//}
+	//
+	//var qwe []btcjson.TransactionInput
+	//qwe = append(qwe, a)
+	//
+	//ammmm, _ := btcutil.NewAmount(0.000915)
+	//ammmm1, _ := btcutil.NewAmount(0.00008)
+	//
+	//out := map[btcutil.Address]btcutil.Amount{destinationAddress: ammmm, sourceAddress: ammmm1}
+	//
+	//transaction, err := bitcoinClient.CreateRawTransaction(qwe, out, nil)
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//buff := bytes.NewBuffer(make([]byte, 0, transaction.SerializeSize()))
+	//transaction.Serialize(buff)
+	//
+	//fmt.Println("TRRRRRRRRRRRRRRR", hex.EncodeToString(buff.Bytes()))
 
-	decode, err := bitcoinClient.DecodeRawTransaction(buf.Bytes())
-	if err != nil {
-		return "", err
-	}
-	fmt.Println("DECODE", decode)
-
-	bal, err := bitcoinClient.GetBalance("mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u")
-	if err != nil {
-		return "", err
-	}
-	println("hash:", bal)
+	//decode, err := bitcoinClient.DecodeRawTransaction(buf.Bytes())
+	//if err != nil {
+	//	return "", err
+	//}
+	//fmt.Println("DECODE", decode)
+	//
+	//bal, err := bitcoinClient.GetBalance("mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u")
+	//if err != nil {
+	//	return "", err
+	//}
+	//println("hash:", bal)
 
 	//hash, err := bitcoinClient.SendRawTransaction(redeemTx, false)
 	//if err != nil {
