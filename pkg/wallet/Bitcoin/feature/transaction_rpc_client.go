@@ -8,8 +8,14 @@ import (
 	"net/http"
 )
 
-func RpcClient(body, res interface{}) error {
-	serverAddr := "http://127.0.0.1:8332" // testnet/main net
+func RpcClient(body, res interface{}, walletInfo bool, walletName string) error {
+	var serverAddr string
+
+	if walletInfo {
+		serverAddr = "http://127.0.0.1:8332/wallet/" + walletName // testnet/main net
+	} else {
+		serverAddr = "http://127.0.0.1:8332"
+	}
 
 	client := &http.Client{}
 

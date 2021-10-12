@@ -6,6 +6,568 @@
 	},
 	"item": [
 		{
+			"name": "Request for second wallet",
+			"item": [
+				{
+					"name": "Get Address Info",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getaddressinfo\",\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/second",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"second"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Import private key",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb\", \"\", false]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Dump Private key",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Balance",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getbalance\",\n  \"params\": [\"*\", 6]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/second",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"second"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List unspent",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [1, 9999999, []]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/secod",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"secod"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get wallet info",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getwalletinfo\",\n  \"params\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/second",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"second"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Request for first wallet",
+			"item": [
+				{
+					"name": "Get Address Info",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getaddressinfo\",\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"testwallet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Import private key",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb\", \"\", false]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"testwallet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Dump Private key",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"testwallet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Balance",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getbalance\",\n  \"params\": [\"*\", 6]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"testwallet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List unspent",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [1, 9999999, [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get wallet info",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getwalletinfo\",\n  \"params\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"testwallet"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Get BTC Raw Transaction",
 			"request": {
 				"auth": {
@@ -393,49 +955,6 @@
 			"response": []
 		},
 		{
-			"name": "Get Address Info",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "password123123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "uuuset",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getaddressinfo\",\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\"]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Load BTC wallet",
 			"request": {
 				"auth": {
@@ -479,7 +998,7 @@
 			"response": []
 		},
 		{
-			"name": "List unspent",
+			"name": "Create wallet",
 			"request": {
 				"auth": {
 					"type": "basic",
@@ -500,136 +1019,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [1, 9999999, []]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get wallet info",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "password123123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "uuuset",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getwalletinfo\",\n  \"params\": []\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Import private key",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "password123123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "uuuset",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD\", \"\", false]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Dump Private key",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "password123123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "uuuset",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createwallet\",\n  \"params\": [\"second\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
