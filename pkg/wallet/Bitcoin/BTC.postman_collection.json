@@ -38,7 +38,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/sec",
+							"raw": "http://127.0.0.1:8332/wallet/second",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -49,7 +49,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"sec"
+								"second"
 							]
 						}
 					},
@@ -85,7 +85,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/sec",
+							"raw": "http://127.0.0.1:8332/wallet/second",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -96,7 +96,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"sec"
+								"second"
 							]
 						}
 					},
@@ -132,7 +132,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/sec",
+							"raw": "http://127.0.0.1:8332/wallet/second",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -143,7 +143,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"sec"
+								"second"
 							]
 						}
 					},
@@ -179,7 +179,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/sec",
+							"raw": "http://127.0.0.1:8332/wallet/second",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -190,7 +190,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"sec"
+								"second"
 							]
 						}
 					},
@@ -226,7 +226,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/sec",
+							"raw": "http://127.0.0.1:8332/wallet/second",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -237,7 +237,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"sec"
+								"second"
 							]
 						}
 					},
@@ -273,7 +273,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/sec",
+							"raw": "http://127.0.0.1:8332/wallet/second",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -284,7 +284,54 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"sec"
+								"second"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Encrypt wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"encryptwallet\",\n  \"params\": [\"leader such empower maximum anxiety pilot shadow destroy joke claw correct doctor\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/second",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"second"
 							]
 						}
 					},
@@ -553,6 +600,53 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getwalletinfo\",\n  \"params\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/first",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"first"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Encrypt wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"encryptwallet\",\n  \"params\": [\"leader such empower maximum anxiety pilot shadow destroy joke claw correct doctor\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
