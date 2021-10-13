@@ -46,7 +46,7 @@ func ListUnspentTXOs(address string) ([]*UTXO, error) {
 		} `json:"result"`
 	}{}
 
-	err := RpcClient(req, &msg, true, "testwallet")
+	err := RpcClient(req, &msg, true, "first")
 	if err != nil {
 		return nil, errors.New("could not get utxos")
 	}

@@ -26,7 +26,7 @@ func GetCurrentFee() (*float64, error) {
 		}
 	}{}
 
-	err := RpcClient(req, &msg, false, "testwallet")
+	err := RpcClient(req, &msg, false, "first")
 	if err != nil {
 		return nil, err
 	}

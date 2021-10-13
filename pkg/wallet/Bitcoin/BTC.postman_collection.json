@@ -38,7 +38,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
+							"raw": "http://127.0.0.1:8332/wallet/sec",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -49,7 +49,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"second"
+								"sec"
 							]
 						}
 					},
@@ -85,7 +85,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332",
+							"raw": "http://127.0.0.1:8332/wallet/sec",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -93,7 +93,11 @@
 								"0",
 								"1"
 							],
-							"port": "8332"
+							"port": "8332",
+							"path": [
+								"wallet",
+								"sec"
+							]
 						}
 					},
 					"response": []
@@ -120,7 +124,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -128,7 +132,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332",
+							"raw": "http://127.0.0.1:8332/wallet/sec",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -136,7 +140,11 @@
 								"0",
 								"1"
 							],
-							"port": "8332"
+							"port": "8332",
+							"path": [
+								"wallet",
+								"sec"
+							]
 						}
 					},
 					"response": []
@@ -171,7 +179,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
+							"raw": "http://127.0.0.1:8332/wallet/sec",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -182,7 +190,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"second"
+								"sec"
 							]
 						}
 					},
@@ -218,7 +226,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/secod",
+							"raw": "http://127.0.0.1:8332/wallet/sec",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -229,7 +237,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"secod"
+								"sec"
 							]
 						}
 					},
@@ -265,7 +273,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
+							"raw": "http://127.0.0.1:8332/wallet/sec",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -276,7 +284,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"second"
+								"sec"
 							]
 						}
 					},
@@ -317,7 +325,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"raw": "http://127.0.0.1:8332/wallet/first",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -328,7 +336,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"testwallet"
+								"first"
 							]
 						}
 					},
@@ -356,7 +364,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb\", \"\", false]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD\", \"\", false]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -364,7 +372,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"raw": "http://127.0.0.1:8332/wallet/first",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -375,7 +383,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"testwallet"
+								"first"
 							]
 						}
 					},
@@ -411,7 +419,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"raw": "http://127.0.0.1:8332/wallet/first",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -422,7 +430,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"testwallet"
+								"first"
 							]
 						}
 					},
@@ -458,7 +466,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"raw": "http://127.0.0.1:8332/wallet/first",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -469,7 +477,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"testwallet"
+								"first"
 							]
 						}
 					},
@@ -505,7 +513,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332",
+							"raw": "http://127.0.0.1:8332/wallet/first",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -513,7 +521,11 @@
 								"0",
 								"1"
 							],
-							"port": "8332"
+							"port": "8332",
+							"path": [
+								"wallet",
+								"first"
+							]
 						}
 					},
 					"response": []
@@ -548,7 +560,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/testwallet",
+							"raw": "http://127.0.0.1:8332/wallet/first",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -559,7 +571,7 @@
 							"port": "8332",
 							"path": [
 								"wallet",
-								"testwallet"
+								"first"
 							]
 						}
 					},
@@ -976,7 +988,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"loadwallet\",\n  \"params\": [\"testwallet\"]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"loadwallet\",\n  \"params\": [\"sec\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1019,7 +1031,50 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createwallet\",\n  \"params\": [\"second\"]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createwallet\",\n  \"params\": [\"first\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8332",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8332"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UnLoad BTC wallet",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"unloadwallet\",\n  \"params\": [\"sec\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
