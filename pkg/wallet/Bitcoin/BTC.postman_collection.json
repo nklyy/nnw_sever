@@ -336,6 +336,53 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Unlock wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"walletpassphrase\",\n  \"params\": [\"leader such empower maximum anxiety pilot shadow destroy joke claw correct doctor\", 600]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/second",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"second"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -646,7 +693,54 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"encryptwallet\",\n  \"params\": [\"leader such empower maximum anxiety pilot shadow destroy joke claw correct doctor\"]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"encryptwallet\",\n  \"params\": [\"dwarf unique fork crunch common penalty behind great human gather then usual\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8332/wallet/first",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8332",
+							"path": [
+								"wallet",
+								"first"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unlock wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"walletpassphrase\",\n  \"params\": [\"dwarf unique fork crunch common penalty behind great human gather then usual\", 600]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
