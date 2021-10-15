@@ -30,7 +30,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getaddressinfo\",\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\"]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getaddressinfo\",\n  \"params\": [\"n3jpLzgY1zSUL9ffXp2yFBpvZNeFTPP9Rs\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -72,7 +72,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb\", \"\", false]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cTLEQgQWPzwvPp6YxZLa3zqprYJF9RmfmAs4UHuLqJRsbxTV6UuQ\", \"\", false]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -114,7 +114,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\"]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"n3jpLzgY1zSUL9ffXp2yFBpvZNeFTPP9Rs\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -366,7 +366,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"importaddress\",\r\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\", \"testing\", false]\r\n}",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"importaddress\",\r\n  \"params\": [\"n3jpLzgY1zSUL9ffXp2yFBpvZNeFTPP9Rs\", \"\", false]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -409,6 +409,82 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createwallet\",\n  \"params\": [\"second\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}",
+							"host": [
+								"{{host}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Load BTC wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"loadwallet\",\n  \"params\": [\"second\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}",
+							"host": [
+								"{{host}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UnLoad BTC wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"unloadwallet\",\n  \"params\": [\"second\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -844,6 +920,82 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Load BTC wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"loadwallet\",\n  \"params\": [\"first\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}",
+							"host": [
+								"{{host}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UnLoad BTC wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"unloadwallet\",\n  \"params\": [\"first\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}",
+							"host": [
+								"{{host}}"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1174,82 +1326,6 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"signrawtransactionwithkey\",\n  \"params\": [\"01000000016c803c496ecf5a094b677b08f4b7cceea1ca0370561ac443750f23b56e5ef851010000006b483045022100f2b39f09e648edf64ec234a8bcfb8f3979ccd6e84b555cd99539774d74c4920f02206411b5bf93ed9081c4f550f2a1e18275fa3dad54cab6c9baeb6fdf38eafade56012102da2c61d91c67d6615b3471b14d3d54bfbfd181537a2a231cdabcf62bd4fe3dfaffffffff02401f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac6c650100000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\", [\"cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD\"], [{\"txid\": \"51f85e6eb5230f7543c41a567003caa1eeccb7f4087b674b095acf6e493c806c\", \"vout\": 1, \"scriptPubKey\": \"76a914690cd6356789d30b99063632e0651a8d0c206c7f88ac\"}]]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{host}}",
-					"host": [
-						"{{host}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Load BTC wallet",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "password123123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "uuuset",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"loadwallet\",\n  \"params\": [\"sec\"]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{host}}",
-					"host": [
-						"{{host}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "UnLoad BTC wallet",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "password123123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "uuuset",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"unloadwallet\",\n  \"params\": [\"sec\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"

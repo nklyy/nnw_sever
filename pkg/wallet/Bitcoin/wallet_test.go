@@ -30,6 +30,11 @@ func TestWalletAndTransaction(t *testing.T) {
 		m/44'/1'/0'/0/1:	mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u
 		WIF: 				cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb
 		***************************************************************************************
+		WALLET #3
+		BIP39 Mnemonic: 	wagon power turkey energy wood man plunge above universe liberty team orchard
+		m/44'/1'/0'/0/1:	n3jpLzgY1zSUL9ffXp2yFBpvZNeFTPP9Rs
+		WIF: 				cTLEQgQWPzwvPp6YxZLa3zqprYJF9RmfmAs4UHuLqJRsbxTV6UuQ
+		***************************************************************************************
 	*/
 
 	km, err := NewKeyManager(128, "", "dwarf unique fork crunch common penalty behind great human gather then usual")
