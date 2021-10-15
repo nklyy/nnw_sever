@@ -343,6 +343,86 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Import address",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"importaddress\",\r\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\", \"testing\", false]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/wallet/second",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"wallet",
+								"second"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createwallet\",\n  \"params\": [\"second\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}",
+							"host": [
+								"{{host}}"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -680,6 +760,86 @@
 							"path": [
 								"wallet",
 								"first"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Import address",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"importaddress\",\r\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\", \"testing\", false]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/wallet/first",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"wallet",
+								"first"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createwallet\",\n  \"params\": [\"first\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}",
+							"host": [
+								"{{host}}"
 							]
 						}
 					},
@@ -1068,44 +1228,6 @@
 			"response": []
 		},
 		{
-			"name": "Create wallet",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "password123123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "uuuset",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createwallet\",\n  \"params\": [\"first\"]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{host}}",
-					"host": [
-						"{{host}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "UnLoad BTC wallet",
 			"request": {
 				"auth": {
@@ -1128,6 +1250,44 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"unloadwallet\",\n  \"params\": [\"sec\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}",
+					"host": [
+						"{{host}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get BTC Fees",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"estimatesmartfee\",\r\n  \"params\": [2]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
