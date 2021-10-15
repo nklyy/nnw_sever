@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b6082465-225f-4128-8cc0-5920b000517f",
+		"_postman_id": "3c623943-aaaf-49d4-bddf-b98ed5d5dc96",
 		"name": "BTC",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -38,15 +38,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/second",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"second"
@@ -85,15 +80,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/second",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"second"
@@ -132,15 +122,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/second",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"second"
@@ -179,15 +164,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/second",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"second"
@@ -226,15 +206,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/second",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"second"
@@ -273,15 +248,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/second",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"second"
@@ -320,15 +290,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/second",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"second"
@@ -367,15 +332,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/second",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/second",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"second"
@@ -419,15 +379,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/first",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/first",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"first"
@@ -466,15 +421,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/first",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/first",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"first"
@@ -513,15 +463,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/first",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/first",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"first"
@@ -560,15 +505,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/first",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/first",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"first"
@@ -607,15 +547,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/first",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/first",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"first"
@@ -654,15 +589,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/first",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/first",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"first"
@@ -701,15 +631,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/first",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/first",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"first"
@@ -748,15 +673,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8332/wallet/first",
-							"protocol": "http",
+							"raw": "{{host}}/wallet/first",
 							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
+								"{{host}}"
 							],
-							"port": "8332",
 							"path": [
 								"wallet",
 								"first"
@@ -797,15 +717,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -840,15 +755,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -883,15 +793,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -926,15 +831,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -969,15 +869,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -1012,15 +907,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -1055,15 +945,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -1098,15 +983,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -1141,15 +1021,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -1184,15 +1059,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -1227,15 +1097,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -1270,15 +1135,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8332",
-					"protocol": "http",
+					"raw": "{{host}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8332"
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
