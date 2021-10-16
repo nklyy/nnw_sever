@@ -30,7 +30,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getaddressinfo\",\n  \"params\": [\"n3jpLzgY1zSUL9ffXp2yFBpvZNeFTPP9Rs\"]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getaddressinfo\",\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -72,7 +72,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cTLEQgQWPzwvPp6YxZLa3zqprYJF9RmfmAs4UHuLqJRsbxTV6UuQ\", \"\", false]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb\", \"\", true]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -198,7 +198,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [1, 9999999, []]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [6, 9999999, [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\"]]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -366,7 +366,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"importaddress\",\r\n  \"params\": [\"n3jpLzgY1zSUL9ffXp2yFBpvZNeFTPP9Rs\", \"\", false]\r\n}",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"importaddress\",\r\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\", \"\", false]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -499,6 +499,48 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Scan Tx Out",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"scantxoutset\",\r\n  \"params\": [\"start\", [\"addr(mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u)\"]]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/wallet/second",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"wallet",
+								"second"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -569,7 +611,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD\", \"\", false]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"importprivkey\",\n  \"params\": [\"cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD\", \"\", true]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -695,7 +737,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [1, 9999999, [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [1, 9999999, []]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -863,7 +905,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"importaddress\",\r\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\", \"testing\", false]\r\n}",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"importaddress\",\r\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\", \"\", false]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -992,6 +1034,48 @@
 							"raw": "{{host}}",
 							"host": [
 								"{{host}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Scan Tx Out",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"scantxoutset\",\r\n  \"params\": [\"start\", [\"addr(mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU)\"]]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/wallet/first",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"wallet",
+								"first"
 							]
 						}
 					},
