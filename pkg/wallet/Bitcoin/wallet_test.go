@@ -52,6 +52,7 @@ func TestWalletAndTransaction(t *testing.T) {
 	fmt.Printf("\n%-18s %s\n", "BIP39 Mnemonic:", km.GetMnemonic())
 	fmt.Printf("%-18s %s\n", "BIP39 Passphrase:", passphrase)
 	fmt.Printf("%-18s %x\n", "BIP39 Seed:", km.GetSeed())
+	fmt.Printf("%-18s %s\n", "BIP32 Public:", masterKey.PublicKey().B58Serialize())
 	fmt.Printf("%-18s %s\n", "BIP32 Root Key:", masterKey.B58Serialize())
 
 	fmt.Printf("\n%-18s %-34s %-52s\n", "Path(BIP44)", "Bitcoin Address", "WIF(Wallet Import Format)")

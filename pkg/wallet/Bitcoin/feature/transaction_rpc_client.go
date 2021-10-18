@@ -3,7 +3,6 @@ package feature
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -12,9 +11,9 @@ func RpcClient(body, res interface{}, walletInfo bool, walletName string) error 
 	var serverAddr string
 
 	if walletInfo {
-		serverAddr = "http://127.0.0.1:8332/wallet/" + walletName // testnet/main net
+		serverAddr = "http://138.68.92.142:8332/wallet/" + walletName // testnet/main net
 	} else {
-		serverAddr = "http://127.0.0.1:8332"
+		serverAddr = "http://138.68.92.142:8332"
 	}
 
 	client := &http.Client{}
@@ -42,7 +41,7 @@ func RpcClient(body, res interface{}, walletInfo bool, walletName string) error 
 		return err
 	}
 
-	fmt.Println(string(respBody))
+	//fmt.Println(string(respBody))
 
 	err = json.Unmarshal(respBody, res)
 	if err != nil {
