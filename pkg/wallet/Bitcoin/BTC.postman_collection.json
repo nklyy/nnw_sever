@@ -114,7 +114,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"n3jpLzgY1zSUL9ffXp2yFBpvZNeFTPP9Rs\"]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"dumpprivkey\",\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -282,7 +282,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"encryptwallet\",\n  \"params\": [\"leader such empower maximum anxiety pilot shadow destroy joke claw correct doctor\"]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"encryptwallet\",\n  \"params\": [\"password\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -324,7 +324,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"walletpassphrase\",\n  \"params\": [\"leader such empower maximum anxiety pilot shadow destroy joke claw correct doctor\", 600]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"walletpassphrase\",\n  \"params\": [\"password\", 60]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -541,6 +541,48 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Send to Wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"sendtoaddress\",\r\n  \"params\": [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\", 0.00010222]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/wallet/second",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"wallet",
+								"second"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -737,7 +779,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [1, 9999999, []]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"listunspent\",\n  \"params\": [1, 9999999, [\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\"]]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1080,6 +1122,48 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Send to Wallet",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "uuuset",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"sendtoaddress\",\r\n  \"params\": [\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\", 0.00110175]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/wallet/first",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"wallet",
+								"first"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1105,7 +1189,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getrawtransaction\",\n  \"params\": [\"95281bc0dd100b36b7629b8c4a374a0fbda9a86881db55578b6f75a47fe393aa\", true]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getrawtransaction\",\n  \"params\": [\"ebc625e6b7ad75b96b23c3b886290ecd690e124a1de5b931255b69f592ac674c\", true]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1257,7 +1341,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"decoderawtransaction\",\n  \"params\": [\"020000000186f7fc48387a90548da765a5ee886c49494c8dfc7000188a1c8e142babc3dd920000000000ffffffff026c650100000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac401f0000000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"decoderawtransaction\",\n  \"params\": [\"02000000017d2b9cea1c046c8c930ea609814d34d6fabda023dad0fa7b52673097ed041ff9010000006a473044022008c0e76f6dfaf1fc8fe5ba386ac86bbc844e0a2d286298cc2f7fa0023a9a28700220548036e6aba2ce3ae7c6c543b64adda75c540099580929d63b90f2118479a3c9012102da2c61d91c67d6615b3471b14d3d54bfbfd181537a2a231cdabcf62bd4fe3dfaffffffff0210270000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588acfe1d0200000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1295,7 +1379,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createrawtransaction\",\n  \"params\": [\n      [{\"txid\": \"92ddc3ab2b148e1c8a180070fc8d4c49496c88eea565a78d54907a3848fcf786\", \"vout\": 0}], \n      [{\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\": 0.00091500}, {\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\": 0.00008000}]\n      ]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"createrawtransaction\",\n  \"params\": [\n      [{\"txid\": \"f91f04ed973067527bfad0da23a0bdfad6344d8109a60e938c6c041cea9c2b7d\", \"vout\": 1}], \n      [{\"mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u\": 0.00041275}, {\"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\": 0.0010875}]\n      ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1333,7 +1417,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"sendrawtransaction\",\n  \"params\": [\"01000000016c803c496ecf5a094b677b08f4b7cceea1ca0370561ac443750f23b56e5ef851010000006b483045022100f2b39f09e648edf64ec234a8bcfb8f3979ccd6e84b555cd99539774d74c4920f02206411b5bf93ed9081c4f550f2a1e18275fa3dad54cab6c9baeb6fdf38eafade56012102da2c61d91c67d6615b3471b14d3d54bfbfd181537a2a231cdabcf62bd4fe3dfaffffffff02401f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac6c650100000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"sendrawtransaction\",\n  \"params\": [\"02000000017d2b9cea1c046c8c930ea609814d34d6fabda023dad0fa7b52673097ed041ff9010000006a47304402206d436665d488d68cdca386773c1403a6d25eb03b69d4da274394bec6521279e3022068bdc764032f8873493ee485a670d0978ff0286d624f56fd1cb2ebf9fa7f7bef012102da2c61d91c67d6615b3471b14d3d54bfbfd181537a2a231cdabcf62bd4fe3dfaffffffff01f69f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac00000000\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1409,7 +1493,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"signrawtransactionwithkey\",\n  \"params\": [\"01000000016c803c496ecf5a094b677b08f4b7cceea1ca0370561ac443750f23b56e5ef851010000006b483045022100f2b39f09e648edf64ec234a8bcfb8f3979ccd6e84b555cd99539774d74c4920f02206411b5bf93ed9081c4f550f2a1e18275fa3dad54cab6c9baeb6fdf38eafade56012102da2c61d91c67d6615b3471b14d3d54bfbfd181537a2a231cdabcf62bd4fe3dfaffffffff02401f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac6c650100000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\", [\"cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD\"], [{\"txid\": \"51f85e6eb5230f7543c41a567003caa1eeccb7f4087b674b095acf6e493c806c\", \"vout\": 1, \"scriptPubKey\": \"76a914690cd6356789d30b99063632e0651a8d0c206c7f88ac\"}]]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"signrawtransactionwithkey\",\n  \"params\": [\"02000000017d2b9cea1c046c8c930ea609814d34d6fabda023dad0fa7b52673097ed041ff90100000000ffffffff01f69f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac00000000\", [\"cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD\"], [{\"txid\": \"f91f04ed973067527bfad0da23a0bdfad6344d8109a60e938c6c041cea9c2b7d\", \"vout\": 1, \"scriptPubKey\": \"76a914690cd6356789d30b99063632e0651a8d0c206c7f88ac\"}]]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
