@@ -31,13 +31,18 @@ func TestWalletAndTransaction(t *testing.T) {
 		WIF: 				cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb
 		***************************************************************************************
 		WALLET #3
-		BIP39 Mnemonic: 	wagon power turkey energy wood man plunge above universe liberty team orchard
-		m/44'/1'/0'/0/1:	n3jpLzgY1zSUL9ffXp2yFBpvZNeFTPP9Rs
-		WIF: 				cTLEQgQWPzwvPp6YxZLa3zqprYJF9RmfmAs4UHuLqJRsbxTV6UuQ
+		BIP39 Mnemonic: 	gorilla chronic bronze random glass jar deny ten exotic female kind history
+		m/44'/1'/0'/0/1:	mvdu6WEXfk75gjcwm8hjSE5kwHMLy9BMfA
+		WIF: 				cMg7YGBar4sMMMswRP8EfrdhgHPYaFEmJfPMBJ1jNf5UrMQCv4DH
+		***************************************************************************************
+		WALLET #3
+		BIP39 Mnemonic: 	security cinnamon absent that side muscle pigeon fat habit sadness veteran subject
+		m/44'/1'/0'/0/1:	mrvZjXUNupoEpQf6KsgiVgzLz7DUca6Kfv
+		WIF: 				cTcEm5gFJ8H9FCxkuQLdBdSaxx7TPLGkZcE2JjWfZRKK1DcwdwMF
 		***************************************************************************************
 	*/
 
-	km, err := NewKeyManager(128, "", "dwarf unique fork crunch common penalty behind great human gather then usual")
+	km, err := NewKeyManager(128, "", "")
 	if err != nil {
 		t.Error(err)
 	}

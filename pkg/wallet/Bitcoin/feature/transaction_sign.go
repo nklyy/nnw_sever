@@ -4,18 +4,8 @@ import (
 	"errors"
 )
 
-func SignTx(tx string, privateKey string, utxos []*UTXO) (string, error) {
+func SignTx(tx string, privateKey string, unspentUtxos []*UnspentList) (string, error) {
 	privateKeyArray := []string{privateKey}
-
-	var params []map[string]interface{}
-
-	for idx := range utxos {
-		paramMap := make(map[string]interface{})
-		paramMap["txid"] = utxos[idx].Hash
-		paramMap["vout"] = utxos[idx].TxIndex
-		paramMap["scriptPubKey"] = utxos[idx].PKScript
-		params = append(params, paramMap)
-	}
 
 	msg := struct {
 		Result struct {
@@ -36,12 +26,12 @@ func SignTx(tx string, privateKey string, utxos []*UTXO) (string, error) {
 	}{
 		JsonRPC: "2.0",
 		Method:  "signrawtransactionwithkey",
-		Params:  []interface{}{tx, privateKeyArray, params},
+		Params:  []interface{}{tx, privateKeyArray, unspentUtxos},
 	}
 
 	err := RpcClient(req, &msg, false, "")
 	if err != nil {
-		return "", errors.New("could not get utxos")
+		return "", errors.New("could not sign transaction")
 	}
 
 	if msg.Error.Message != "" {

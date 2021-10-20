@@ -29,12 +29,18 @@ func BuildTransaction() {
 
 	log.Printf("from wallet public address: %s", fromWalletPublicAddress)
 
-	unspentTXOs, err := ListUnspentTXOs(fromWalletPublicAddress)
+	// List unspent
+	unspentTXOs, err := ListUnspentTXOs(fromWalletPublicAddress, "first")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	balance := big.NewInt(110700)
+	// Scan unspent
+	//unspentTXOs, err := ScanUnspentTXOs(fromWalletPublicAddress)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
 	unspentTXOs, UTXOsAmount, err := marshalUTXOs(unspentTXOs, amountToSend, feeRate)
 	if err != nil {
 		log.Fatal(err)
@@ -48,15 +54,14 @@ func BuildTransaction() {
 	var sourceUTXOs []*UTXO
 	// prepare tx ins
 	for idx := range unspentTXOs {
-		unspentTXOs[idx].Amount = balance
-		hashStr := unspentTXOs[idx].Hash
+		hashStr := unspentTXOs[idx].TxId
 
 		sourceUTXOHash, err := chainhash.NewHashFromStr(hashStr)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		sourceUTXOIndex := uint32(unspentTXOs[idx].TxIndex)
+		sourceUTXOIndex := uint32(unspentTXOs[idx].Vout)
 		sourceUTXO := wire.NewOutPoint(sourceUTXOHash, sourceUTXOIndex)
 		sourceUTXOs = append(sourceUTXOs, unspentTXOs[idx])
 		sourceTxIn := wire.NewTxIn(sourceUTXO, nil, nil)
@@ -83,7 +88,6 @@ func BuildTransaction() {
 
 	// calculate fees
 	txByteSize := big.NewInt(int64(len(tx.TxIn)*180 + len(tx.TxOut)*34 + 10 + len(tx.TxIn)))
-	fmt.Println(txByteSize.Int64(), "ASDASDASDASDAS")
 	totalFee := new(big.Int).Mul(feeRate, txByteSize)
 	log.Printf("total fee: %s", totalFee)
 
@@ -92,7 +96,7 @@ func BuildTransaction() {
 	//fmt.Println("TOTALFEE", totalFee)
 
 	// calculate the change
-	change := new(big.Int).Set(balance)
+	change := new(big.Int).Set(UTXOsAmount)
 	change = new(big.Int).Sub(change, amountToSend)
 	change = new(big.Int).Sub(change, totalFee)
 	if change.Cmp(big.NewInt(0)) == -1 {
@@ -114,7 +118,7 @@ func BuildTransaction() {
 	changeOutput := wire.NewTxOut(change.Int64(), changeSendToScript)
 	tx.AddTxOut(changeOutput)
 
-	privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
+	//privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
 
 	//decodedWif, err := btcutil.DecodeWIF(privWif)
 	//if err != nil {
@@ -151,19 +155,19 @@ func BuildTransaction() {
 
 	fmt.Printf("Redeem Tx: %v\n", hex.EncodeToString(buf.Bytes()))
 
-	t := hex.EncodeToString(buf.Bytes())
+	//t := hex.EncodeToString(buf.Bytes())
 
-	signTx, err := SignTx(t, privWif, sourceUTXOs)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//signTx, err := SignTx(t, privWif, sourceUTXOs)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//fmt.Println("SignedTX:", signTx)
 
-	fmt.Println("SignedTX:", signTx)
-
-	sendHash, err := SendTx(signTx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("tx hash: %s\n", sendHash) // 1d8f70dfc8b90bff672ee663a7cc811c4e88e98c6895dc93aa9f73202bb7809b
+	//sendHash, err := SendTx(signTx)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//fmt.Printf("tx hash: %s\n", sendHash) // 1d8f70dfc8b90bff672ee663a7cc811c4e88e98c6895dc93aa9f73202bb7809b
 }

@@ -2,7 +2,7 @@ package feature
 
 import "errors"
 
-func SendTx(signedTX string) (string, error) {
+func GetAddressPrivateKey(address, walletName string) (string, error) {
 	msg := struct {
 		Result string `json:"result"`
 	}{}
@@ -13,18 +13,14 @@ func SendTx(signedTX string) (string, error) {
 		Params  []string `json:"params"`
 	}{
 		JsonRPC: "2.0",
-		Method:  "sendrawtransaction",
-		Params:  []string{signedTX},
+		Method:  "dumpprivkey",
+		Params:  []string{address},
 	}
 
-	err := RpcClient(req, &msg, false, "")
+	err := RpcClient(req, &msg, true, walletName)
 	if err != nil {
 		return "", errors.New("could not sent transaction")
 	}
-
-	//if msg.Error.Message != "" {
-	//	return "", errors.New(msg.Error.Message)
-	//}
 
 	return msg.Result, nil
 }

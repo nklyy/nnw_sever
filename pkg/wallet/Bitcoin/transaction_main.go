@@ -12,7 +12,7 @@ import (
 )
 
 func CreateTransaction(privWif string, txHash string, destination string, amount int64, txFee int64, balance int64) (string, error) {
-	sourceUTXOIndex := uint32(1)
+	sourceUTXOIndex := uint32(0)
 	chainParams := &chaincfg.TestNet3Params
 
 	decodedWif, err := btcutil.DecodeWIF(privWif)
@@ -64,11 +64,11 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	//redeemTx.LockTime = 2097025
 	redeemTx.AddTxIn(sourceTxIn)
 
-	redeemTxOut := wire.NewTxOut(8000, destinationPkScript)
+	redeemTxOut := wire.NewTxOut(amount-txFee, destinationPkScript)
 	redeemTx.AddTxOut(redeemTxOut)
-
-	redeemTxOut = wire.NewTxOut(91500, sourcePkScript)
-	redeemTx.AddTxOut(redeemTxOut)
+	//
+	//redeemTxOut = wire.NewTxOut(balance-amount-txFee, sourcePkScript)
+	//redeemTx.AddTxOut(redeemTxOut)
 
 	sigScript, err := txscript.SignatureScript(redeemTx, 0, sourceTxOut.PkScript, txscript.SigHashAll, decodedWif.PrivKey, true)
 	if err != nil {
