@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"nnw_s/pkg/wallet/Bitcoin/rpc"
 	"strings"
 )
 
@@ -11,7 +12,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	//chainParams := &chaincfg.TestNet3Params
 
 	// Get smart fee
-	feeRate, err := GetCurrentFeeRate()
+	feeRate, err := rpc.GetCurrentFeeRate()
 	fmt.Printf("%-18s %v\n", "current fee rate:", feeRate)
 	if err != nil {
 		log.Fatal(err)
@@ -19,13 +20,13 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	fmt.Println(strings.Repeat("-", 106))
 
 	// Get list unspent tx
-	utxos, err := ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
+	utxos, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Create Transaction
-	createTxHash, unspentUtxosList, err := CreateTransaction(utxos, destinationAddress, amountToSend)
+	createTxHash, unspentUtxosList, err := rpc.CreateTransaction(utxos, destinationAddress, amountToSend)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +36,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	fmt.Println(strings.Repeat("-", 106))
 
 	// Fund for transaction
-	fundTxHash, err := FundForTransaction(createTxHash, fromWalletPublicAddress, userWalletName)
+	fundTxHash, err := rpc.FundForTransaction(createTxHash, fromWalletPublicAddress, userWalletName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,13 +45,13 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	fmt.Println(strings.Repeat("-", 106))
 
 	// Unlock wallet
-	err = UnLockWallet(userWalletPassword, userWalletName)
+	err = rpc.UnLockWallet(userWalletPassword, userWalletName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Get Private key
-	privWif, err := GetAddressPrivateKey(fromWalletPublicAddress, userWalletName)
+	privWif, err := rpc.GetAddressPrivateKey(fromWalletPublicAddress, userWalletName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,7 +60,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	fmt.Println(strings.Repeat("-", 106))
 
 	// Sign Transaction
-	signTxHash, err := SignTx(fundTxHash, privWif, unspentUtxosList)
+	signTxHash, err := rpc.SignTx(fundTxHash, privWif, unspentUtxosList)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +69,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	fmt.Println(strings.Repeat("-", 106))
 
 	// Send Transaction
-	transactionHash, err := SendTx(signTxHash)
+	transactionHash, err := rpc.SendTx(signTxHash)
 	if err != nil {
 		log.Fatal(err)
 	}

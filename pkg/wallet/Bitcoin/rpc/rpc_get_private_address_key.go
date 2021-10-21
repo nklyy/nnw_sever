@@ -1,6 +1,8 @@
-package transaction
+package rpc
 
-import "errors"
+import (
+	"errors"
+)
 
 func GetAddressPrivateKey(address, walletName string) (string, error) {
 	msg := struct {

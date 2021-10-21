@@ -11,6 +11,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"log"
 	"math/big"
+	"nnw_s/pkg/wallet/Bitcoin/rpc"
 )
 
 func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletName, userWalletPassword string, amountToSend *big.Int) {
@@ -18,14 +19,14 @@ func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletNam
 	chainParams := &chaincfg.TestNet3Params
 
 	// Get fee
-	feeRate, err := GetCurrentFeeRate()
+	feeRate, err := rpc.GetCurrentFeeRate()
 	log.Printf("%-18s %s\n", "current fee rate:", feeRate)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// List unspent
-	unspentTXOsList, err := ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
+	unspentTXOsList, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +42,7 @@ func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletNam
 
 	// prepare transaction inputs
 	sourceUtxosAmount := big.NewInt(0)
-	var sourceUTXOs []*UnspentList
+	var sourceUTXOs []*rpc.UnspentList
 	for idx := range unspentTXOsList {
 		hashStr := unspentTXOsList[idx].TxId
 		sourceUtxosAmount.Add(sourceUtxosAmount, unspentTXOsList[idx].Amount)
@@ -54,7 +55,7 @@ func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletNam
 		if amountToSend.Int64() <= sourceUtxosAmount.Int64() {
 			sourceUTXOIndex := uint32(unspentTXOsList[idx].Vout)
 			sourceUTXO := wire.NewOutPoint(sourceUTXOHash, sourceUTXOIndex)
-			sourceUTXOs = append(sourceUTXOs, &UnspentList{
+			sourceUTXOs = append(sourceUTXOs, &rpc.UnspentList{
 				TxId:         unspentTXOsList[idx].TxId,
 				Vout:         unspentTXOsList[idx].Vout,
 				ScriptPubKey: unspentTXOsList[idx].PKScript,
@@ -67,7 +68,7 @@ func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletNam
 
 		sourceUTXOIndex := uint32(unspentTXOsList[idx].Vout)
 		sourceUTXO := wire.NewOutPoint(sourceUTXOHash, sourceUTXOIndex)
-		sourceUTXOs = append(sourceUTXOs, &UnspentList{
+		sourceUTXOs = append(sourceUTXOs, &rpc.UnspentList{
 			TxId:         unspentTXOsList[idx].TxId,
 			Vout:         unspentTXOsList[idx].Vout,
 			ScriptPubKey: unspentTXOsList[idx].PKScript,
@@ -156,13 +157,13 @@ func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletNam
 
 	// Prepare to sign tx
 	// Unlock wallet
-	err = UnLockWallet(userWalletPassword, userWalletName)
+	err = rpc.UnLockWallet(userWalletPassword, userWalletName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Get Private key
-	privWif, err := GetAddressPrivateKey(fromWalletPublicAddress, userWalletName)
+	privWif, err := rpc.GetAddressPrivateKey(fromWalletPublicAddress, userWalletName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -205,7 +206,7 @@ func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletNam
 	log.Printf("%-18s %s\n", "Redeem Tx:", hex.EncodeToString(buf.Bytes()))
 
 	// Send Transaction
-	sendHash, err := SendTx(hex.EncodeToString(buf.Bytes()))
+	sendHash, err := rpc.SendTx(hex.EncodeToString(buf.Bytes()))
 	if err != nil {
 		log.Fatal(err)
 	}

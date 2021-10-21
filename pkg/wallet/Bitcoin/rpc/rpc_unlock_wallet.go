@@ -1,6 +1,8 @@
-package transaction
+package rpc
 
-import "errors"
+import (
+	"errors"
+)
 
 func UnLockWallet(password, walletName string) error {
 	msg := struct {

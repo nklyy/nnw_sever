@@ -1,6 +1,8 @@
-package transaction
+package rpc
 
-import "errors"
+import (
+	"errors"
+)
 
 func AddressInfo(address, walletName string) (string, error) {
 	req := struct {

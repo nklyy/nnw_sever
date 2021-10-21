@@ -1,6 +1,8 @@
-package transaction
+package rpc
 
-import "errors"
+import (
+	"errors"
+)
 
 func SendTx(signedTX string) (string, error) {
 	msg := struct {
