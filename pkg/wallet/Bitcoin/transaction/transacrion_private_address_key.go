@@ -1,10 +1,13 @@
-package feature
+package transaction
 
 import "errors"
 
 func GetAddressPrivateKey(address, walletName string) (string, error) {
 	msg := struct {
 		Result string `json:"result"`
+		Error  struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	req := struct {
@@ -20,6 +23,10 @@ func GetAddressPrivateKey(address, walletName string) (string, error) {
 	err := RpcClient(req, &msg, true, walletName)
 	if err != nil {
 		return "", errors.New("could not sent transaction")
+	}
+
+	if msg.Error.Message != "" {
+		return "", errors.New(msg.Error.Message)
 	}
 
 	return msg.Result, nil

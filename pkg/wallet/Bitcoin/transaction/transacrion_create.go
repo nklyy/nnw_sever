@@ -1,9 +1,10 @@
-package feature
+package transaction
 
 import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 )
 
 type UnspentList struct {
@@ -31,8 +32,11 @@ func CreateTransaction(utxos []*UTXO, addressTo string, spendAmount *big.Int) (s
 		return "", nil, errors.New("your balance too low for this transaction")
 	}
 
+	sourceUtxosAmount := big.NewInt(0)
 	for idx := range utxos {
-		if spendAmount.Int64() > utxos[idx].Amount.Int64() {
+		sourceUtxosAmount.Add(sourceUtxosAmount, utxos[idx].Amount)
+
+		if spendAmount.Int64() > sourceUtxosAmount.Int64() {
 			//paramMap := make(map[string]interface{})
 			//paramMap["txid"] = utxos[idx].TxId
 			//paramMap["vout"] = utxos[idx].Vout
@@ -72,6 +76,9 @@ func CreateTransaction(utxos []*UTXO, addressTo string, spendAmount *big.Int) (s
 
 	msg := struct {
 		Result string `json:"result"`
+		Error  struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	err := RpcClient(req, &msg, false, "")
@@ -79,9 +86,14 @@ func CreateTransaction(utxos []*UTXO, addressTo string, spendAmount *big.Int) (s
 		return "", nil, errors.New("could not create transaction")
 	}
 
+	if msg.Error.Message != "" {
+		return "", nil, errors.New(msg.Error.Message)
+	}
+
 	fmt.Printf("%-18s %s\n", "Balance:", utxosAmount)
 	fmt.Printf("%-18s %s\n", "Spend amount:", spendAmount)
 	fmt.Printf("%-18s %s\n", "Remainder: ", utxosAmount.Sub(utxosAmount, spendAmount))
+	fmt.Println(strings.Repeat("-", 106))
 
 	return msg.Result, unspentParams, nil
 }

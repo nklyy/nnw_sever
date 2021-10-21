@@ -1,10 +1,13 @@
-package feature
+package transaction
 
 import "errors"
 
 func UnLockWallet(password, walletName string) error {
 	msg := struct {
 		Result interface{} `json:"result"`
+		Error  struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	req := struct {
@@ -20,6 +23,10 @@ func UnLockWallet(password, walletName string) error {
 	err := RpcClient(req, &msg, true, walletName)
 	if err != nil {
 		return errors.New("could not sent transaction")
+	}
+
+	if msg.Error.Message != "" {
+		return errors.New(msg.Error.Message)
 	}
 
 	return nil

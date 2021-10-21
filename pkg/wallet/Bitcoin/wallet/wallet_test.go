@@ -1,4 +1,4 @@
-package Bitcoin
+package wallet
 
 import (
 	"fmt"
@@ -42,10 +42,22 @@ func TestWalletAndTransaction(t *testing.T) {
 		***************************************************************************************
 	*/
 
-	km, err := NewKeyManager(128, "", "")
-	if err != nil {
-		t.Error(err)
+	var km *KeyManager
+	var bError error
+	backUp := false
+
+	if backUp {
+		km, bError = NewKeyManager(128, "", "")
+		if bError != nil {
+			t.Error(bError)
+		}
+	} else {
+		km, bError = NewKeyManager(128, "", "dwarf unique fork crunch common penalty behind great human gather then usual")
+		if bError != nil {
+			t.Error(bError)
+		}
 	}
+
 	masterKey, err := km.GetMasterKey()
 	if err != nil {
 		t.Error(err)
@@ -74,23 +86,23 @@ func TestWalletAndTransaction(t *testing.T) {
 
 	fmt.Printf("%-18s %-34s %s\n", key.GetPath(), address, wif)
 	fmt.Println(strings.Repeat("-", 106))
-	fmt.Printf("\t\t\t\t\t\t%s \n\n", "Create Transaction")
 
+	//fmt.Printf("\t\t\t\t\t\t%s \n\n", "Create Transaction")
 	// Transaction
-	privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
-	txHash := "51f85e6eb5230f7543c41a567003caa1eeccb7f4087b674b095acf6e493c806c"
-	destination := "mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u"
-	amount := int64(5000)
-	txFee := int64(300)
-	balance := int64(100700)
+	//privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
+	//txHash := "51f85e6eb5230f7543c41a567003caa1eeccb7f4087b674b095acf6e493c806c"
+	//destination := "mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u"
+	//amount := int64(5000)
+	//txFee := int64(300)
+	//balance := int64(100700)
 
-	tx, err := CreateTransaction(privWif, txHash, destination, amount, txFee, balance)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fmt.Println(strings.Repeat("-", 106))
-	fmt.Printf("%-18s %s\n", "Transaction:", tx)
+	//tx, err := Bitcoin.CreateTransaction(privWif, txHash, destination, amount, txFee, balance)
+	//if err != nil {
+	//	t.Error(err)
+	//}
+	//
+	//fmt.Println(strings.Repeat("-", 106))
+	//fmt.Printf("%-18s %s\n", "Transaction:", tx)
 	//https://live.blockcypher.com/btc-testnet/tx/b494bb411e3bddb8c00bb0a84786146e6d0a03c85efa8b677883901c11cbad3c/
 	//curl -v --user uuuset --data-binary '{"jsonrpc": "2.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
 }

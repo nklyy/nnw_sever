@@ -1,9 +1,10 @@
-package feature
+package transaction
 
 import (
 	"fmt"
 	"log"
 	"math/big"
+	"strings"
 )
 
 func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletName, userWalletPassword string, amountToSend *big.Int) {
@@ -15,6 +16,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(strings.Repeat("-", 106))
 
 	// Get list unspent tx
 	utxos, err := ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
@@ -30,6 +32,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 
 	fmt.Printf("%-18s %s\n", "TxHash:", createTxHash)
 	fmt.Printf("%-18s %v\n", "UnspentParamList:", unspentUtxosList)
+	fmt.Println(strings.Repeat("-", 106))
 
 	// Fund for transaction
 	fundTxHash, err := FundForTransaction(createTxHash, fromWalletPublicAddress, userWalletName)
@@ -38,6 +41,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	}
 
 	fmt.Printf("%-18s %s\n", "FundTxHash:", fundTxHash)
+	fmt.Println(strings.Repeat("-", 106))
 
 	// Unlock wallet
 	err = UnLockWallet(userWalletPassword, userWalletName)
@@ -52,6 +56,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	}
 
 	fmt.Printf("%-18s %s\n", "Private key:", privWif)
+	fmt.Println(strings.Repeat("-", 106))
 
 	// Sign Transaction
 	signTxHash, err := SignTx(fundTxHash, privWif, unspentUtxosList)
@@ -60,6 +65,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	}
 
 	fmt.Printf("%-18s %s\n", "SignTxHash:", signTxHash)
+	fmt.Println(strings.Repeat("-", 106))
 
 	// Send Transaction
 	transactionHash, err := SendTx(signTxHash)
@@ -68,4 +74,5 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	}
 
 	fmt.Printf("%-18s %s\n", "TransactionHash:", transactionHash)
+	fmt.Println(strings.Repeat("-", 106))
 }

@@ -1,8 +1,7 @@
-package feature
+package transaction
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"math/big"
 )
@@ -24,6 +23,9 @@ func GetCurrentFee() (*float64, error) {
 			Feerate float64 `json:"feerate"`
 			Blocks  int64   `json:"blocks"`
 		}
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	err := RpcClient(req, &msg, false, "first")
@@ -35,6 +37,10 @@ func GetCurrentFee() (*float64, error) {
 		log.Printf("expected result > 0; received: %f", msg.Result.Feerate)
 	}
 
+	if msg.Error.Message != "" {
+		return nil, errors.New(msg.Error.Message)
+	}
+
 	var fee float64
 	fee = msg.Result.Feerate
 	// sanity check
@@ -43,7 +49,7 @@ func GetCurrentFee() (*float64, error) {
 	} else if fee < 0 {
 		fee = 0
 	}
-	fmt.Printf("fee: %f\n", fee)
+	//fmt.Printf("fee: %f\n", fee)
 
 	if fee == 0 {
 		log.Print("could not get fees")
@@ -65,7 +71,7 @@ func GetCurrentFeeRate() (*big.Int, error) {
 	// convert to satoshis to kb
 	feeRate := big.NewInt(int64(*fee * 1.0e5))
 
-	fmt.Printf("fee rate: %s\n", feeRate)
+	//fmt.Printf("fee rate: %s\n", feeRate)
 
 	return feeRate, nil
 }

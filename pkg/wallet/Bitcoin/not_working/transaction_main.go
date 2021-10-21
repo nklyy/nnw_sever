@@ -1,4 +1,4 @@
-package Bitcoin
+package not_working
 
 import (
 	"bytes"
@@ -90,7 +90,10 @@ func CreateTransaction(privWif string, txHash string, destination string, amount
 	}
 
 	buf := bytes.NewBuffer(make([]byte, 0, redeemTx.SerializeSize()))
-	redeemTx.Serialize(buf)
+	err = redeemTx.Serialize(buf)
+	if err != nil {
+		return "", err
+	}
 
 	fmt.Printf("%-18s %v\n", "Redeem Tx: ", hex.EncodeToString(buf.Bytes())) // redeem Tx: 01000000011efc...5bb88ac00000000
 

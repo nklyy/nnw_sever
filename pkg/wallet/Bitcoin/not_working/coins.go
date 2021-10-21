@@ -1,8 +1,7 @@
-package Bitcoin
+package not_working
 
 import (
 	"nnw_s/pkg/wallet"
-	"nnw_s/pkg/wallet/Bitcoin/not_working"
 )
 
 func init() {
@@ -12,12 +11,12 @@ func init() {
 }
 
 type BTCCoins struct {
-	*not_working.BTC
+	*BTC
 }
 
 func NewLTC(key *wallet.Key) wallet.Wallet {
 	key.Opt.Params = &LTCParams
-	token := not_working.NewBTC(key).(*not_working.BTC)
+	token := NewBTC(key).(*BTC)
 	token.Name = "Litecoin"
 	token.Symbol = "LTC"
 
@@ -26,7 +25,7 @@ func NewLTC(key *wallet.Key) wallet.Wallet {
 
 func NewDOGE(key *wallet.Key) wallet.Wallet {
 	key.Opt.Params = &DOGEParams
-	token := not_working.NewBTC(key).(*not_working.BTC)
+	token := NewBTC(key).(*BTC)
 	token.Name = "Dogecoin"
 	token.Symbol = "DOGE"
 
@@ -35,7 +34,7 @@ func NewDOGE(key *wallet.Key) wallet.Wallet {
 
 func NewBtcTestNet(key *wallet.Key) wallet.Wallet {
 	key.Opt.Params = &BTCTestnetParams
-	token := not_working.NewBTC(key).(*not_working.BTC)
+	token := NewBTC(key).(*BTC)
 	token.Name = "BTC Test Net"
 	token.Symbol = "BTC"
 

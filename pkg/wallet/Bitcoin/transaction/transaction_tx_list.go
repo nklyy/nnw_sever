@@ -1,4 +1,4 @@
-package feature
+package transaction
 
 import (
 	"errors"
@@ -29,11 +29,18 @@ func TransactionList(walletName string) ([]*UTXO, error) {
 			Blockhash string      `json:"blockhash"`
 			Txid      string      `json:"txid"`
 		} `json:"result"`
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	err := RpcClient(req, &msg, true, walletName)
 	if err != nil {
 		return nil, errors.New("could not get transaction list")
+	}
+
+	if msg.Error.Message != "" {
+		return nil, errors.New(msg.Error.Message)
 	}
 
 	var utxos []*UTXO

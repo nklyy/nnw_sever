@@ -1,9 +1,10 @@
-package feature
+package transaction
 
 import (
 	"errors"
 	"fmt"
 	"github.com/btcsuite/btcutil"
+	"strings"
 )
 
 func FundForTransaction(createTxHash, changeAddress, walletName string) (string, error) {
@@ -28,12 +29,19 @@ func FundForTransaction(createTxHash, changeAddress, walletName string) (string,
 		Result struct {
 			Hex string  `json:"hex"`
 			Fee float64 `json:"fee"`
-		}
+		} `json:"result"`
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	err := RpcClient(req, &msg, true, walletName)
 	if err != nil {
 		return "", errors.New("could not fund for transaction")
+	}
+
+	if msg.Error.Message != "" {
+		return "", errors.New(msg.Error.Message)
 	}
 
 	feeAmount, err := btcutil.NewAmount(msg.Result.Fee)
@@ -43,6 +51,7 @@ func FundForTransaction(createTxHash, changeAddress, walletName string) (string,
 
 	fmt.Printf("%-18s %v\n", "Fee for transaction in BTC:", feeAmount)
 	fmt.Printf("%-18s %v\n", "Fee for transaction in Satoshi:", feeAmount.Format(btcutil.AmountSatoshi))
+	fmt.Println(strings.Repeat("-", 106))
 
 	return msg.Result.Hex, nil
 }

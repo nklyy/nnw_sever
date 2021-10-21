@@ -1,4 +1,4 @@
-package feature
+package transaction
 
 import (
 	"errors"
@@ -45,11 +45,18 @@ func ListUnspentTXOs(address string, walletName string) ([]*UTXO, error) {
 			Desc          string  `json:"desc"`
 			Safe          bool    `json:"safe"`
 		} `json:"result"`
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	err := RpcClient(req, &msg, true, walletName)
 	if err != nil {
 		return nil, errors.New("could not get utxos")
+	}
+
+	if msg.Error.Message != "" {
+		return nil, errors.New(msg.Error.Message)
 	}
 
 	var utxos []*UTXO

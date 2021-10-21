@@ -1,4 +1,4 @@
-package feature
+package transaction
 
 import (
 	"errors"
@@ -37,11 +37,18 @@ func ScanUnspentTXOs(address string) ([]*UTXO, error) {
 			} `json:"unspents"`
 			TotalAmount interface{} `json:"total_amount"`
 		} `json:"result"`
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	err := RpcClient(req, &msg, false, "")
 	if err != nil {
 		return nil, errors.New("could not scan unspent transactions")
+	}
+
+	if msg.Error.Message != "" {
+		return nil, errors.New(msg.Error.Message)
 	}
 
 	var utxos []*UTXO

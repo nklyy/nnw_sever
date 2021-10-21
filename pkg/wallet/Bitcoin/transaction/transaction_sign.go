@@ -1,4 +1,4 @@
-package feature
+package transaction
 
 import (
 	"errors"
@@ -16,7 +16,6 @@ func SignTx(tx string, privateKey string, unspentUtxos []*UnspentList) (string, 
 			Code    interface{} `json:"code"`
 			Message string      `json:"message"`
 		} `json:"error"`
-		Id interface{} `json:"id"`
 	}{}
 
 	req := struct {

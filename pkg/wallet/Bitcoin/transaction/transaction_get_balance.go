@@ -1,4 +1,4 @@
-package feature
+package transaction
 
 import (
 	"errors"
@@ -19,11 +19,18 @@ func GetBalance(walletName string) (*big.Int, error) {
 
 	msg := struct {
 		Result float64 `json:"result"`
+		Error  struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	err := RpcClient(req, &msg, true, walletName)
 	if err != nil {
 		return nil, errors.New("could not get address info")
+	}
+
+	if msg.Error.Message != "" {
+		return nil, errors.New(msg.Error.Message)
 	}
 
 	balance, _ := btcutil.NewAmount(msg.Result)

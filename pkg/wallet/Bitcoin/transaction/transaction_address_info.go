@@ -1,4 +1,4 @@
-package feature
+package transaction
 
 import "errors"
 
@@ -18,11 +18,18 @@ func AddressInfo(address, walletName string) (string, error) {
 			Address      string `json:"address"`
 			ScriptPubKey string `json:"scriptPubKey"`
 		} `json:"result"`
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}{}
 
 	err := RpcClient(req, &msg, true, walletName)
 	if err != nil {
 		return "", errors.New("could not get address info")
+	}
+
+	if msg.Error.Message != "" {
+		return "", errors.New(msg.Error.Message)
 	}
 
 	return msg.Result.ScriptPubKey, nil
