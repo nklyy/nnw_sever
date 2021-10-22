@@ -2,31 +2,40 @@ package Solana
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
+	"github.com/tyler-smith/go-bip39"
 	"math/big"
-	"nnw_s/pkg/wallet"
+	"net/http"
 	"testing"
 	"time"
 )
 
-func TestGenerateSOLHDWallet(t *testing.T) {
-	//garment inflict make idle duck pepper summer flash target act will access cage charge snow salmon total panic romance foil police hill infant drama
-	//Time to hack with only one card: 3830854 years
+type SolanaKeys struct {
+	PublicKey string  `json:"public_key"`
+	SecretKey []uint8 `json:"secret_key"`
+}
 
-	//chair column reveal income inside soul blade concert series syrup ivory bulb
-	//Time to hack with only one card: 109 seconds
-	master, err := wallet.NewKey(
-		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
-	)
+func TestGenerateWalletFromMnemonic(t *testing.T) {
+	entropy, _ := bip39.NewEntropy(256)
+	mnemonic, _ := bip39.NewMnemonic(entropy)
+
+	resp, err := http.Get("http://localhost:3000/wallet/generate/" + mnemonic)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err)
 	}
 
-	solWallet, _ := master.GetWallet(wallet.CoinType(wallet.SolType))
-	solAddress, _ := solWallet.GetAddress()
-	fmt.Println("Solana Address: ", solAddress)
+	defer resp.Body.Close()
+
+	var solanaKeys SolanaKeys
+	err = json.NewDecoder(resp.Body).Decode(&solanaKeys)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(solanaKeys)
 }
 
 func TestGenerateDeterministicSolanaWalletAndMakeAirDropTransaction(t *testing.T) {

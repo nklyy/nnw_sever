@@ -73,6 +73,7 @@ func (k *Key) init() error {
 
 	k.PrivateECDSA = k.Private.ToECDSA()
 	k.PublicECDSA = &k.PrivateECDSA.PublicKey
+
 	return nil
 }
 

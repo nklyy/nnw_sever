@@ -9,7 +9,7 @@ require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	//github.com/dfuse-io/binary v0.0.0-20210216024852-4ae6830a495d // indirect
 	github.com/ethereum/go-ethereum v1.10.8
-	//github.com/gagliardetto/solana-go v0.5.1
+	github.com/gagliardetto/solana-go v1.0.1
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/mock v1.6.0
