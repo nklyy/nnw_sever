@@ -8,13 +8,13 @@ import (
 
 func TestCrateBtcHDWallet(t *testing.T) {
 	master, err := wallet.NewKey(
-		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
+		wallet.Mnemonic("leader such empower maximum anxiety pilot shadow destroy joke claw correct doctor"),
 	)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	btcWallet, _ := master.GetWallet(wallet.CoinType(wallet.BtcType), wallet.AddressIndex(1))
+	btcWallet, _ := master.GetWallet(wallet.CoinType(wallet.BtcTestNetType), wallet.AddressIndex(1))
 	btcAddress, _ := btcWallet.GetAddress()
 	fmt.Println("Bitcoin Address:", btcAddress)
 
