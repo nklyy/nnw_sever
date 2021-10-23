@@ -5,6 +5,7 @@ import (
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestWalletAndTransaction(t *testing.T) {
@@ -45,6 +46,8 @@ func TestWalletAndTransaction(t *testing.T) {
 
 	var km *KeyManager
 	var bError error
+	var scan bool
+
 	backUp := false
 
 	if backUp {
@@ -52,11 +55,15 @@ func TestWalletAndTransaction(t *testing.T) {
 		if bError != nil {
 			t.Error(bError)
 		}
+
+		scan = true
 	} else {
 		km, bError = NewKeyManager(128, "", "dwarf unique fork crunch common penalty behind great human gather then usual")
 		if bError != nil {
 			t.Error(bError)
 		}
+
+		scan = false
 	}
 
 	masterKey, err := km.GetMasterKey()
@@ -88,7 +95,7 @@ func TestWalletAndTransaction(t *testing.T) {
 	fmt.Printf("%-18s %-34s %s\n", key.GetPath(), address, wif)
 	fmt.Println(strings.Repeat("-", 106))
 
-	createdWalletName, err := rpc.CreateWallet("sixth")
+	createdWalletName, err := rpc.CreateWallet("ninth")
 	if err != nil {
 		t.Error(err)
 	}
@@ -103,10 +110,13 @@ func TestWalletAndTransaction(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = rpc.ImportPrivateKey(wif, createdWalletName)
-	if err != nil {
-		t.Error(err)
-	}
+	go func() {
+		err := rpc.ImportPrivateKey(wif, createdWalletName, scan)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
+	time.Sleep(2 * time.Second)
 
 	fmt.Printf("%-18s %s\n", "Your wallet:", address)
 	fmt.Printf("%-18s %s\n", "Your mnemonic:", km.GetMnemonic())

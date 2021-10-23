@@ -28,7 +28,7 @@ func GetCurrentFee() (*float64, error) {
 		} `json:"error"`
 	}{}
 
-	err := RpcClient(req, &msg, false, "first")
+	err := Client(req, &msg, false, "first")
 	if err != nil {
 		return nil, err
 	}

@@ -22,7 +22,7 @@ func GetAddressPrivateKey(address, walletName string) (string, error) {
 		Params:  []string{address},
 	}
 
-	err := RpcClient(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletName)
 	if err != nil {
 		return "", errors.New("could not sent transaction")
 	}

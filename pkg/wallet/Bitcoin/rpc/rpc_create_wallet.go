@@ -1,6 +1,8 @@
 package rpc
 
-import "errors"
+import (
+	"errors"
+)
 
 func CreateWallet(walletName string) (string, error) {
 	msg := struct {
@@ -8,6 +10,7 @@ func CreateWallet(walletName string) (string, error) {
 			Name string `json:"name"`
 		} `json:"result"`
 		Error struct {
+			Code    int64  `json:"code"`
 			Message string `json:"message"`
 		} `json:"error"`
 	}{}
@@ -22,9 +25,9 @@ func CreateWallet(walletName string) (string, error) {
 		Params:  []string{walletName},
 	}
 
-	err := RpcClient(req, &msg, false, "")
+	err := Client(req, &msg, false, "")
 	if err != nil {
-		return "", errors.New("could not sent transaction")
+		return "", errors.New(msg.Error.Message)
 	}
 
 	if msg.Error.Message != "" {

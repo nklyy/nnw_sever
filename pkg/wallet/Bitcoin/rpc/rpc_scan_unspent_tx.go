@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func ScanUnspentTXOs(address string) ([]*UTXO, error) {
+func ScanUnspentTXOs(address string) ([]*UTXO, *btcutil.Amount, error) {
 	addressArray := []string{"addr(" + address + ")"}
 
 	req := struct {
@@ -42,13 +42,13 @@ func ScanUnspentTXOs(address string) ([]*UTXO, error) {
 		} `json:"error"`
 	}{}
 
-	err := RpcClient(req, &msg, false, "")
+	err := Client(req, &msg, false, "")
 	if err != nil {
-		return nil, errors.New("could not scan unspent transactions")
+		return nil, nil, errors.New("could not scan unspent transactions")
 	}
 
 	if msg.Error.Message != "" {
-		return nil, errors.New(msg.Error.Message)
+		return nil, nil, errors.New(msg.Error.Message)
 	}
 
 	var utxos []*UTXO
@@ -67,10 +67,10 @@ func ScanUnspentTXOs(address string) ([]*UTXO, error) {
 	totalStr := fmt.Sprintf("%v", msg.Result.TotalAmount)
 	float, err := strconv.ParseFloat(totalStr, 64)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	totalAmount, _ := btcutil.NewAmount(float)
 	fmt.Println("TOTAL", int64(totalAmount))
 
-	return utxos, nil
+	return utxos, &totalAmount, nil
 }

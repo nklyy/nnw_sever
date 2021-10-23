@@ -2,10 +2,11 @@ package rpc
 
 import "errors"
 
-func ImportPrivateKey(key, walletName string) error {
+func ImportPrivateKey(key, walletName string, scan bool) error {
 	msg := struct {
 		Result string `json:"result"`
 		Error  struct {
+			Code    int64  `json:"code"`
 			Message string `json:"message"`
 		} `json:"error"`
 	}{}
@@ -17,12 +18,12 @@ func ImportPrivateKey(key, walletName string) error {
 	}{
 		JsonRPC: "2.0",
 		Method:  "importprivkey",
-		Params:  []interface{}{key, "", true},
+		Params:  []interface{}{key, "", scan},
 	}
 
-	err := RpcClient(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletName)
 	if err != nil {
-		return errors.New("could not sent transaction")
+		return errors.New(msg.Error.Message)
 	}
 
 	if msg.Error.Message != "" {

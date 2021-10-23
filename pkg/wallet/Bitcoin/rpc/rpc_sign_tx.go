@@ -28,7 +28,7 @@ func SignTx(tx string, privateKey string, unspentUtxos []*UnspentList) (string, 
 		Params:  []interface{}{tx, privateKeyArray, unspentUtxos},
 	}
 
-	err := RpcClient(req, &msg, false, "")
+	err := Client(req, &msg, false, "")
 	if err != nil {
 		return "", errors.New("could not sign transaction")
 	}

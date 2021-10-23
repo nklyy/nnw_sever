@@ -3,11 +3,12 @@ package rpc
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 )
 
-func RpcClient(body, res interface{}, walletInfo bool, walletName string) error {
+func Client(body, res interface{}, walletInfo bool, walletName string) error {
 	var serverAddr string
 
 	if walletInfo {
@@ -46,6 +47,10 @@ func RpcClient(body, res interface{}, walletInfo bool, walletName string) error 
 	err = json.Unmarshal(respBody, res)
 	if err != nil {
 		return err
+	}
+
+	if resp.Status != "200" {
+		return errors.New(string(respBody))
 	}
 
 	return nil

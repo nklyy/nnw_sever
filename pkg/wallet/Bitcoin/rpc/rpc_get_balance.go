@@ -24,7 +24,7 @@ func GetBalance(walletName string) (*big.Int, error) {
 		} `json:"error"`
 	}{}
 
-	err := RpcClient(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletName)
 	if err != nil {
 		return nil, errors.New("could not get address info")
 	}

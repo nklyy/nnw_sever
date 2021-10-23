@@ -6,6 +6,7 @@ func EncryptWallet(password, walletName string) error {
 	msg := struct {
 		Result string `json:"result"`
 		Error  struct {
+			Code    int64  `json:"code"`
 			Message string `json:"message"`
 		} `json:"error"`
 	}{}
@@ -20,9 +21,9 @@ func EncryptWallet(password, walletName string) error {
 		Params:  []string{password},
 	}
 
-	err := RpcClient(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletName)
 	if err != nil {
-		return errors.New("could not sent transaction")
+		return errors.New(msg.Error.Message)
 	}
 
 	if msg.Error.Message != "" {

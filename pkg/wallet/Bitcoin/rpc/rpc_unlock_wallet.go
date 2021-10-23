@@ -8,6 +8,7 @@ func UnLockWallet(password, walletName string) error {
 	msg := struct {
 		Result interface{} `json:"result"`
 		Error  struct {
+			Code    int64  `json:"code"`
 			Message string `json:"message"`
 		} `json:"error"`
 	}{}
@@ -22,9 +23,9 @@ func UnLockWallet(password, walletName string) error {
 		Params:  []interface{}{password, 60},
 	}
 
-	err := RpcClient(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletName)
 	if err != nil {
-		return errors.New("could not sent transaction")
+		return errors.New(msg.Error.Message)
 	}
 
 	if msg.Error.Message != "" {

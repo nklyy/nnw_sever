@@ -22,7 +22,7 @@ func SendTx(signedTX string) (string, error) {
 		Params:  []string{signedTX},
 	}
 
-	err := RpcClient(req, &msg, false, "")
+	err := Client(req, &msg, false, "")
 	if err != nil {
 		return "", errors.New("could not sent transaction")
 	}

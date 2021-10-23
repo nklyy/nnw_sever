@@ -25,7 +25,7 @@ func AddressInfo(address, walletName string) (string, error) {
 		} `json:"error"`
 	}{}
 
-	err := RpcClient(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletName)
 	if err != nil {
 		return "", errors.New("could not get address info")
 	}

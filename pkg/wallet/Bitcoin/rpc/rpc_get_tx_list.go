@@ -34,7 +34,7 @@ func TransactionList(walletName string) ([]*UTXO, error) {
 		} `json:"error"`
 	}{}
 
-	err := RpcClient(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletName)
 	if err != nil {
 		return nil, errors.New("could not get transaction list")
 	}

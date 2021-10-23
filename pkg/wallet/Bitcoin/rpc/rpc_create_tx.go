@@ -81,7 +81,7 @@ func CreateTransaction(utxos []*UTXO, addressTo string, spendAmount *big.Int) (s
 		} `json:"error"`
 	}{}
 
-	err := RpcClient(req, &msg, false, "")
+	err := Client(req, &msg, false, "")
 	if err != nil {
 		return "", nil, errors.New("could not create transaction")
 	}
