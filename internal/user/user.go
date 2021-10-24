@@ -14,6 +14,7 @@ type User struct {
 	Credentials *credentials.Credentials `bson:"credentials"`
 	Status      Status                   `bson:"status"`
 	IsVerified  bool                     `bson:"is_verified"`
+	BtcWallet   string                   `bson:"btc_wallet"`
 
 	CreatedAt time.Time `bson:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at"`
@@ -45,4 +46,8 @@ func (u *User) SetToVerified() {
 func (u *User) SetToActive() {
 	u.Status = Active
 	u.UpdatedAt = time.Now()
+}
+
+func (u *User) SetBtcWallet(walletName string) {
+	u.BtcWallet = walletName
 }

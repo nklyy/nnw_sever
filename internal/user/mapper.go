@@ -19,6 +19,7 @@ func MapToDTO(u *User) *DTO {
 		SecretOTP:  secretOTP,
 		Status:     string(u.Status),
 		IsVerified: u.IsVerified,
+		BtcWallet:  u.BtcWallet,
 		CreatedAt:  u.CreatedAt,
 		UpdatedAt:  u.UpdatedAt,
 	}
@@ -39,6 +40,7 @@ func MapToEntity(dto *DTO) (*User, error) {
 		},
 		Status:     Status(dto.Status),
 		IsVerified: dto.IsVerified,
+		BtcWallet:  dto.BtcWallet,
 		CreatedAt:  dto.CreatedAt,
 		UpdatedAt:  dto.UpdatedAt,
 	}, nil

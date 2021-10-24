@@ -15,6 +15,7 @@ type DTO struct {
 	Password   string `json:"password"`
 	SecretOTP  string `json:"secret_otp"`
 	Status     string `json:"status"`
+	BtcWallet  string `json:"btc_wallet"`
 	IsVerified bool   `json:"is_verified"`
 
 	CreatedAt time.Time `json:"created_at"`
