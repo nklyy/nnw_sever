@@ -115,9 +115,10 @@ func main() {
 
 	// BTC
 	btcDeps := btc.ServiceDeps{
-		UserService:  userSvc,
-		TwoFAService: twoFaSvc,
-		JWTService:   jwtSvc,
+		UserService:        userSvc,
+		TwoFAService:       twoFaSvc,
+		JWTService:         jwtSvc,
+		CredentialsService: credentialsSvc,
 	}
 
 	btcWalletSvc, err := btc.NewWalletService(logger, &btcDeps)
