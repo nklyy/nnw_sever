@@ -2,40 +2,43 @@ package Solana
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/tyler-smith/go-bip39"
 	"math/big"
-	"net/http"
 	"testing"
 	"time"
 )
 
-type SolanaKeys struct {
-	PublicKey string  `json:"public_key"`
-	SecretKey []uint8 `json:"secret_key"`
-}
+func TestCreateWalletsAndMakeTransaction(t *testing.T) {
+	entropy1, _ := bip39.NewEntropy(256)
+	mnemonic1, _ := bip39.NewMnemonic(entropy1)
+	entropy2, _ := bip39.NewEntropy(256)
+	mnemonic2, _ := bip39.NewMnemonic(entropy2)
 
-func TestGenerateWalletFromMnemonic(t *testing.T) {
-	entropy, _ := bip39.NewEntropy(256)
-	mnemonic, _ := bip39.NewMnemonic(entropy)
-
-	resp, err := http.Get("http://localhost:3000/wallet/generate/" + mnemonic)
+	firstWallet, err := CreateWalletFromMnemonic(mnemonic1)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
-	defer resp.Body.Close()
-
-	var solanaKeys SolanaKeys
-	err = json.NewDecoder(resp.Body).Decode(&solanaKeys)
+	secondWallet, err := CreateWalletFromMnemonic(mnemonic2)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
-	fmt.Println(solanaKeys)
+	fmt.Println("first wallet: ", firstWallet)
+	fmt.Println("second wallet: ", secondWallet)
+
+	err = MakeAirDrop(firstWallet.PublicKey)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = MakeTransaction(firstWallet.PublicKey, firstWallet.SecretKey, secondWallet.PublicKey, 100)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestGenerateDeterministicSolanaWalletAndMakeAirDropTransaction(t *testing.T) {
