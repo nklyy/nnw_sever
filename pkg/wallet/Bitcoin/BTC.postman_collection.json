@@ -947,7 +947,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"encryptwallet\",\n  \"params\": [\"dwarf unique fork crunch common penalty behind great human gather then usual\"]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"encryptwallet\",\n  \"params\": [\"password\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -989,7 +989,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"walletpassphrase\",\n  \"params\": [\"dwarf unique fork crunch common penalty behind great human gather then usual\", 600]\n}",
+							"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"walletpassphrase\",\n  \"params\": [\"password\", 60]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1313,7 +1313,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"fundrawtransaction\",\r\n  \"params\": [\"020000000275f7d38aff1b5f4a78e029bec0ba6bfe3425af6832546ddcd4f2a95b056267410100000000ffffffffc4ee1493e2ab98fec811d830f4be3de15bde108fea8ed2a427b974accf9c31a70100000000ffffffff02e8030000000000001976a9147d2088ac227d1719087a7d62654f176b6c75a12b88ac10270000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac00000000\", {\"changeAddress\": \"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\", \"subtractFeeFromOutputs\": [0]}]\r\n}",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"fundrawtransaction\",\r\n  \"params\": [\"020000000275f7d38aff1b5f4a78e029bec0ba6bfe3425af6832546ddcd4f2a95b056267410100000000ffffffffc4ee1493e2ab98fec811d830f4be3de15bde108fea8ed2a427b974accf9c31a70100000000ffffffff01983a0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac00000000\", {\"changeAddress\": \"mq6Qd7JJKsgBYkMFsGCk24MHMxUkuyTnkU\", \"subtractFeeFromOutputs\": [0]}]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1509,7 +1509,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"decoderawtransaction\",\n  \"params\": [\"020000000275f7d38aff1b5f4a78e029bec0ba6bfe3425af6832546ddcd4f2a95b056267410100000000ffffffffc4ee1493e2ab98fec811d830f4be3de15bde108fea8ed2a427b974accf9c31a70100000000ffffffff0352020000000000001976a9147d2088ac227d1719087a7d62654f176b6c75a12b88ac10270000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac03250000000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"decoderawtransaction\",\n  \"params\": [\"020000000278fcb805a97bd6a0575b3827df062de7ead1b05b5815f01c06289922cc12dec1010000006a473044022057b780c9e1f89770435fc6c2877179a4e05e4dad1f6b6fcc672820286d416cd502200b25923f33bd7de934987e311df9159bb1d30973535e6f5dcaefd3ec4c7b73dd012102da2c61d91c67d6615b3471b14d3d54bfbfd181537a2a231cdabcf62bd4fe3dfaffffffff8cdad483c6830a50b400af342abd8edc176b2ea74e3f2b4b1b6f1f52be12107b000000006a47304402203c7cb6aa712a6130150f7c2e9ce7aacb41ac4f1cb8489ec1587992f4e3bdea8a02206afa34284bf26a5229a94b0742722301cee9cea21c828321dc210246946fafcf012102da2c61d91c67d6615b3471b14d3d54bfbfd181537a2a231cdabcf62bd4fe3dfaffffffff0215270000000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac04cf0200000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac00000000\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1586,44 +1586,6 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"sendrawtransaction\",\n  \"params\": [\"0100000001a0278af889001d43bcfb938d11907086a3783f459597e177c77bfa9b9263a8f9000000006b483045022100e2fb0bf4e5db0b0abfca51c0ad7dff30dd8a35a4e651a132ff52f9d1bb64df3302200416e5476f26f416ba5323769949ead9ab36d50f2b8014b36fd9432ac2a3f5ed012102da2c61d91c67d6615b3471b14d3d54bfbfd181537a2a231cdabcf62bd4fe3dfaffffffff0210270000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588aca0270000000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{host}}",
-					"host": [
-						"{{host}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Fund BTC Raw Transaction",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "password123123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "uuuset",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"fundrawtransaction\",\n  \"params\": [\"02000000016c803c496ecf5a094b677b08f4b7cceea1ca0370561ac443750f23b56e5ef8510100000000ffffffff02401f0000000000001976a91443738e06bb02b07ad9c67e9480918d5df41fe35588ac6c650100000000001976a914690cd6356789d30b99063632e0651a8d0c206c7f88ac00000000\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
