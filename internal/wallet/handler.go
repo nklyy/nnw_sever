@@ -1,4 +1,4 @@
-package btc
+package wallet
 
 import (
 	"fmt"
@@ -9,12 +9,12 @@ import (
 )
 
 type Handler struct {
-	walletSvc WalletService
+	walletSvc Service
 	jwtSvc    jwt.Service
 	shift     int
 }
 
-func NewHandler(walletSvc WalletService, jwtSvc jwt.Service, shift int) *Handler {
+func NewHandler(walletSvc Service, jwtSvc jwt.Service, shift int) *Handler {
 	return &Handler{
 		walletSvc: walletSvc,
 		jwtSvc:    jwtSvc,
@@ -26,7 +26,7 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 	v1 := router.Group("/api/v1")
 
 	// Create wallet
-	v1.POST("/create-btc-wallet", h.createWallet)
+	v1.POST("/create-wallet", h.createWallet)
 }
 
 func (h *Handler) createWallet(ctx echo.Context) error {

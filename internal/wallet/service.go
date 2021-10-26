@@ -1,4 +1,4 @@
-package btc
+package wallet
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 )
 
 //go:generate mockgen -source=wallet_service.go -destination=mocks/wallet_service_mock.go
-type WalletService interface {
+type Service interface {
 	CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*wallet.Payload, error)
 }
 
@@ -32,7 +32,7 @@ type ServiceDeps struct {
 	CredentialsService credentials.Service
 }
 
-func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (WalletService, error) {
+func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 	if deps == nil {
 		return nil, errors.NewInternal("invalid service dependencies")
 	}
@@ -68,6 +68,7 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 		return nil, err
 	}
 
+	// Create wallets
 	walletPayload, err := wallet.CreateBTCWallet(*dto.Backup, decodePass, "")
 	if err != nil {
 		return nil, err
