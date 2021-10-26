@@ -8,8 +8,8 @@ import (
 )
 
 type SolanaAccount struct {
-	PublicKey string  `json:"publicKey"`
-	SecretKey []uint8 `json:"secretKey"`
+	PublicKey string          `json:"publicKey"`
+	SecretKey json.RawMessage `json:"secretKey"`
 }
 
 type Transaction struct {
@@ -51,7 +51,7 @@ func MakeAirDrop(address string) error {
 	return nil
 }
 
-func MakeTransaction(fromAccountPubKey string, fromAccountSecKey []uint8, toAccountPubKey string, lamports int) error {
+func MakeTransaction(fromAccountPubKey string, fromAccountSecKey []byte, toAccountPubKey string, lamports int) error {
 	body := Transaction{FromAccount: SolanaAccount{
 		PublicKey: fromAccountPubKey,
 		SecretKey: fromAccountSecKey,
