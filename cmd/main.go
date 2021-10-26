@@ -9,9 +9,9 @@ import (
 	"nnw_s/internal/auth/jwt"
 	"nnw_s/internal/auth/twofa"
 	"nnw_s/internal/auth/verification"
-	"nnw_s/internal/btc"
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
+	"nnw_s/internal/wallet"
 	"nnw_s/pkg/mongodb"
 	"nnw_s/pkg/notificator"
 	"nnw_s/pkg/smtp"
@@ -113,24 +113,24 @@ func main() {
 		logger.Fatalf("failed to connect reset password service: %v", err)
 	}
 
-	// BTC
-	btcDeps := btc.ServiceDeps{
+	// Wallet
+	walletDeps := wallet.ServiceDeps{
 		UserService:        userSvc,
 		TwoFAService:       twoFaSvc,
 		JWTService:         jwtSvc,
 		CredentialsService: credentialsSvc,
 	}
 
-	btcWalletSvc, err := btc.NewWalletService(logger, &btcDeps)
+	walletSvc, err := wallet.NewWalletService(logger, &walletDeps)
 	if err != nil {
-		logger.Fatalf("failed to connect btc wallet service: %v", err)
+		logger.Fatalf("failed to connect wallet wallet service: %v", err)
 	}
 
 	authHandler := auth.NewHandler(registrationSvc, loginSvc, resetPasswordSvc, jwtSvc, cfg.Shift)
 	authHandler.SetupRoutes(router)
 
-	btcHandler := btc.NewHandler(btcWalletSvc, jwtSvc, cfg.Shift)
-	btcHandler.SetupRoutes(router)
+	walletHandler := wallet.NewHandler(walletSvc, jwtSvc, cfg.Shift)
+	walletHandler.SetupRoutes(router)
 
 	// NotFound Urls
 	echo.NotFoundHandler = func(c echo.Context) error {

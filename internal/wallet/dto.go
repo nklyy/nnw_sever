@@ -1,4 +1,4 @@
-package btc
+package wallet
 
 import (
 	"github.com/go-playground/validator/v10"

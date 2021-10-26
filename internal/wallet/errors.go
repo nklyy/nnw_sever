@@ -1,4 +1,4 @@
-package btc
+package wallet
 
 import (
 	"nnw_s/pkg/codes"
