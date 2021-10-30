@@ -2,48 +2,47 @@ package Solana
 
 import (
 	"fmt"
-	"nnw_s/pkg/wallet"
 )
 
-func init() {
-	wallet.Coins[wallet.SolType] = NewSolana
+type ISolanaWallet interface {
+	GetAddress() (string, error)
+	CreateWallet(mnemonic string) error
+	MakeTransfer(fromAccount string, toAccount string, lamports int) error
+	GetBalance(pubKey string) string
 }
 
-type Solana struct {
-	Name   string
-	Symbol string
-	Key    *wallet.Key
-
-	// eth token
-	contract string
+type SolanaWallet struct {
+	SolanaWeb3Client ISolanaWeb3Client
 }
 
-func NewSolana(key *wallet.Key) wallet.Wallet {
-	return &Solana{
-		Name:   "Solana",
-		Symbol: "Solana",
-		Key:    key,
+func NewSolana(solanaWeb3Client ISolanaWeb3Client) ISolanaWallet {
+	return &SolanaWallet{
+		SolanaWeb3Client: solanaWeb3Client,
 	}
 }
 
-func (c *Solana) GetType() uint32 {
-	return c.Key.Opt.CoinType
+func (s *SolanaWallet) CreateWallet(mnemonic string) error {
+	account, err := s.SolanaWeb3Client.CreateWalletFromMnemonic(mnemonic)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(account.PublicKey)
+	fmt.Println(account.SecretKey)
+
+	return nil
 }
 
-func (c *Solana) GetName() string {
-	return c.Name
+func (s *SolanaWallet) MakeTransfer(fromAccount string, toAccount string, lamports int) error {
+	//secretKey := getSecretKey()
+	err := s.SolanaWeb3Client.MakeTransaction(fromAccount, []byte{}, toAccount, lamports)
+	return err
 }
 
-func (c *Solana) GetSymbol() string {
-	return c.Symbol
-}
-
-func (c *Solana) GetKey() *wallet.Key {
-	return c.Key
-}
-
-func (c *Solana) GetAddress() (string, error) {
-	fmt.Println(*c.Key.Public.ToECDSA())
-	//return crypto.PubkeyToAddress(*c.key.PublicECDSA).Hex(), nil
+func (s *SolanaWallet) GetAddress() (string, error) {
 	return "", nil
+}
+
+func (s *SolanaWallet) GetBalance(pubKey string) string {
+	return ""
 }

@@ -7,6 +7,14 @@ import (
 	"net/http"
 )
 
+type ISolanaWeb3Client interface {
+	CreateWalletFromMnemonic(mnemonic string) (*SolanaAccount, error)
+	MakeAirDrop(address string) error
+	MakeTransaction(fromAccountPubKey string, fromAccountSecKey []byte, toAccountPubKey string, lamports int) error
+}
+
+type SolanaWeb3Client struct{}
+
 type SolanaAccount struct {
 	PublicKey string          `json:"publicKey"`
 	SecretKey json.RawMessage `json:"secretKey"`
@@ -18,7 +26,11 @@ type Transaction struct {
 	Lamports    int           `json:"lamports"`
 }
 
-func CreateWalletFromMnemonic(mnemonic string) (*SolanaAccount, error) {
+func NewSolanaWeb3Client() ISolanaWeb3Client {
+	return &SolanaWeb3Client{}
+}
+
+func (s *SolanaWeb3Client) CreateWalletFromMnemonic(mnemonic string) (*SolanaAccount, error) {
 	resp, err := http.Get("http://localhost:3000/api/v1/wallet/generate/" + mnemonic)
 	if err != nil {
 		return nil, err
@@ -35,7 +47,7 @@ func CreateWalletFromMnemonic(mnemonic string) (*SolanaAccount, error) {
 	return &solanaKeys, nil
 }
 
-func MakeAirDrop(address string) error {
+func (s *SolanaWeb3Client) MakeAirDrop(address string) error {
 	json_data, err := json.Marshal(map[string]string{"address": address})
 	resp, err := http.Post("http://localhost:3000/test/v1/make/air/drop", "application/json", bytes.NewBuffer(json_data))
 	if err != nil {
@@ -51,7 +63,7 @@ func MakeAirDrop(address string) error {
 	return nil
 }
 
-func MakeTransaction(fromAccountPubKey string, fromAccountSecKey []byte, toAccountPubKey string, lamports int) error {
+func (s *SolanaWeb3Client) MakeTransaction(fromAccountPubKey string, fromAccountSecKey []byte, toAccountPubKey string, lamports int) error {
 	body := Transaction{FromAccount: SolanaAccount{
 		PublicKey: fromAccountPubKey,
 		SecretKey: fromAccountSecKey,
