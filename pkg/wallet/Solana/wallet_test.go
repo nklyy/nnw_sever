@@ -29,7 +29,6 @@ func TestCreateWalletsAndMakeTransaction(t *testing.T) {
 
 	fmt.Println("first wallet: ", firstWallet)
 	fmt.Println("second wallet: ", secondWallet)
-	fmt.Println(string(firstWallet.SecretKey))
 	err = MakeAirDrop(firstWallet.PublicKey)
 	if err != nil {
 		t.Error(err)
