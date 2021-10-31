@@ -1,27 +1,16 @@
-package feature
+package transaction
 
 import (
-	"bytes"
-	"encoding/hex"
 	"errors"
-	"github.com/btcsuite/btcd/wire"
 	"log"
 	"math/big"
 	"math/rand"
+	"nnw_s/pkg/wallet/Bitcoin/rpc"
 	"sort"
 	"time"
 )
 
-//// UTXO ...
-//type UTXO struct {
-//	Hash      string
-//	TxIndex   int
-//	Amount    *big.Int
-//	Spendable bool
-//	PKScript  []byte
-//}
-
-func marshalUTXOs(utxos []*UTXO, amount, feeRate *big.Int) ([]*UTXO, *big.Int, error) {
+func marshalUTXOs(utxos []*rpc.UTXO, amount, feeRate *big.Int) ([]*rpc.UTXO, *big.Int, error) {
 	// same strategy as bitcoin core
 	// from: https://medium.com/@lopp/the-challenges-of-optimizing-unspent-output-selection-a3e5d05d13ef
 	// 1. sort the UTXOs from smallest to largest amounts
@@ -37,9 +26,8 @@ func marshalUTXOs(utxos []*UTXO, amount, feeRate *big.Int) ([]*UTXO, *big.Int, e
 
 		switch utxos[idx].Amount.Cmp(totalTxAmount) {
 		case 0:
-			var resp []*UTXO
+			var resp []*rpc.UTXO
 			resp = append(resp, utxos[idx])
-			// TODO: store these in the DB to be sure they aren't being claimed??
 			return resp, sumUTXOs(resp), nil
 
 		case 1:
@@ -49,7 +37,7 @@ func marshalUTXOs(utxos []*UTXO, amount, feeRate *big.Int) ([]*UTXO, *big.Int, e
 
 	// 3. calculate the sum of all UTXOs smaller than amount
 	sumSmall := big.NewInt(0)
-	var sumSmallUTXOs []*UTXO
+	var sumSmallUTXOs []*rpc.UTXO
 	for idx := range utxos {
 		switch utxos[idx].Amount.Cmp(amount) {
 		case -1:
@@ -75,13 +63,13 @@ func marshalUTXOs(utxos []*UTXO, amount, feeRate *big.Int) ([]*UTXO, *big.Int, e
 			totalFee := new(big.Int).Mul(feeRate, big.NewInt(int64(exactTxSize)))
 			totalTxAmount := new(big.Int).Add(totalFee, amount)
 			if utxos[idx].Amount.Cmp(totalTxAmount) == 1 {
-				var resp []*UTXO
+				var resp []*rpc.UTXO
 				resp = append(resp, utxos[idx])
 				return resp, sumUTXOs(resp), nil
 			}
 		}
 
-		// should reach here if not enought UXOs
+		// should reach here if not enough UXOs
 		log.Fatal("not enough UTXOs to meet target amount")
 
 	case 1:
@@ -94,8 +82,8 @@ func marshalUTXOs(utxos []*UTXO, amount, feeRate *big.Int) ([]*UTXO, *big.Int, e
 	return nil, nil, nil
 }
 
-func roundRobinSelectUTXOs(utxos []*UTXO, amount, feeRate *big.Int) ([]*UTXO, *big.Int, error) {
-	var possibilities [][]*UTXO
+func roundRobinSelectUTXOs(utxos []*rpc.UTXO, amount, feeRate *big.Int) ([]*rpc.UTXO, *big.Int, error) {
+	var possibilities [][]*rpc.UTXO
 	lenInput := len(utxos)
 	log.Printf("round robin select; lenInput: %v", lenInput)
 	if lenInput == 0 {
@@ -105,7 +93,7 @@ func roundRobinSelectUTXOs(utxos []*UTXO, amount, feeRate *big.Int) ([]*UTXO, *b
 	for i := 0; i < 1000; i++ {
 		selectedIdxs := make(map[int]bool)
 		var sum *big.Int
-		var possibility []*UTXO
+		var possibility []*rpc.UTXO
 		for {
 			for {
 				rand.Seed(time.Now().Unix())
@@ -156,7 +144,7 @@ func roundRobinSelectUTXOs(utxos []*UTXO, amount, feeRate *big.Int) ([]*UTXO, *b
 	return possibilities[smallestIdx], sumUTXOs(possibilities[smallestIdx]), nil
 }
 
-func sumUTXOs(utxos []*UTXO) *big.Int {
+func sumUTXOs(utxos []*rpc.UTXO) *big.Int {
 	sum := big.NewInt(0)
 	for idx := range utxos {
 		sum = sum.Add(sum, utxos[idx].Amount)
@@ -170,27 +158,27 @@ func calculateTotalTxBytes(txInLength, txOutLength int) int {
 	return txInLength*180 + txOutLength*34 + 10 + txInLength
 }
 
-func decodeRawTx(rawTx string) (*wire.MsgTx, error) {
-	raw, err := hex.DecodeString(rawTx)
-	if err != nil {
-		log.Printf("err decoding raw tx; err: %v", err)
-		return nil, err
-	}
-
-	var version int32 = 2
-	if rawTx[:8] == "01000000" {
-		version = 1
-	}
-	log.Printf("version: %d", version)
-
-	r := bytes.NewReader(raw)
-	tmpTx := wire.NewMsgTx(version)
-
-	err = tmpTx.BtcDecode(r, uint32(version), wire.BaseEncoding)
-	if err != nil {
-		log.Printf("could not decode raw tx; err: %v", err)
-		return nil, err
-	}
-
-	return tmpTx, nil
-}
+//func decodeRawTx(rawTx string) (*wire.MsgTx, error) {
+//	raw, err := hex.DecodeString(rawTx)
+//	if err != nil {
+//		log.Printf("err decoding raw tx; err: %v", err)
+//		return nil, err
+//	}
+//
+//	var version int32 = 2
+//	if rawTx[:8] == "01000000" {
+//		version = 1
+//	}
+//	log.Printf("version: %d", version)
+//
+//	r := bytes.NewReader(raw)
+//	tmpTx := wire.NewMsgTx(version)
+//
+//	err = tmpTx.BtcDecode(r, uint32(version), wire.BaseEncoding)
+//	if err != nil {
+//		log.Printf("could not decode raw tx; err: %v", err)
+//		return nil, err
+//	}
+//
+//	return tmpTx, nil
+//}

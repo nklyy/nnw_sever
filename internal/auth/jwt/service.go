@@ -14,6 +14,7 @@ const jwtExpiry = time.Second * 600
 type Service interface {
 	CreateJWT(ctx context.Context, email string) (*DTO, error)
 	VerifyJWT(ctx context.Context, id string) (*Payload, error)
+	DeleteJWT(ctx context.Context, token string) error
 }
 
 type service struct {
@@ -90,4 +91,13 @@ func (svc *service) VerifyJWT(ctx context.Context, token string) (*Payload, erro
 		return nil, ErrTokenDoesNotValid
 	}
 	return payload, nil
+}
+
+func (svc *service) DeleteJWT(ctx context.Context, token string) error {
+	err := svc.repo.DeleteJWT(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

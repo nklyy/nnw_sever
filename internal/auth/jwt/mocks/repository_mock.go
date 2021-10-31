@@ -35,6 +35,20 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// DeleteJWT mocks base method.
+func (m *MockRepository) DeleteJWT(ctx context.Context, token string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteJWT", ctx, token)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteJWT indicates an expected call of DeleteJWT.
+func (mr *MockRepositoryMockRecorder) DeleteJWT(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteJWT", reflect.TypeOf((*MockRepository)(nil).DeleteJWT), ctx, token)
+}
+
 // GetJWT mocks base method.
 func (m *MockRepository) GetJWT(ctx context.Context, token string) (*jwt.JWT, error) {
 	m.ctrl.T.Helper()

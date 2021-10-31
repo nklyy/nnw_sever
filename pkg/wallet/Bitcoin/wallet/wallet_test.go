@@ -1,9 +1,11 @@
-package Bitcoin
+package wallet
 
 import (
 	"fmt"
+	"nnw_s/pkg/wallet/Bitcoin/rpc"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestWalletAndTransaction(t *testing.T) {
@@ -30,12 +32,37 @@ func TestWalletAndTransaction(t *testing.T) {
 		m/44'/1'/0'/0/1:	mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u
 		WIF: 				cP4dZeLM1U39DAaui6q4rF2KwMXPJSA67znfJ2Y22CdzbqVMp2mb
 		***************************************************************************************
+		WALLET #3
+		BIP39 Mnemonic: 	gorilla chronic bronze random glass jar deny ten exotic female kind history
+		m/44'/1'/0'/0/1:	mvdu6WEXfk75gjcwm8hjSE5kwHMLy9BMfA
+		WIF: 				cMg7YGBar4sMMMswRP8EfrdhgHPYaFEmJfPMBJ1jNf5UrMQCv4DH
+		***************************************************************************************
+		WALLET #3
+		BIP39 Mnemonic: 	security cinnamon absent that side muscle pigeon fat habit sadness veteran subject
+		m/44'/1'/0'/0/1:	mrvZjXUNupoEpQf6KsgiVgzLz7DUca6Kfv
+		WIF: 				cTcEm5gFJ8H9FCxkuQLdBdSaxx7TPLGkZcE2JjWfZRKK1DcwdwMF
+		***************************************************************************************
 	*/
 
-	km, err := NewKeyManager(128, "", "dwarf unique fork crunch common penalty behind great human gather then usual")
-	if err != nil {
-		t.Error(err)
+	// 128: 12 phrases
+	// 256: 24 phrases
+
+	var km *KeyManager
+	var bError error
+	backUp := false
+
+	if backUp {
+		km, bError = NewKeyManager(128, "", "")
+		if bError != nil {
+			t.Error(bError)
+		}
+	} else {
+		km, bError = NewKeyManager(128, "", "dwarf unique fork crunch common penalty behind great human gather then usual")
+		if bError != nil {
+			t.Error(bError)
+		}
 	}
+
 	masterKey, err := km.GetMasterKey()
 	if err != nil {
 		t.Error(err)
@@ -47,6 +74,7 @@ func TestWalletAndTransaction(t *testing.T) {
 	fmt.Printf("\n%-18s %s\n", "BIP39 Mnemonic:", km.GetMnemonic())
 	fmt.Printf("%-18s %s\n", "BIP39 Passphrase:", passphrase)
 	fmt.Printf("%-18s %x\n", "BIP39 Seed:", km.GetSeed())
+	fmt.Printf("%-18s %s\n", "BIP32 Public:", masterKey.PublicKey().B58Serialize())
 	fmt.Printf("%-18s %s\n", "BIP32 Root Key:", masterKey.B58Serialize())
 
 	fmt.Printf("\n%-18s %-34s %-52s\n", "Path(BIP44)", "Bitcoin Address", "WIF(Wallet Import Format)")
@@ -63,23 +91,38 @@ func TestWalletAndTransaction(t *testing.T) {
 
 	fmt.Printf("%-18s %-34s %s\n", key.GetPath(), address, wif)
 	fmt.Println(strings.Repeat("-", 106))
-	fmt.Printf("\t\t\t\t\t\t%s \n\n", "Create Transaction")
 
-	// Transaction
-	privWif := "cPRZfnSdhrLvetS9KySaxdqD99yoy1mD3tHhDaMRDqM1gdWf36KD"
-	txHash := "51f85e6eb5230f7543c41a567003caa1eeccb7f4087b674b095acf6e493c806c"
-	destination := "mmfbzo2533SFa34ErmYNY4RdVtfw5XYK1u"
-	amount := int64(5000)
-	txFee := int64(300)
-	balance := int64(100700)
-
-	tx, err := CreateTransaction(privWif, txHash, destination, amount, txFee, balance)
+	createdWalletName, err := rpc.CreateWallet("ninth")
 	if err != nil {
 		t.Error(err)
 	}
 
+	err = rpc.EncryptWallet("password", createdWalletName)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = rpc.UnLockWallet("password", createdWalletName)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if backUp {
+		go func() {
+			err := rpc.ImportPrivateKey(wif, createdWalletName, true)
+			if err != nil {
+				t.Error(err)
+			}
+		}()
+		time.Sleep(2 * time.Second)
+	} else {
+		err := rpc.ImportPrivateKey(wif, createdWalletName, false)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	fmt.Printf("%-18s %s\n", "Your wallet:", address)
+	fmt.Printf("%-18s %s\n", "Your mnemonic:", km.GetMnemonic())
 	fmt.Println(strings.Repeat("-", 106))
-	fmt.Printf("%-18s %s\n", "Transaction:", tx)
-	//https://live.blockcypher.com/btc-testnet/tx/b494bb411e3bddb8c00bb0a84786146e6d0a03c85efa8b677883901c11cbad3c/
-	//curl -v --user uuuset --data-binary '{"jsonrpc": "2.0", "id": "curltest", "method": "getwalletinfo", "params": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/
 }

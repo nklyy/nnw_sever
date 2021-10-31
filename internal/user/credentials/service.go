@@ -13,6 +13,7 @@ import (
 type Service interface {
 	CreateCredentials(ctx context.Context, password string, secretOTP SecretOTP) (*DTO, error)
 	ValidatePassword(ctx context.Context, credentialsDTO *DTO, password string) error
+	DecodePassword(ctx context.Context, password string) (string, error)
 }
 
 type service struct {
@@ -60,4 +61,14 @@ func (svc *service) ValidatePassword(ctx context.Context, credentialsDTO *DTO, p
 		return ErrInvalidPassword
 	}
 	return nil
+}
+
+func (svc *service) DecodePassword(ctx context.Context, password string) (string, error) {
+	decodedPassword, err := helpers.CaesarShift(password, -svc.shift)
+	if err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to decode password: %v", err)
+		return "", ErrInvalidPassword
+	}
+
+	return decodedPassword, nil
 }
