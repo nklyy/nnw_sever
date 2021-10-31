@@ -2,45 +2,49 @@ package Solana
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 )
 
 type ISolanaWallet interface {
-	GetAddress() (string, error)
-	CreateWallet(mnemonic string) error
-	MakeTransfer(fromAccount string, toAccount string, lamports int) error
+	CreateWallet(mnemonic string) (*Payload, error)
 	GetBalance(pubKey string) string
+}
+
+type Payload struct {
+	WalletName string
+	Address    string
+	Mnemonic   string
 }
 
 type SolanaWallet struct {
 	SolanaWeb3Client ISolanaWeb3Client
 }
 
-func NewSolana(solanaWeb3Client ISolanaWeb3Client) ISolanaWallet {
+func NewSolanaWallet(solanaWeb3Client ISolanaWeb3Client) ISolanaWallet {
 	return &SolanaWallet{
 		SolanaWeb3Client: solanaWeb3Client,
 	}
 }
 
-func (s *SolanaWallet) CreateWallet(mnemonic string) error {
+func (s *SolanaWallet) CreateWallet(mnemonic string) (*Payload, error) {
 	account, err := s.SolanaWeb3Client.CreateWalletFromMnemonic(mnemonic)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	fmt.Println(account.PublicKey)
 	fmt.Println(account.SecretKey)
 
-	return nil
-}
+	walletUuid, err := uuid.NewUUID()
+	if err != nil {
+		return nil, err
+	}
 
-func (s *SolanaWallet) MakeTransfer(fromAccount string, toAccount string, lamports int) error {
-	//secretKey := getSecretKey()
-	err := s.SolanaWeb3Client.MakeTransaction(fromAccount, []byte{}, toAccount, lamports)
-	return err
-}
-
-func (s *SolanaWallet) GetAddress() (string, error) {
-	return "", nil
+	return &Payload{
+		WalletName: walletUuid.String(),
+		Address:    account.PublicKey,
+		Mnemonic:   mnemonic,
+	}, nil
 }
 
 func (s *SolanaWallet) GetBalance(pubKey string) string {
