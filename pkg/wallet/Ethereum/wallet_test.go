@@ -2,60 +2,57 @@ package Ethereum
 
 import (
 	"fmt"
-	"nnw_s/pkg/wallet"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
+	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
+	"github.com/tyler-smith/go-bip39"
+	"math/big"
 	"testing"
 )
 
 func TestGenerateEthHDWallet(t *testing.T) {
-	master, err := wallet.NewKey(
-		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
-	)
+	client, err := ethclient.Dial("http://localhost:8545")
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err)
 	}
 
-	ethWallet, _ := master.GetWallet(wallet.CoinType(wallet.EthType))
-	ethAddress, _ := ethWallet.GetAddress()
-	fmt.Println("Ethereum Address: ", ethAddress)
+	fmt.Println("we have a connection")
+	_ = client // we'll use this in the upcoming sections
 }
 
-func TestGenerateIOSTHDWallet(t *testing.T) {
-	master, err := wallet.NewKey(
-		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
-	)
+func TestGenerateEthHDWalletAndMakeTransaction(t *testing.T) {
+	entropy, _ := bip39.NewEntropy(256)
+	mnemonic, _ := bip39.NewMnemonic(entropy)
+
+	wallet, err := hdwallet.NewFromMnemonic(mnemonic)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err)
 	}
 
-	IOSTWallet, _ := master.GetWallet(wallet.CoinType(wallet.IOST))
-	IOSTAddress, _ := IOSTWallet.GetAddress()
-	fmt.Println("IOST Address: ", IOSTAddress)
-}
-
-func TestGenerateUSDCHDWallet(t *testing.T) {
-	master, err := wallet.NewKey(
-		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
-	)
+	path := hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/0")
+	account, err := wallet.Derive(path, false)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err)
 	}
 
-	USDCWallet, _ := master.GetWallet(wallet.CoinType(wallet.USDC))
-	USDCAddress, _ := USDCWallet.GetAddress()
-	fmt.Println("USDC Address: ", USDCAddress)
-}
+	fmt.Println(account.Address.Hex())
 
-func TestGenerateOMGHDWallet(t *testing.T) {
-	master, err := wallet.NewKey(
-		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
-	)
+	_, err = ethclient.Dial("http://localhost:8545")
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err)
 	}
 
-	OMGWallet, _ := master.GetWallet(wallet.CoinType(wallet.OMG))
-	OMGAddress, _ := OMGWallet.GetAddress()
-	fmt.Println("OMG Address: ", OMGAddress)
-}
+	fmt.Println("we have a connection")
+	nonce := uint64(0)
+	value := big.NewInt(1000000000000000000)
+	toAddress := account.Address
+	gasLimit := uint64(21000)
+	gasPrice := big.NewInt(21000000000)
+	var data []byte
 
-//0x2a5E7ddC6BcC51Ee37FD54C21E5a394DDc48bbf6
+	tx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, data)
+	_, err = wallet.SignTx(account, tx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
