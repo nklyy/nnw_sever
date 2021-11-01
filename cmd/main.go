@@ -88,7 +88,6 @@ func main() {
 		logger.Fatalf("failed to create JWT service: %v", err)
 	}
 
-	// AUTH
 	authDeps := auth.ServiceDeps{
 		UserService:         userSvc,
 		NotificatorService:  notificatorSvc,
@@ -113,7 +112,6 @@ func main() {
 		logger.Fatalf("failed to connect reset password service: %v", err)
 	}
 
-	// Wallet
 	walletDeps := wallet.ServiceDeps{
 		UserService:        userSvc,
 		TwoFAService:       twoFaSvc,
@@ -126,9 +124,16 @@ func main() {
 		logger.Fatalf("failed to connect wallet wallet service: %v", err)
 	}
 
+	// Handlers
+	// User
+	userHandler := user.NewHandler(userSvc, jwtSvc, cfg.Shift)
+	userHandler.SetupRoutes(router)
+
+	// Auth
 	authHandler := auth.NewHandler(registrationSvc, loginSvc, resetPasswordSvc, jwtSvc, cfg.Shift)
 	authHandler.SetupRoutes(router)
 
+	// Wallet
 	walletHandler := wallet.NewHandler(walletSvc, jwtSvc, cfg.Shift)
 	walletHandler.SetupRoutes(router)
 
