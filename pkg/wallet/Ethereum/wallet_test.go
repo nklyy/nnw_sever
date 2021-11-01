@@ -55,16 +55,16 @@ func TestGenerateEthHDWalletAndMakeTransaction(t *testing.T) {
 
 	value := big.NewInt(1000000000000000000)
 	toAddress := crypto.PubkeyToAddress(privateKeyECDSA.PublicKey)
-	gasLimit := uint64(21000)
+	gasLimit := big.NewInt(21000)
 
 	fmt.Println("toAddress:", &toAddress)
 
 	tx := types.NewTx(&types.DynamicFeeTx{
 		ChainID:   chainID,
 		Nonce:     nonce,
-		GasFeeCap: gasPrice,
+		GasFeeCap: gasLimit,
 		GasTipCap: gasTip,
-		Gas:       gasLimit,
+		Gas:       gasPrice.Uint64(),
 		To:        &toAddress,
 		Value:     value,
 		Data:      []byte{},
