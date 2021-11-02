@@ -4,6 +4,7 @@ import (
 	"context"
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/wallet"
 
 	"github.com/sirupsen/logrus"
 )
@@ -67,7 +68,7 @@ func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string,
 	userCredentials := credentials.MapToEntity(userCredentialsDTO)
 
 	// create user with new credentials
-	newUser, err := NewUser(dto.Email, userCredentials)
+	newUser, err := NewUser(dto.Email, wallet.NilWallet, userCredentials)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create user due to validation error: %v", err)
 		return "", err

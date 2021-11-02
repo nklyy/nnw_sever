@@ -1,7 +1,6 @@
 package wallet
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/internal/auth/jwt"
@@ -33,7 +32,6 @@ func (h *Handler) createWallet(ctx echo.Context) error {
 	var dto CreateWalletDTO
 
 	if err := ctx.Bind(&dto); err != nil {
-		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
@@ -45,9 +43,6 @@ func (h *Handler) createWallet(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
-
-	fmt.Println(jwtPayload)
-	fmt.Println(*dto.Backup)
 
 	walletPayload, err := h.walletSvc.CreateWallet(ctx.Request().Context(), &dto, jwtPayload.Email, h.shift)
 	if err != nil {

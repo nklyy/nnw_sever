@@ -13,19 +13,24 @@ type Payload struct {
 }
 
 func CreateBTCWallet(backup bool, password, mnemonic string) (*Payload, error) {
-	var km *KeyManager
-	var bError error
+	//var km *KeyManager
+	//var bError error
 
-	if !backup {
-		km, bError = NewKeyManager(256, password, "")
-		if bError != nil {
-			return nil, bError
-		}
-	} else {
-		km, bError = NewKeyManager(256, "", mnemonic)
-		if bError != nil {
-			return nil, bError
-		}
+	//if !backup {
+	//	km, bError = NewKeyManager(256, password, "")
+	//	if bError != nil {
+	//		return nil, bError
+	//	}
+	//} else {
+	//	km, bError = NewKeyManager(256, "", mnemonic)
+	//	if bError != nil {
+	//		return nil, bError
+	//	}
+	//}
+
+	km, err := NewKeyManager(256, password, mnemonic)
+	if err != nil {
+		return nil, err
 	}
 
 	//masterKey, err := km.GetMasterKey()

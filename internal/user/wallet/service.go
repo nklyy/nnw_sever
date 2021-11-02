@@ -3,6 +3,7 @@ package wallet
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	"github.com/tyler-smith/go-bip39"
 	"nnw_s/internal/auth/jwt"
 	"nnw_s/internal/auth/twofa"
 	"nnw_s/internal/user"
@@ -14,7 +15,7 @@ import (
 
 //go:generate mockgen -source=wallet_service.go -destination=mocks/wallet_service_mock.go
 type Service interface {
-	CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*btc_wallet.Payload, error)
+	CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*string, error)
 }
 
 type walletSvc struct {
@@ -53,7 +54,7 @@ func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 		return nil, errors.NewInternal("invalid logger")
 	}
 	return &walletSvc{
-		//userSvc:        deps.UserService,
+		userSvc:        deps.UserService,
 		twoFaSvc:       deps.TwoFAService,
 		jwtSvc:         deps.JWTService,
 		credentialsSvc: deps.CredentialsService,
@@ -61,7 +62,7 @@ func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 	}, nil
 }
 
-func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*btc_wallet.Payload, error) {
+func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*string, error) {
 	userDTO, _ := svc.userSvc.GetUserByEmail(ctx, email)
 
 	decodePass, err := svc.credentialsSvc.DecodePassword(ctx, dto.Password)
@@ -69,11 +70,29 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 		return nil, err
 	}
 
-	// Create wallets
-	walletPayload, err := btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, "")
+	// Create BTC wallets
+	//var walletPayload *btc_wallet.Payload
+	//if *dto.Backup {
+	//	// need to put user mnemonic
+	//	walletPayload, err = btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, "")
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//} else {
+	//	walletPayload, err = btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, "")
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//}
+	entropy, err := bip39.NewEntropy(256)
 	if err != nil {
 		return nil, err
 	}
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return nil, err
+	}
+	walletPayload, err := btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, mnemonic)
 
 	// map dto to user
 	userEntity, err := user.MapToEntity(userDTO)
@@ -84,10 +103,12 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 	var wallets []*wallet.Wallet
 
 	wallets = append(wallets, &wallet.Wallet{
+		Name:       "BTC",
 		WalletName: walletPayload.WalletName,
 		Address:    walletPayload.Address,
 	})
-	userEntity.SetWallet(wallets)
+
+	userEntity.SetWallet(&wallets)
 
 	// map back to dto
 	userDTO = user.MapToDTO(userEntity)
@@ -98,14 +119,5 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 		return nil, err
 	}
 
-	// map back to dto
-	userDTO = user.MapToDTO(userEntity)
-
-	// update user entity in storage
-	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
-		svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
-		return nil, err
-	}
-
-	return walletPayload, nil
+	return &mnemonic, nil
 }

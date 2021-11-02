@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/internal/auth/jwt"
@@ -33,7 +32,6 @@ func (h *Handler) getUser(ctx echo.Context) error {
 	var dto GetUserDTO
 
 	if err := ctx.Bind(&dto); err != nil {
-		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 

@@ -1,20 +1,24 @@
 package user
 
 import (
-	"fmt"
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/wallet"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func MapToDTO(u *User) *DTO {
-	fmt.Println(u)
-
 	var secretOTP string
 	if u.Credentials.SecretOTP != nil {
 		secretOTP = *u.Credentials.SecretOTP
 	}
+
+	var userWallet []*wallet.Wallet
+	if u.Wallet != nil {
+		userWallet = *u.Wallet
+	}
+
 	return &DTO{
 		ID:         u.ID.Hex(),
 		Email:      u.Email,
@@ -22,7 +26,7 @@ func MapToDTO(u *User) *DTO {
 		SecretOTP:  secretOTP,
 		Status:     string(u.Status),
 		IsVerified: u.IsVerified,
-		Wallet:     u.Wallet,
+		Wallet:     &userWallet,
 		CreatedAt:  u.CreatedAt,
 		UpdatedAt:  u.UpdatedAt,
 	}
