@@ -1,4 +1,4 @@
-package wallet
+package not_working
 
 import (
 	"github.com/tyler-smith/go-bip39"

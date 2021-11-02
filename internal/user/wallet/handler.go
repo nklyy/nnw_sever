@@ -54,7 +54,5 @@ func (h *Handler) createWallet(ctx echo.Context) error {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
 
-	fmt.Println(walletPayload)
-
-	return ctx.NoContent(200)
+	return ctx.JSON(http.StatusOK, walletPayload)
 }

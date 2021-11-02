@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/go-playground/validator/v10"
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/wallet"
 	"time"
 )
 
@@ -32,23 +33,23 @@ type GetUserDTO struct {
 }
 
 type DTO struct {
-	ID         string `json:"id"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	SecretOTP  string `json:"secret_otp"`
-	Status     string `json:"status"`
-	BtcWallet  string `json:"btc_wallet"`
-	IsVerified bool   `json:"is_verified"`
+	ID         string           `json:"id"`
+	Email      string           `json:"email"`
+	Password   string           `json:"password"`
+	SecretOTP  string           `json:"secret_otp"`
+	Status     string           `json:"status"`
+	Wallet     []*wallet.Wallet `json:"wallet"`
+	IsVerified bool             `json:"is_verified"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type GetUserResponseDTO struct {
-	Email      string `json:"email"`
-	Status     string `json:"status"`
-	IsVerified bool   `json:"is_verified"`
-	BtcWallet  string `json:"btc_wallet"`
+	Email      string           `json:"email"`
+	Status     string           `json:"status"`
+	IsVerified bool             `json:"is_verified"`
+	Wallet     []*wallet.Wallet `json:"wallet"`
 }
 
 func NormalizeGetUserResponseDTO(dto *DTO) *GetUserResponseDTO {
@@ -56,6 +57,6 @@ func NormalizeGetUserResponseDTO(dto *DTO) *GetUserResponseDTO {
 		Email:      dto.Email,
 		Status:     dto.Status,
 		IsVerified: dto.IsVerified,
-		BtcWallet:  dto.BtcWallet,
+		Wallet:     dto.Wallet,
 	}
 }

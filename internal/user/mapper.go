@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
 
@@ -8,6 +9,8 @@ import (
 )
 
 func MapToDTO(u *User) *DTO {
+	fmt.Println(u)
+
 	var secretOTP string
 	if u.Credentials.SecretOTP != nil {
 		secretOTP = *u.Credentials.SecretOTP
@@ -19,7 +22,7 @@ func MapToDTO(u *User) *DTO {
 		SecretOTP:  secretOTP,
 		Status:     string(u.Status),
 		IsVerified: u.IsVerified,
-		BtcWallet:  u.BtcWallet,
+		Wallet:     u.Wallet,
 		CreatedAt:  u.CreatedAt,
 		UpdatedAt:  u.UpdatedAt,
 	}
@@ -40,7 +43,7 @@ func MapToEntity(dto *DTO) (*User, error) {
 		},
 		Status:     Status(dto.Status),
 		IsVerified: dto.IsVerified,
-		BtcWallet:  dto.BtcWallet,
+		Wallet:     dto.Wallet,
 		CreatedAt:  dto.CreatedAt,
 		UpdatedAt:  dto.UpdatedAt,
 	}, nil

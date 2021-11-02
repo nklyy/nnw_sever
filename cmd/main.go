@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
@@ -11,13 +13,10 @@ import (
 	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
-	"nnw_s/internal/wallet"
+	"nnw_s/internal/user/wallet"
 	"nnw_s/pkg/mongodb"
 	"nnw_s/pkg/notificator"
 	"nnw_s/pkg/smtp"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {

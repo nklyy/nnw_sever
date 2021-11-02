@@ -6,7 +6,7 @@ import (
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 	"math/big"
-	"nnw_s/pkg/wallet"
+	"nnw_s/pkg/wallet/Bitcoin/not_working"
 	"testing"
 	"time"
 )
@@ -17,14 +17,14 @@ func TestGenerateSOLHDWallet(t *testing.T) {
 
 	//chair column reveal income inside soul blade concert series syrup ivory bulb
 	//Time to hack with only one card: 109 seconds
-	master, err := wallet.NewKey(
-		wallet.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
+	master, err := not_working.NewKey(
+		not_working.Mnemonic("chair column reveal income inside soul blade concert series syrup ivory bulb"),
 	)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	solWallet, _ := master.GetWallet(wallet.CoinType(wallet.SolType))
+	solWallet, _ := master.GetWallet(not_working.CoinType(not_working.SolType))
 	solAddress, _ := solWallet.GetAddress()
 	fmt.Println("Solana Address: ", solAddress)
 }

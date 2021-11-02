@@ -8,12 +8,13 @@ import (
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
-	"nnw_s/pkg/wallet/Bitcoin/wallet"
+	"nnw_s/pkg/wallet"
+	btc_wallet "nnw_s/pkg/wallet/Bitcoin/wallet"
 )
 
 //go:generate mockgen -source=wallet_service.go -destination=mocks/wallet_service_mock.go
 type Service interface {
-	CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*wallet.Payload, error)
+	CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*btc_wallet.Payload, error)
 }
 
 type walletSvc struct {
@@ -36,9 +37,9 @@ func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 	if deps == nil {
 		return nil, errors.NewInternal("invalid service dependencies")
 	}
-	if deps.UserService == nil {
-		return nil, errors.NewInternal("invalid user service")
-	}
+	//if deps.UserService == nil {
+	//	return nil, errors.NewInternal("invalid user service")
+	//}
 	if deps.TwoFAService == nil {
 		return nil, errors.NewInternal("invalid TwoFA service")
 	}
@@ -52,7 +53,7 @@ func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 		return nil, errors.NewInternal("invalid logger")
 	}
 	return &walletSvc{
-		userSvc:        deps.UserService,
+		//userSvc:        deps.UserService,
 		twoFaSvc:       deps.TwoFAService,
 		jwtSvc:         deps.JWTService,
 		credentialsSvc: deps.CredentialsService,
@@ -60,7 +61,7 @@ func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 	}, nil
 }
 
-func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*wallet.Payload, error) {
+func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*btc_wallet.Payload, error) {
 	userDTO, _ := svc.userSvc.GetUserByEmail(ctx, email)
 
 	decodePass, err := svc.credentialsSvc.DecodePassword(ctx, dto.Password)
@@ -69,7 +70,7 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 	}
 
 	// Create wallets
-	walletPayload, err := wallet.CreateBTCWallet(*dto.Backup, decodePass, "")
+	walletPayload, err := btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, "")
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +81,22 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 		return nil, err
 	}
 
-	userEntity.SetBtcWallet(walletPayload.WalletName)
+	var wallets []*wallet.Wallet
+
+	wallets = append(wallets, &wallet.Wallet{
+		WalletName: walletPayload.WalletName,
+		Address:    walletPayload.Address,
+	})
+	userEntity.SetWallet(wallets)
+
+	// map back to dto
+	userDTO = user.MapToDTO(userEntity)
+
+	// update user entity in storage
+	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
+		return nil, err
+	}
 
 	// map back to dto
 	userDTO = user.MapToDTO(userEntity)

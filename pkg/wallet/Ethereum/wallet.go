@@ -2,23 +2,23 @@ package Ethereum
 
 import (
 	"github.com/ethereum/go-ethereum/crypto"
-	"nnw_s/pkg/wallet"
+	"nnw_s/pkg/wallet/Bitcoin/not_working"
 )
 
 func init() {
-	wallet.Coins[wallet.EthType] = NewETH
+	not_working.Coins[not_working.EthType] = NewETH
 }
 
 type ETH struct {
 	Name   string
 	Symbol string
-	Key    *wallet.Key
+	Key    *not_working.Key
 
 	// eth token
 	contract string
 }
 
-func NewETH(key *wallet.Key) wallet.Wallet {
+func NewETH(key *not_working.Key) not_working.Wallet {
 	return &ETH{
 		Name:   "Ethereum",
 		Symbol: "ETH",
@@ -38,7 +38,7 @@ func (c *ETH) GetSymbol() string {
 	return c.Symbol
 }
 
-func (c *ETH) GetKey() *wallet.Key {
+func (c *ETH) GetKey() *not_working.Key {
 	return c.Key
 }
 

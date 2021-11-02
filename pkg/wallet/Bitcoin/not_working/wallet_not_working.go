@@ -1,20 +1,16 @@
 package not_working
 
-import (
-	"nnw_s/pkg/wallet"
-)
-
 func init() {
-	wallet.Coins[wallet.BtcType] = NewBTC
+	Coins[BtcType] = NewBTC
 }
 
 type BTC struct {
 	Name   string
 	Symbol string
-	Key    *wallet.Key
+	Key    *Key
 }
 
-func NewBTC(key *wallet.Key) wallet.Wallet {
+func NewBTC(key *Key) Wallet {
 	return &BTC{
 		Name:   "Bitcoin",
 		Symbol: "BTC",
@@ -34,7 +30,7 @@ func (c *BTC) GetSymbol() string {
 	return c.Symbol
 }
 
-func (c *BTC) GetKey() *wallet.Key {
+func (c *BTC) GetKey() *Key {
 	return c.Key
 }
 

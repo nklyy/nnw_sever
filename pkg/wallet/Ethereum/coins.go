@@ -1,20 +1,20 @@
 package Ethereum
 
 import (
-	"nnw_s/pkg/wallet"
+	"nnw_s/pkg/wallet/Bitcoin/not_working"
 )
 
 func init() {
-	wallet.Coins[wallet.USDC] = NewUSDC
-	wallet.Coins[wallet.IOST] = NewIOST
-	wallet.Coins[wallet.OMG] = NewOMG
+	not_working.Coins[not_working.USDC] = NewUSDC
+	not_working.Coins[not_working.IOST] = NewIOST
+	not_working.Coins[not_working.OMG] = NewOMG
 }
 
 type ETHCoins struct {
 	*ETH
 }
 
-func NewIOST(key *wallet.Key) wallet.Wallet {
+func NewIOST(key *not_working.Key) not_working.Wallet {
 	token := NewETH(key).(*ETH)
 	token.Name = "IOStoken"
 	token.Symbol = "IOST"
@@ -23,7 +23,7 @@ func NewIOST(key *wallet.Key) wallet.Wallet {
 	return &ETHCoins{ETH: token}
 }
 
-func NewUSDC(key *wallet.Key) wallet.Wallet {
+func NewUSDC(key *not_working.Key) not_working.Wallet {
 	token := NewETH(key).(*ETH)
 	token.Name = "USD Coin"
 	token.Symbol = "USDC"
@@ -32,7 +32,7 @@ func NewUSDC(key *wallet.Key) wallet.Wallet {
 	return &ETHCoins{ETH: token}
 }
 
-func NewOMG(key *wallet.Key) wallet.Wallet {
+func NewOMG(key *not_working.Key) not_working.Wallet {
 	token := NewETH(key).(*ETH)
 	token.Name = "OMG Coin"
 	token.Symbol = "OMG"
