@@ -16,6 +16,7 @@ import (
 //go:generate mockgen -source=wallet_service.go -destination=mocks/wallet_service_mock.go
 type Service interface {
 	CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*string, error)
+	GetWallet(ctx context.Context, email string, walletId string) (*wallet.Wallet, error)
 }
 
 type walletSvc struct {
@@ -120,4 +121,29 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 	}
 
 	return &mnemonic, nil
+}
+
+func (svc *walletSvc) GetWallet(ctx context.Context, email string, walletId string) (*wallet.Wallet, error) {
+	userDTO, err := svc.userSvc.GetUserByWalletID(ctx, email, walletId)
+	if err != nil {
+		return nil, err
+	}
+
+	// map dto to user
+	userEntity, err := user.MapToEntity(userDTO)
+	if err != nil {
+		return nil, err
+	}
+
+	var walletPayload wallet.Wallet
+	for _, w := range *userEntity.Wallet {
+		if w.WalletName == walletId {
+			walletPayload.Name = w.Name
+			walletPayload.WalletName = w.WalletName
+			walletPayload.Address = w.Address
+			break
+		}
+	}
+
+	return &walletPayload, nil
 }

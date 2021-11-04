@@ -13,6 +13,7 @@ import (
 type Service interface {
 	GetUserByID(ctx context.Context, userID string) (*DTO, error)
 	GetUserByEmail(ctx context.Context, email string) (*DTO, error)
+	GetUserByWalletID(ctx context.Context, email, walletId string) (*DTO, error)
 
 	CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error)
 
@@ -103,4 +104,12 @@ func (svc *service) DeleteUserByEmail(ctx context.Context, email string) error {
 		return err
 	}
 	return nil
+}
+
+func (svc *service) GetUserByWalletID(ctx context.Context, email, walletId string) (*DTO, error) {
+	u, err := svc.repo.GetWalletByID(ctx, email, walletId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToDTO(u), nil
 }

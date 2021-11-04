@@ -45,3 +45,8 @@ type CreateWalletDTO struct {
 	Backup   *bool  `json:"backup" validate:"required"`
 	Jwt      string `json:"jwt" validate:"required"`
 }
+
+type GetWalletDTO struct {
+	Jwt      string `json:"jwt" validate:"required"`
+	WalletId string `json:"wallet_id" validate:"required"`
+}
