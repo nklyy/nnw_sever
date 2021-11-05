@@ -7,8 +7,10 @@ import (
 
 const (
 	StatusInvalidRequest errors.Status = "invalid_request"
+	StatusInvalidWallet  errors.Status = "invalid_wallet"
 )
 
 var (
 	ErrInvalidRequest = errors.New(codes.BadRequest, StatusInvalidRequest)
+	ErrInvalidWallet  = errors.New(codes.BadRequest, StatusInvalidWallet)
 )
