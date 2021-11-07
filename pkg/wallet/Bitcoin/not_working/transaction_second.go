@@ -34,9 +34,9 @@ func GetUTXO(address string) (string, int64, string, error) {
 	//body, err := ioutil.ReadAll(response.Body)
 
 	// based on the response you get, should define a struct
-	// so before unmarshaling check your JSON response model
+	// so before unmarshaling check your JSON response models
 
-	//var blockChairResp = model.BlockChairResp{}
+	//var blockChairResp = models.BlockChairResp{}
 	//err = json.Unmarshal(body, &blockChairResp)
 	//if err != nil {
 	// fmt.Println("error in GetUTXO, json.Unmarshal")

@@ -1,86 +1,48 @@
 package Ethereum
 
 import (
-	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 	"github.com/tyler-smith/go-bip39"
-	"math/big"
+	"nnw_s/pkg/wallet/Ethereum/modules"
 	"testing"
 )
 
 func TestGenerateEthHDWalletAndMakeTransaction(t *testing.T) {
 	entropy, _ := bip39.NewEntropy(256)
 	mnemonic, _ := bip39.NewMnemonic(entropy)
+	fmt.Println("\n" + mnemonic)
 
 	privateKeyECDSA, err := createHdWallet(mnemonic)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	client, err := ethclient.Dial("http://localhost:8545")
+	client, err := ethclient.Dial("http://localhost:7545")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ctx := context.Background()
-	chainID, err := client.ChainID(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	gasTip, err := client.SuggestGasTipCap(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	gasPrice, err := client.SuggestGasPrice(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	blockNumber, err := client.BlockNumber(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nonce, err := client.NonceAt(ctx, crypto.PubkeyToAddress(privateKeyECDSA.PublicKey), new(big.Int).SetUint64(blockNumber))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	value := big.NewInt(1000000000000000000)
+	fromPrivKey := "f24c39e22f1c128f4c4e09fd2ae34d772e264493011a3caf15184113eae6f6c0"
 	toAddress := crypto.PubkeyToAddress(privateKeyECDSA.PublicKey)
-	gasLimit := big.NewInt(21000)
+	fmt.Println("\n toAddress:", &toAddress)
 
-	fmt.Println("toAddress:", &toAddress)
-
-	tx := types.NewTx(&types.DynamicFeeTx{
-		ChainID:   chainID,
-		Nonce:     nonce,
-		GasFeeCap: gasLimit,
-		GasTipCap: gasTip,
-		Gas:       gasPrice.Uint64(),
-		To:        &toAddress,
-		Value:     value,
-		Data:      []byte{},
-	})
-
-	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKeyECDSA)
+	tx, err := modules.TransferEth(*client, fromPrivKey, toAddress.String(), 100000)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = client.SendTransaction(ctx, signedTx)
+	fmt.Println("\n transaction:", tx)
+
+	balance, err := modules.GetAddressBalance(*client, toAddress.String())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fmt.Printf("tx sent: %s", signedTx.Hash().Hex())
+	fmt.Println("\n balance:", balance)
 }
 
 func createHdWallet(mnemonic string) (*ecdsa.PrivateKey, error) {
@@ -105,6 +67,8 @@ func createHdWallet(mnemonic string) (*ecdsa.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Print("Private key:", privateKey)
 
 	return privateKeyECDSA, nil
 }
