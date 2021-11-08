@@ -124,6 +124,9 @@ func (h *Handler) getBalance(ctx echo.Context) error {
 	}
 
 	balance, err := h.walletSvc.GetBalance(ctx.Request().Context(), &dto)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
 
 	return ctx.JSON(http.StatusOK, balance)
 }
