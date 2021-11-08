@@ -2,14 +2,17 @@ package wallet
 
 import (
 	"context"
+	"github.com/btcsuite/btcutil"
 	"github.com/sirupsen/logrus"
 	"github.com/tyler-smith/go-bip39"
+	"math/big"
 	"nnw_s/internal/auth/jwt"
 	"nnw_s/internal/auth/twofa"
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
 	"nnw_s/pkg/wallet"
+	"nnw_s/pkg/wallet/Bitcoin/rpc"
 	btc_wallet "nnw_s/pkg/wallet/Bitcoin/wallet"
 )
 
@@ -17,6 +20,7 @@ import (
 type Service interface {
 	CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*string, error)
 	GetWallet(ctx context.Context, email string, walletId string) (*wallet.Wallet, error)
+	GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) (*BalanceDTO, error)
 }
 
 type walletSvc struct {
@@ -146,4 +150,32 @@ func (svc *walletSvc) GetWallet(ctx context.Context, email string, walletId stri
 	}
 
 	return &walletPayload, nil
+}
+
+func (svc *walletSvc) GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) (*BalanceDTO, error) {
+
+	var balanceInt *big.Int
+	var balanceStr *btcutil.Amount
+
+	switch dto.Name {
+	case "BTC":
+		warning, err := rpc.LoadWallet(dto.WalletId)
+		if err != nil {
+			return nil, err
+		}
+
+		if warning != "" {
+			return nil, errors.NewInternal(warning)
+		}
+
+		balanceInt, balanceStr, err = rpc.GetBalance(dto.WalletId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &BalanceDTO{
+		BalanceInt: balanceInt,
+		BalanceStr: balanceStr.String(),
+	}, nil
 }

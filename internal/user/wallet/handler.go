@@ -31,8 +31,8 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 	v1.POST("/create-wallet", h.createWallet)
 
 	//Wallet
+	v1.POST("/get-balance", h.getBalance)
 	//v1.POST("/unlock", h.unlockWallet)
-	//v1.POST("get-balance", h.getBalance)
 	//v1.POST("/get-tx", h.getTX)
 }
 
@@ -107,28 +107,26 @@ func (h *Handler) getWallet(ctx echo.Context) error {
 //
 //}
 
-//func (h *Handler) getBalance(ctx echo.Context) error {
-//	var dto GetWalletBalanceDTO
-//
-//	if err := ctx.Bind(&dto); err != nil {
-//		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
-//	}
-//
-//	if err := Validate(dto, h.shift); err != nil {
-//		return ctx.JSON(http.StatusBadRequest, err)
-//	}
-//
-//	jwtPayload, err := h.jwtSvc.VerifyJWT(ctx.Request().Context(), dto.Jwt)
-//	if err != nil {
-//		return ctx.JSON(http.StatusBadRequest, err)
-//	}
-//
-//	switch dto.Name {
-//	case "BTC":
-//		// Call get balance from btc rpc
-//		fmt.Println("BTC")
-//	}
-//}
+func (h *Handler) getBalance(ctx echo.Context) error {
+	var dto GetWalletBalanceDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	_, err := h.jwtSvc.VerifyJWT(ctx.Request().Context(), dto.Jwt)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	balance, err := h.walletSvc.GetBalance(ctx.Request().Context(), &dto)
+
+	return ctx.JSON(http.StatusOK, balance)
+}
 
 //func (h *Handler) getTX(ctx echo.Context) error {
 //	var dto GetWalletTxDTO

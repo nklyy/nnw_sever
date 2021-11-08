@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"github.com/go-playground/validator/v10"
+	"math/big"
 	"nnw_s/pkg/errors"
 	"nnw_s/pkg/helpers"
 )
@@ -38,6 +39,11 @@ func Validate(dto interface{}, shift int) error {
 		return validationErr
 	}
 	return nil
+}
+
+type BalanceDTO struct {
+	BalanceInt *big.Int `json:"balance_int"`
+	BalanceStr string   `json:"balance_str"`
 }
 
 type CreateWalletDTO struct {
