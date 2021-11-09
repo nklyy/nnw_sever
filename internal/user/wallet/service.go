@@ -175,6 +175,7 @@ func (svc *walletSvc) GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) 
 	}
 
 	return &BalanceDTO{
+		Balance:    float64(balanceStr.MulF64(1e-8)),
 		BalanceInt: balanceInt,
 		BalanceStr: balanceStr.String(),
 	}, nil

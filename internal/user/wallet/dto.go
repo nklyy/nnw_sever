@@ -42,6 +42,7 @@ func Validate(dto interface{}, shift int) error {
 }
 
 type BalanceDTO struct {
+	Balance    float64  `json:"balance"`
 	BalanceInt *big.Int `json:"balance_int"`
 	BalanceStr string   `json:"balance_str"`
 }
