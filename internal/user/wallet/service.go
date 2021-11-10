@@ -21,6 +21,7 @@ type Service interface {
 	CreateWallet(ctx context.Context, dto *CreateWalletDTO, email string, shift int) (*string, error)
 	GetWallet(ctx context.Context, email string, walletId string) (*wallet.Wallet, error)
 	GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) (*BalanceDTO, error)
+	GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*TxsDTO, error)
 }
 
 type walletSvc struct {
@@ -179,4 +180,37 @@ func (svc *walletSvc) GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) 
 		BalanceInt: balanceInt,
 		BalanceStr: balanceStr.String(),
 	}, nil
+}
+
+func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*TxsDTO, error) {
+
+	var arrTxs []*TxsDTO
+
+	switch dto.Name {
+	case "BTC":
+		warning, err := rpc.LoadWallet(dto.WalletId)
+		if err != nil {
+			return nil, err
+		}
+
+		if warning != "" {
+			return nil, errors.NewInternal(warning)
+		}
+
+		_, txs, err := rpc.TransactionList(dto.WalletId)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, tx := range txs {
+			arrTxs = append(arrTxs, &TxsDTO{
+				Address:  tx.Address,
+				Category: tx.Category,
+				Amount:   tx.Amount,
+				Txid:     tx.Txid,
+			})
+		}
+	}
+
+	return arrTxs, nil
 }

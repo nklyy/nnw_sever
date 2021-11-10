@@ -47,6 +47,13 @@ type BalanceDTO struct {
 	BalanceStr string   `json:"balance_str"`
 }
 
+type TxsDTO struct {
+	Address  string      `json:"address"`
+	Category string      `json:"category"`
+	Amount   interface{} `json:"amount"`
+	Txid     string      `json:"txid"`
+}
+
 type CreateWalletDTO struct {
 	Password string `json:"password" validate:"required,password"`
 	Backup   *bool  `json:"backup" validate:"required"`
@@ -74,5 +81,5 @@ type GetWalletTxDTO struct {
 	Jwt      string `json:"jwt" validate:"required"`
 	Name     string `json:"name" validate:"required"`
 	WalletId string `json:"wallet_id" validate:"required"`
-	Address  string `json:"address" validate:"required"`
+	//Address  string `json:"address" validate:"required"`
 }
