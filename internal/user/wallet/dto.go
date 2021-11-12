@@ -81,5 +81,5 @@ type GetWalletTxDTO struct {
 	Jwt      string `json:"jwt" validate:"required"`
 	Name     string `json:"name" validate:"required"`
 	WalletId string `json:"wallet_id" validate:"required"`
-	//Address  string `json:"address" validate:"required"`
+	Address  string `json:"address" validate:"required"`
 }

@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"context"
+	"fmt"
 	"github.com/btcsuite/btcutil"
 	"github.com/sirupsen/logrus"
 	"github.com/tyler-smith/go-bip39"
@@ -11,6 +12,7 @@ import (
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/helpers"
 	"nnw_s/pkg/wallet"
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
 	btc_wallet "nnw_s/pkg/wallet/Bitcoin/wallet"
@@ -210,6 +212,23 @@ func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*
 				Txid:     tx.Txid,
 			})
 		}
+
+		var arrTx []string
+		for _, tx := range txs {
+			if !helpers.ContainsStr(arrTx, tx.Txid) {
+				arrTx = append(arrTx, tx.Txid)
+			}
+		}
+
+		asd, err := rpc.GetRawTransaction(dto.WalletId, dto.Address, arrTx[0])
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Println(asd)
+
+		//fmt.Println(arrTx)
+		//fmt.Println(len(arrTx))
 	}
 
 	return arrTxs, nil
