@@ -1,4 +1,4 @@
-package modules
+package Ethereum
 
 import (
 	"context"
@@ -10,10 +10,26 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
-	"nnw_s/pkg/wallet/Ethereum/models"
 )
 
-func GetLatestBlock(client ethclient.Client) *models.Block {
+type ITransactionClient interface {
+	GetLatestBlock() *Block
+	GetTxByHash(hash common.Hash) *Transaction
+	GetLogTransactions(address []common.Address) (*[]types.Log, error)
+	TransferEth(privKey string, to string, amount int64) (string, error)
+}
+
+type TransactionClient struct {
+	client ethclient.Client
+}
+
+func NewTransactionClient(client ethclient.Client) ITransactionClient {
+	return &TransactionClient{
+		client: client,
+	}
+}
+
+func (t *TransactionClient) GetLatestBlock() *Block {
 	// We add a recover function from panics to prevent our API from crashing due to an unexpected error
 	defer func() {
 		if err := recover(); err != nil {
@@ -22,25 +38,25 @@ func GetLatestBlock(client ethclient.Client) *models.Block {
 	}()
 
 	// Query the latest block
-	header, _ := client.HeaderByNumber(context.Background(), nil)
+	header, _ := t.client.HeaderByNumber(context.Background(), nil)
 	blockNumber := big.NewInt(header.Number.Int64())
-	block, err := client.BlockByNumber(context.Background(), blockNumber)
+	block, err := t.client.BlockByNumber(context.Background(), blockNumber)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	// Build the response to our model
-	_block := &models.Block{
+	_block := &Block{
 		BlockNumber:       block.Number().Int64(),
 		Timestamp:         block.Time(),
 		Difficulty:        block.Difficulty().Uint64(),
 		Hash:              block.Hash().String(),
 		TransactionsCount: len(block.Transactions()),
-		Transactions:      []models.Transaction{},
+		Transactions:      []Transaction{},
 	}
 
 	for _, tx := range block.Transactions() {
-		_block.Transactions = append(_block.Transactions, models.Transaction{
+		_block.Transactions = append(_block.Transactions, Transaction{
 			Hash:     tx.Hash().String(),
 			Value:    tx.Value().String(),
 			Gas:      tx.Gas(),
@@ -54,7 +70,7 @@ func GetLatestBlock(client ethclient.Client) *models.Block {
 }
 
 // GetTxByHash by a given hash
-func GetTxByHash(client ethclient.Client, hash common.Hash) *models.Transaction {
+func (t *TransactionClient) GetTxByHash(hash common.Hash) *Transaction {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -62,12 +78,12 @@ func GetTxByHash(client ethclient.Client, hash common.Hash) *models.Transaction 
 		}
 	}()
 
-	tx, pending, err := client.TransactionByHash(context.Background(), hash)
+	tx, pending, err := t.client.TransactionByHash(context.Background(), hash)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	return &models.Transaction{
+	return &Transaction{
 		Hash:     tx.Hash().String(),
 		Value:    tx.Value().String(),
 		Gas:      tx.Gas(),
@@ -79,7 +95,7 @@ func GetTxByHash(client ethclient.Client, hash common.Hash) *models.Transaction 
 }
 
 // GetLogTransactions get list of transactions
-func GetLogTransactions(client ethclient.Client, address []common.Address) (*[]types.Log, error) {
+func (t *TransactionClient) GetLogTransactions(address []common.Address) (*[]types.Log, error) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -87,9 +103,9 @@ func GetLogTransactions(client ethclient.Client, address []common.Address) (*[]t
 		}
 	}()
 
-	latestBlock := GetLatestBlock(client)
+	latestBlock := t.GetLatestBlock()
 
-	log, err := client.FilterLogs(context.Background(), ethereum.FilterQuery{
+	log, err := t.client.FilterLogs(context.Background(), ethereum.FilterQuery{
 		BlockHash: nil,
 		FromBlock: nil,
 		ToBlock:   big.NewInt(latestBlock.BlockNumber),
@@ -104,18 +120,7 @@ func GetLogTransactions(client ethclient.Client, address []common.Address) (*[]t
 	return &log, nil
 }
 
-// GetAddressBalance returns the given address balance =P
-func GetAddressBalance(client ethclient.Client, address string) (string, error) {
-	account := common.HexToAddress(address)
-	balance, err := client.BalanceAt(context.Background(), account, nil)
-	if err != nil {
-		return "0", err
-	}
-
-	return balance.String(), nil
-}
-
-func TransferEth(client ethclient.Client, privKey string, to string, amount int64) (string, error) {
+func (t *TransactionClient) TransferEth(privKey string, to string, amount int64) (string, error) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -139,14 +144,14 @@ func TransferEth(client ethclient.Client, privKey string, to string, amount int6
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
 
 	// Now we can read the nonce that we should use for the account's transaction.
-	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	nonce, err := t.client.PendingNonceAt(context.Background(), fromAddress)
 	if err != nil {
 		return "", err
 	}
 
 	value := big.NewInt(amount) // in wei (1 eth)
 	gasLimit := uint64(21000)   // in units
-	gasPrice, err := client.SuggestGasPrice(context.Background())
+	gasPrice, err := t.client.SuggestGasPrice(context.Background())
 	if err != nil {
 		return "", err
 	}
@@ -165,7 +170,7 @@ func TransferEth(client ethclient.Client, privKey string, to string, amount int6
 		Data:     data,
 	})
 
-	chainID, err := client.NetworkID(context.Background())
+	chainID, err := t.client.NetworkID(context.Background())
 	if err != nil {
 		return "", err
 	}
@@ -177,7 +182,7 @@ func TransferEth(client ethclient.Client, privKey string, to string, amount int6
 	}
 
 	// Now we are finally ready to broadcast the transaction to the entire network
-	err = client.SendTransaction(context.Background(), signedTx)
+	err = t.client.SendTransaction(context.Background(), signedTx)
 	if err != nil {
 		return "", err
 	}

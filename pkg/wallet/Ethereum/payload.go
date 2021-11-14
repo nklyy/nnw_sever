@@ -1,4 +1,4 @@
-package models
+package Ethereum
 
 // Block data structure
 type Block struct {
