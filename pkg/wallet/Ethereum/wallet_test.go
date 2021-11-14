@@ -3,6 +3,7 @@ package Ethereum
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
@@ -26,7 +27,7 @@ func TestGenerateEthHDWalletAndMakeTransaction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fromPrivKey := "f24c39e22f1c128f4c4e09fd2ae34d772e264493011a3caf15184113eae6f6c0"
+	fromPrivKey := "2f5199067115f233332df47de048fe75e0df518b34ee0dafd4cfb5bc44cd212f"
 	toAddress := crypto.PubkeyToAddress(privateKeyECDSA.PublicKey)
 	fmt.Println("\n toAddress:", &toAddress)
 
@@ -43,6 +44,13 @@ func TestGenerateEthHDWalletAndMakeTransaction(t *testing.T) {
 	}
 
 	fmt.Println("\n balance:", balance)
+
+	log, err := modules.GetLogTransactions(*client, []common.Address{toAddress})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println("\n log:", log)
 }
 
 func createHdWallet(mnemonic string) (*ecdsa.PrivateKey, error) {

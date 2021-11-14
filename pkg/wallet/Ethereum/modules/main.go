@@ -25,7 +25,6 @@ func GetLatestBlock(client ethclient.Client) *models.Block {
 	header, _ := client.HeaderByNumber(context.Background(), nil)
 	blockNumber := big.NewInt(header.Number.Int64())
 	block, err := client.BlockByNumber(context.Background(), blockNumber)
-
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -79,8 +78,8 @@ func GetTxByHash(client ethclient.Client, hash common.Hash) *models.Transaction 
 	}
 }
 
-// getLogTransactions get list of transactions
-func getLogTransactions(client ethclient.Client, address []common.Address) (*[]types.Log, error) {
+// GetLogTransactions get list of transactions
+func GetLogTransactions(client ethclient.Client, address []common.Address) (*[]types.Log, error) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -88,15 +87,12 @@ func getLogTransactions(client ethclient.Client, address []common.Address) (*[]t
 		}
 	}()
 
-	latestBlockNumber, err := client.BlockNumber(context.Background())
-	if err != nil {
-		return nil, err
-	}
+	latestBlock := GetLatestBlock(client)
 
 	log, err := client.FilterLogs(context.Background(), ethereum.FilterQuery{
 		BlockHash: nil,
 		FromBlock: nil,
-		ToBlock:   big.NewInt(int64(latestBlockNumber)),
+		ToBlock:   big.NewInt(latestBlock.BlockNumber),
 		Addresses: address,
 		Topics:    nil,
 	})
