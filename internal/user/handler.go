@@ -1,7 +1,6 @@
-package wallet
+package user
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/internal/auth/jwt"
@@ -9,16 +8,16 @@ import (
 )
 
 type Handler struct {
-	walletSvc Service
-	jwtSvc    jwt.Service
-	shift     int
+	userSvc Service
+	jwtSvc  jwt.Service
+	shift   int
 }
 
-func NewHandler(walletSvc Service, jwtSvc jwt.Service, shift int) *Handler {
+func NewHandler(userSvc Service, jwtSvc jwt.Service, shift int) *Handler {
 	return &Handler{
-		walletSvc: walletSvc,
-		jwtSvc:    jwtSvc,
-		shift:     shift,
+		userSvc: userSvc,
+		jwtSvc:  jwtSvc,
+		shift:   shift,
 	}
 }
 
@@ -26,18 +25,17 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 	v1 := router.Group("/api/v1")
 
 	// Create wallet
-	v1.POST("/create-wallet", h.createWallet)
+	v1.POST("/get-user", h.getUser)
 }
 
-func (h *Handler) createWallet(ctx echo.Context) error {
-	var dto CreateWalletDTO
+func (h *Handler) getUser(ctx echo.Context) error {
+	var dto GetUserDTO
 
 	if err := ctx.Bind(&dto); err != nil {
-		fmt.Println(err)
 		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
 	}
 
-	if err := Validate(dto, h.shift); err != nil {
+	if err := Validate(dto); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
@@ -46,15 +44,10 @@ func (h *Handler) createWallet(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
-	fmt.Println(jwtPayload)
-	fmt.Println(*dto.Backup)
-
-	walletPayload, err := h.walletSvc.CreateWallet(ctx.Request().Context(), &dto, jwtPayload.Email, h.shift)
+	user, err := h.userSvc.GetUserByEmail(ctx.Request().Context(), jwtPayload.Email)
 	if err != nil {
 		return ctx.JSON(errors.HTTPCode(err), err)
 	}
 
-	fmt.Println(walletPayload)
-
-	return ctx.NoContent(200)
+	return ctx.JSON(http.StatusOK, NormalizeGetUserResponseDTO(user))
 }

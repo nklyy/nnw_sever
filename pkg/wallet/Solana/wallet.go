@@ -2,23 +2,23 @@ package Solana
 
 import (
 	"fmt"
-	"nnw_s/pkg/wallet"
+	"nnw_s/pkg/wallet/Bitcoin/not_working"
 )
 
 func init() {
-	wallet.Coins[wallet.SolType] = NewSolana
+	not_working.Coins[not_working.SolType] = NewSolana
 }
 
 type Solana struct {
 	Name   string
 	Symbol string
-	Key    *wallet.Key
+	Key    *not_working.Key
 
 	// eth token
 	contract string
 }
 
-func NewSolana(key *wallet.Key) wallet.Wallet {
+func NewSolana(key *not_working.Key) not_working.Wallet {
 	return &Solana{
 		Name:   "Solana",
 		Symbol: "Solana",
@@ -38,7 +38,7 @@ func (c *Solana) GetSymbol() string {
 	return c.Symbol
 }
 
-func (c *Solana) GetKey() *wallet.Key {
+func (c *Solana) GetKey() *not_working.Key {
 	return c.Key
 }
 

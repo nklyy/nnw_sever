@@ -1,4 +1,4 @@
-package wallet
+package not_working
 
 // mnemonic language
 const (

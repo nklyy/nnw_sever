@@ -9,7 +9,14 @@ import (
 //	TxIndex int64
 //}
 
-func TransactionList(walletName string) ([]*UTXO, error) {
+type Txs struct {
+	Address  string      `json:"address"`
+	Category string      `json:"category"`
+	Amount   interface{} `json:"amount"`
+	Txid     string      `json:"txid"`
+}
+
+func TransactionList(walletName string) ([]*UTXO, []*Txs, error) {
 	req := struct {
 		JsonRPC string        `json:"json_rpc"`
 		Method  string        `json:"method"`
@@ -17,13 +24,14 @@ func TransactionList(walletName string) ([]*UTXO, error) {
 	}{
 		JsonRPC: "2.0",
 		Method:  "listtransactions",
-		Params:  []interface{}{"*", 1},
+		Params:  []interface{}{"*", 1000000},
 	}
 
 	msg := struct {
 		Result []struct {
 			Address   string      `json:"address"`
 			Category  string      `json:"category"`
+			Amount    interface{} `json:"amount"`
 			Vout      int64       `json:"vout"`
 			Fee       interface{} `json:"fee"`
 			Blockhash string      `json:"blockhash"`
@@ -36,11 +44,11 @@ func TransactionList(walletName string) ([]*UTXO, error) {
 
 	err := Client(req, &msg, true, walletName)
 	if err != nil {
-		return nil, errors.New("could not get transaction list")
+		return nil, nil, errors.New("could not get transaction list")
 	}
 
 	if msg.Error.Message != "" {
-		return nil, errors.New(msg.Error.Message)
+		return nil, nil, errors.New(msg.Error.Message)
 	}
 
 	var utxos []*UTXO
@@ -51,5 +59,15 @@ func TransactionList(walletName string) ([]*UTXO, error) {
 		})
 	}
 
-	return utxos, nil
+	var txs []*Txs
+	for idx := range msg.Result {
+		txs = append(txs, &Txs{
+			Address:  msg.Result[idx].Address,
+			Category: msg.Result[idx].Category,
+			Amount:   msg.Result[idx].Amount,
+			Txid:     msg.Result[idx].Txid,
+		})
+	}
+
+	return utxos, txs, nil
 }

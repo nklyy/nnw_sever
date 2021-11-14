@@ -9,12 +9,15 @@ import (
 )
 
 func Client(body, res interface{}, walletInfo bool, walletName string) error {
+	//remoteURL := "http://138.68.92.142:8332"
+	localURL := "http://127.0.0.1:8332"
+
 	var serverAddr string
 
 	if walletInfo {
-		serverAddr = "http://138.68.92.142:8332/wallet/" + walletName // testnet/main net
+		serverAddr = localURL + "/wallet/" + walletName // testnet/main net
 	} else {
-		serverAddr = "http://138.68.92.142:8332"
+		serverAddr = localURL
 	}
 
 	client := &http.Client{}
@@ -49,7 +52,7 @@ func Client(body, res interface{}, walletInfo bool, walletName string) error {
 		return err
 	}
 
-	if resp.Status != "200" {
+	if resp.StatusCode != 200 {
 		return errors.New(string(respBody))
 	}
 

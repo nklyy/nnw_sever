@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
@@ -11,13 +13,10 @@ import (
 	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
-	"nnw_s/internal/wallet"
+	"nnw_s/internal/user/wallet"
 	"nnw_s/pkg/mongodb"
 	"nnw_s/pkg/notificator"
 	"nnw_s/pkg/smtp"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -88,7 +87,6 @@ func main() {
 		logger.Fatalf("failed to create JWT service: %v", err)
 	}
 
-	// AUTH
 	authDeps := auth.ServiceDeps{
 		UserService:         userSvc,
 		NotificatorService:  notificatorSvc,
@@ -113,7 +111,6 @@ func main() {
 		logger.Fatalf("failed to connect reset password service: %v", err)
 	}
 
-	// Wallet
 	walletDeps := wallet.ServiceDeps{
 		UserService:        userSvc,
 		TwoFAService:       twoFaSvc,
@@ -126,9 +123,16 @@ func main() {
 		logger.Fatalf("failed to connect wallet wallet service: %v", err)
 	}
 
+	// Handlers
+	// User
+	userHandler := user.NewHandler(userSvc, jwtSvc, cfg.Shift)
+	userHandler.SetupRoutes(router)
+
+	// Auth
 	authHandler := auth.NewHandler(registrationSvc, loginSvc, resetPasswordSvc, jwtSvc, cfg.Shift)
 	authHandler.SetupRoutes(router)
 
+	// Wallet
 	walletHandler := wallet.NewHandler(walletSvc, jwtSvc, cfg.Shift)
 	walletHandler.SetupRoutes(router)
 
