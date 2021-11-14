@@ -1271,7 +1271,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"listtransactions\",\r\n  \"params\": [\"*\", 1]\r\n}",
+							"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"listtransactions\",\r\n  \"params\": [\"*\", 1000000]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1357,7 +1357,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getrawtransaction\",\n  \"params\": [\"f9a863929bfa7bc777e19795453f78a3867090118d93fbbc431d0089f88a27a0\", true]\n}",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"getrawtransaction\",\n  \"params\": [\"e2f4b09eb6d46faad5b77acbabec587b5f7719e664548d57c1e62bc90ede9550\", true]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1662,6 +1662,44 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"estimatesmartfee\",\r\n  \"params\": [2]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}",
+					"host": [
+						"{{host}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Transaction",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "uuuset",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"jsonrpc\": \"2.0\",\r\n  \"method\": \"gettransaction\",\r\n  \"params\": [\"d30777a4c097757d640bac82ef2eb9ff4e089e65e3080e63a873ce49eff53c28\", false, true]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

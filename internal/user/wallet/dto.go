@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"nnw_s/pkg/errors"
 	"nnw_s/pkg/helpers"
+	"time"
 )
 
 const passwordMinLength = 8
@@ -48,10 +49,29 @@ type BalanceDTO struct {
 }
 
 type TxsDTO struct {
-	Address  string      `json:"address"`
-	Category string      `json:"category"`
-	Amount   interface{} `json:"amount"`
-	Txid     string      `json:"txid"`
+	//ToAddress   string  `json:"to_address"`
+	//FromAddress string  `json:"from_address"`
+	//Amount      float64 `json:"amount"`
+	//TxId        string  `json:"tx_id"`
+	//Address  string      `json:"address"`
+	//Category string      `json:"category"`
+	//Amount   interface{} `json:"amount"`
+	Txid   string        `json:"txid"`
+	Input  []*InputTxDTO `json:"input"`
+	Output []*OutTxDTO   `json:"output"`
+	Time   time.Time     `json:"time"`
+}
+
+type InputTxDTO struct {
+	//Vin     int64   `json:"vin"`
+	//TxId    string  `json:"txid"`
+	Address string  `json:"address"`
+	Value   float64 `json:"value"`
+}
+
+type OutTxDTO struct {
+	Address string  `json:"address"`
+	Value   float64 `json:"value"`
 }
 
 type CreateWalletDTO struct {

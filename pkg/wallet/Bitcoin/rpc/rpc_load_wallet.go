@@ -28,7 +28,7 @@ func LoadWallet(walletID string) (string, error) {
 
 	err := Client(req, &msg, true, walletID)
 
-	if msg.Error.Code == -4 {
+	if msg.Error.Code == -4 || msg.Error.Code == -35 {
 		return "", nil
 	}
 

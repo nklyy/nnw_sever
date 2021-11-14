@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"context"
-	"fmt"
 	"github.com/btcsuite/btcutil"
 	"github.com/sirupsen/logrus"
 	"github.com/tyler-smith/go-bip39"
@@ -186,7 +185,7 @@ func (svc *walletSvc) GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) 
 
 func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*TxsDTO, error) {
 
-	var arrTxs []*TxsDTO
+	var resultTxs []*TxsDTO
 
 	switch dto.Name {
 	case "BTC":
@@ -204,32 +203,62 @@ func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*
 			return nil, err
 		}
 
-		for _, tx := range txs {
-			arrTxs = append(arrTxs, &TxsDTO{
-				Address:  tx.Address,
-				Category: tx.Category,
-				Amount:   tx.Amount,
-				Txid:     tx.Txid,
-			})
-		}
+		//for _, tx := range txs {
+		//	arrTxs = append(arrTxs, &TxsDTO{
+		//		Address:  tx.Address,
+		//		Category: tx.Category,
+		//		Amount:   tx.Amount,
+		//		Txid:     tx.Txid,
+		//	})
+		//}
 
-		var arrTx []string
+		var sortedTx []string
 		for _, tx := range txs {
-			if !helpers.ContainsStr(arrTx, tx.Txid) {
-				arrTx = append(arrTx, tx.Txid)
+			if !helpers.ContainsStr(sortedTx, tx.Txid) {
+				sortedTx = append(sortedTx, tx.Txid)
 			}
 		}
 
-		asd, err := rpc.GetRawTransaction(dto.WalletId, dto.Address, arrTx[0])
-		if err != nil {
-			return nil, err
+		for _, tx := range sortedTx {
+			var inputTx []*InputTxDTO
+			var outputTx []*OutTxDTO
+
+			rt, err := rpc.GetRawTransaction(dto.WalletId, dto.Address, tx)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, in := range rt.Vin {
+				rt, err := rpc.GetRawTransaction(dto.WalletId, dto.Address, in.Txid)
+				if err != nil {
+					return nil, err
+				}
+
+				for _, out := range rt.Vout {
+					if out.N == in.Vout {
+						inputTx = append(inputTx, &InputTxDTO{
+							Address: out.ScriptPubKey.Addresses,
+							Value:   out.Value,
+						})
+					}
+				}
+			}
+
+			for _, out := range rt.Vout {
+				outputTx = append(outputTx, &OutTxDTO{
+					Address: out.ScriptPubKey.Addresses,
+					Value:   out.Value,
+				})
+			}
+
+			resultTxs = append(resultTxs, &TxsDTO{
+				Txid:   tx,
+				Time:   rt.Time,
+				Input:  inputTx,
+				Output: outputTx,
+			})
 		}
-
-		fmt.Println(asd)
-
-		//fmt.Println(arrTx)
-		//fmt.Println(len(arrTx))
 	}
 
-	return arrTxs, nil
+	return resultTxs, nil
 }

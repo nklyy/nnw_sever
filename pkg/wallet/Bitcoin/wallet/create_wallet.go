@@ -28,7 +28,7 @@ func CreateBTCWallet(backup bool, password, mnemonic string) (*Payload, error) {
 	//	}
 	//}
 
-	km, err := NewKeyManager(256, password, mnemonic)
+	km, err := NewKeyManager(256, "", mnemonic)
 	if err != nil {
 		return nil, err
 	}

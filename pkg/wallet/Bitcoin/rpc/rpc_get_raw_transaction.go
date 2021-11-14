@@ -3,21 +3,28 @@ package rpc
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
-//type TxList struct {
-//	Hash    string
-//	TxIndex int64
-//}
+// TODO: Add confirmation field, then check it on front-end and set label unconfirmed if confirmation less than 6 or confirm if confirmation bigger than 6.
 
-type TxSimple struct {
-	ToAddress   []string `json:"to_address"`
-	FromAddress []string `json:"from_address"`
-	Amount      float64  `json:"amount"`
-	TxId        string   `json:"tx_id"`
+type TxInfo struct {
+	Txid string `json:"txid"`
+	Vin  []struct {
+		Txid string `json:"txid"`
+		Vout int64  `json:"vout"`
+	} `json:"vin"`
+	Vout []struct {
+		Value        float64 `json:"value"`
+		N            int64   `json:"n"`
+		ScriptPubKey struct {
+			Addresses string `json:"address"`
+		} `json:"scriptPubKey"`
+	} `json:"vout"`
+	Time time.Time `json:"time"`
 }
 
-func GetRawTransaction(walletName, address, tx string) ([]*Txs, error) {
+func GetRawTransaction(walletName, address, tx string) (*TxInfo, error) {
 	req := struct {
 		JsonRPC string        `json:"json_rpc"`
 		Method  string        `json:"method"`
@@ -31,13 +38,18 @@ func GetRawTransaction(walletName, address, tx string) ([]*Txs, error) {
 	msg := struct {
 		Result struct {
 			Txid string `json:"txid"`
+			Vin  []struct {
+				Txid string `json:"txid"`
+				Vout int64  `json:"vout"`
+			} `json:"vin"`
 			Vout []struct {
 				Value        float64 `json:"value"`
 				N            int64   `json:"n"`
 				ScriptPubKey struct {
-					Addresses []string `json:"addresses"`
+					Addresses string `json:"address"`
 				} `json:"scriptPubKey"`
 			} `json:"vout"`
+			Time int64 `json:"time"`
 		} `json:"result"`
 		Error struct {
 			Message string `json:"message"`
@@ -54,7 +66,10 @@ func GetRawTransaction(walletName, address, tx string) ([]*Txs, error) {
 		return nil, errors.New(msg.Error.Message)
 	}
 
-	fmt.Println(msg)
-
-	return nil, nil
+	return &TxInfo{
+		Txid: msg.Result.Txid,
+		Vin:  msg.Result.Vin,
+		Vout: msg.Result.Vout,
+		Time: time.Unix(msg.Result.Time, 0),
+	}, nil
 }
