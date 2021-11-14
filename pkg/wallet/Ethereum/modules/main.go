@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -76,6 +77,35 @@ func GetTxByHash(client ethclient.Client, hash common.Hash) *models.Transaction 
 		Pending:  pending,
 		Nonce:    tx.Nonce(),
 	}
+}
+
+// getLogTransactions get list of transactions
+func getLogTransactions(client ethclient.Client, address []common.Address) (*[]types.Log, error) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	latestBlockNumber, err := client.BlockNumber(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	log, err := client.FilterLogs(context.Background(), ethereum.FilterQuery{
+		BlockHash: nil,
+		FromBlock: nil,
+		ToBlock:   big.NewInt(int64(latestBlockNumber)),
+		Addresses: address,
+		Topics:    nil,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &log, nil
 }
 
 // GetAddressBalance returns the given address balance =P
