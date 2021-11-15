@@ -21,7 +21,8 @@ type TxInfo struct {
 			Addresses string `json:"address"`
 		} `json:"scriptPubKey"`
 	} `json:"vout"`
-	Time time.Time `json:"time"`
+	Time          time.Time `json:"time"`
+	Confirmations int64     `json:"confirmations"`
 }
 
 func GetRawTransaction(walletName, address, tx string) (*TxInfo, error) {
@@ -49,7 +50,8 @@ func GetRawTransaction(walletName, address, tx string) (*TxInfo, error) {
 					Addresses string `json:"address"`
 				} `json:"scriptPubKey"`
 			} `json:"vout"`
-			Time int64 `json:"time"`
+			Time          int64 `json:"time"`
+			Confirmations int64 `json:"confirmations"`
 		} `json:"result"`
 		Error struct {
 			Message string `json:"message"`
@@ -67,9 +69,10 @@ func GetRawTransaction(walletName, address, tx string) (*TxInfo, error) {
 	}
 
 	return &TxInfo{
-		Txid: msg.Result.Txid,
-		Vin:  msg.Result.Vin,
-		Vout: msg.Result.Vout,
-		Time: time.Unix(msg.Result.Time, 0),
+		Txid:          msg.Result.Txid,
+		Vin:           msg.Result.Vin,
+		Vout:          msg.Result.Vout,
+		Time:          time.Unix(msg.Result.Time, 0),
+		Confirmations: msg.Result.Confirmations,
 	}, nil
 }

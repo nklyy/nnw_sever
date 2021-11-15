@@ -56,10 +56,11 @@ type TxsDTO struct {
 	//Address  string      `json:"address"`
 	//Category string      `json:"category"`
 	//Amount   interface{} `json:"amount"`
-	Txid   string        `json:"txid"`
-	Input  []*InputTxDTO `json:"input"`
-	Output []*OutTxDTO   `json:"output"`
-	Time   time.Time     `json:"time"`
+	Txid          string        `json:"txid"`
+	Input         []*InputTxDTO `json:"input"`
+	Output        []*OutTxDTO   `json:"output"`
+	Time          time.Time     `json:"time"`
+	Confirmations int64         `json:"confirmations"`
 }
 
 type InputTxDTO struct {

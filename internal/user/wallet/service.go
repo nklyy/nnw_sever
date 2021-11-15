@@ -252,10 +252,11 @@ func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*
 			}
 
 			resultTxs = append(resultTxs, &TxsDTO{
-				Txid:   tx,
-				Time:   rt.Time,
-				Input:  inputTx,
-				Output: outputTx,
+				Txid:          tx,
+				Time:          rt.Time,
+				Confirmations: rt.Confirmations,
+				Input:         inputTx,
+				Output:        outputTx,
 			})
 		}
 	}
