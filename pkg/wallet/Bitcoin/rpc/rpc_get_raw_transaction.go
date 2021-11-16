@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-// TODO: Add confirmation field, then check it on front-end and set label unconfirmed if confirmation less than 6 or confirm if confirmation bigger than 6.
-
 type TxInfo struct {
 	Txid string `json:"txid"`
 	Vin  []struct {

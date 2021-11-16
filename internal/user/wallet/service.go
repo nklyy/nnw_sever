@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"context"
-	"fmt"
 	"github.com/btcsuite/btcutil"
 	"github.com/sirupsen/logrus"
 	"github.com/tyler-smith/go-bip39"
@@ -27,6 +26,7 @@ type Service interface {
 	GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*TxsDTO, error)
 
 	CreateTx(ctx context.Context, dto *CreateTxDTO) (string, string, error)
+	SendTx(ctx context.Context, dto *SendTxDTO, email string) (string, error)
 }
 
 type walletSvc struct {
@@ -292,12 +292,46 @@ func (svc *walletSvc) CreateTx(ctx context.Context, dto *CreateTxDTO) (string, s
 			return "", "", err
 		}
 
-		// TODO
-		fmt.Println(float64(f.Int64() / 1e8))
 		notSignTx = nstx
-		feeAmount, _ := btcutil.NewAmount(float64(f.Int64() / 1e8))
+		feeAmount, _ := btcutil.NewAmount(float64(f.Int64()) / 1e8)
 		fee = feeAmount.String()
 	}
 
 	return notSignTx, fee, nil
+}
+
+func (svc *walletSvc) SendTx(ctx context.Context, dto *SendTxDTO, email string) (string, error) {
+	userDTO, err := svc.userSvc.GetUserByEmail(ctx, email)
+	if err != nil {
+		return "", err
+	}
+
+	err = svc.twoFaSvc.CheckTwoFACode(ctx, dto.TwoFaCode, userDTO.SecretOTP)
+	if err != nil {
+		return "", err
+	}
+
+	decodePass, err := svc.credentialsSvc.DecodePassword(ctx, dto.Password)
+	if err != nil {
+		return "", err
+	}
+
+	var txHash string
+
+	switch dto.Name {
+	case "BTC":
+		amount, err := btcutil.NewAmount(dto.Amount)
+		if err != nil {
+			return "", err
+		}
+
+		h, err := btc_transaction.SignAndSendTx(decodePass, dto.WalletId, dto.FromAddress, dto.NotSignTx, big.NewInt(int64(amount)))
+		if err != nil {
+			return "", err
+		}
+
+		txHash = h
+	}
+
+	return txHash, nil
 }

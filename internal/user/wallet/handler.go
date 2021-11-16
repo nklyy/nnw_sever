@@ -1,7 +1,6 @@
 package wallet
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/internal/auth/jwt"
@@ -37,6 +36,7 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 
 	// Transaction
 	v1.POST("/create-tx", h.createTx)
+	v1.POST("/send-tx", h.sendTx)
 	//v1.POST("/unlock", h.unlockWallet)
 }
 
@@ -176,7 +176,30 @@ func (h *Handler) createTx(ctx echo.Context) error {
 	}
 
 	notSignedTx, fee, err := h.walletSvc.CreateTx(ctx.Request().Context(), &dto)
-	fmt.Println(notSignedTx, fee)
 
 	return ctx.JSON(200, map[string]interface{}{"from": dto.FromAddress, "to": dto.ToAddress, "amount": dto.Amount, "fee": fee, "nstx": notSignedTx})
+}
+
+func (h *Handler) sendTx(ctx echo.Context) error {
+	var dto SendTxDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	jwtPayload, err := h.jwtSvc.VerifyJWT(ctx.Request().Context(), dto.Jwt)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	txHash, err := h.walletSvc.SendTx(ctx.Request().Context(), &dto, jwtPayload.Email)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]string{"txHash": txHash})
 }

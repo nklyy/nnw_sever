@@ -9,7 +9,6 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"log"
 	"math/big"
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
 )
@@ -20,7 +19,6 @@ func CreateNotSignTx(fromWalletPublicAddress, destinationAddress, userWalletName
 
 	// Get fee
 	feeRate, err := rpc.GetCurrentFeeRate()
-	log.Printf("%-18s %s\n", "current fee rate:", feeRate)
 	if err != nil {
 		return "", nil, err
 	}
@@ -127,8 +125,6 @@ func CreateNotSignTx(fromWalletPublicAddress, destinationAddress, userWalletName
 		return "", nil, errors.New("your balance too low for this transaction")
 	}
 
-	log.Printf("%-18s %s\n", "total fee:", totalFee)
-
 	// Change amount of source output transaction
 	tx.TxOut[0].Value = amountToSend.Int64() - totalFee.Int64()
 
@@ -138,7 +134,6 @@ func CreateNotSignTx(fromWalletPublicAddress, destinationAddress, userWalletName
 	if err != nil {
 		return "", nil, err
 	}
-	log.Printf("%-18s %s\n", "Not signed Tx:", hex.EncodeToString(notSignedTxBuf.Bytes()))
 
 	return hex.EncodeToString(notSignedTxBuf.Bytes()), totalFee, nil
 }
