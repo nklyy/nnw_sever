@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nnw_s/internal/auth/jwt"
@@ -33,6 +34,9 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 	//Wallet
 	v1.POST("/get-balance", h.getBalance)
 	v1.POST("/get-tx", h.getTX)
+
+	// Transaction
+	v1.POST("/create-tx", h.createTx)
 	//v1.POST("/unlock", h.unlockWallet)
 }
 
@@ -153,4 +157,26 @@ func (h *Handler) getTX(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, txs)
+}
+
+func (h *Handler) createTx(ctx echo.Context) error {
+	var dto CreateTxDTO
+
+	if err := ctx.Bind(&dto); err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
+
+	if err := Validate(dto, h.shift); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	_, err := h.jwtSvc.VerifyJWT(ctx.Request().Context(), dto.Jwt)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	notSignedTx, fee, err := h.walletSvc.CreateTx(ctx.Request().Context(), &dto)
+	fmt.Println(notSignedTx, fee)
+
+	return ctx.JSON(200, map[string]interface{}{"from": dto.FromAddress, "to": dto.ToAddress, "amount": dto.Amount, "fee": fee, "nstx": notSignedTx})
 }

@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"context"
+	"fmt"
 	"github.com/btcsuite/btcutil"
 	"github.com/sirupsen/logrus"
 	"github.com/tyler-smith/go-bip39"
@@ -14,6 +15,7 @@ import (
 	"nnw_s/pkg/helpers"
 	"nnw_s/pkg/wallet"
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
+	btc_transaction "nnw_s/pkg/wallet/Bitcoin/transaction"
 	btc_wallet "nnw_s/pkg/wallet/Bitcoin/wallet"
 )
 
@@ -23,6 +25,8 @@ type Service interface {
 	GetWallet(ctx context.Context, email string, walletId string) (*wallet.Wallet, error)
 	GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) (*BalanceDTO, error)
 	GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*TxsDTO, error)
+
+	CreateTx(ctx context.Context, dto *CreateTxDTO) (string, string, error)
 }
 
 type walletSvc struct {
@@ -45,9 +49,9 @@ func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 	if deps == nil {
 		return nil, errors.NewInternal("invalid service dependencies")
 	}
-	//if deps.UserService == nil {
-	//	return nil, errors.NewInternal("invalid user service")
-	//}
+	if deps.UserService == nil {
+		return nil, errors.NewInternal("invalid user service")
+	}
 	if deps.TwoFAService == nil {
 		return nil, errors.NewInternal("invalid TwoFA service")
 	}
@@ -77,6 +81,7 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 		return nil, err
 	}
 
+	walletNameMap := []string{"BTC"}
 	// Create BTC wallets
 	//var walletPayload *btc_wallet.Payload
 	//if *dto.Backup {
@@ -99,31 +104,37 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 	if err != nil {
 		return nil, err
 	}
-	walletPayload, err := btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, mnemonic)
 
-	// map dto to user
-	userEntity, err := user.MapToEntity(userDTO)
-	if err != nil {
-		return nil, err
-	}
+	for _, w := range walletNameMap {
+		switch w {
+		case "BTC":
+			walletPayload, err := btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, mnemonic)
 
-	var wallets []*wallet.Wallet
+			// map dto to user
+			userEntity, err := user.MapToEntity(userDTO)
+			if err != nil {
+				return nil, err
+			}
 
-	wallets = append(wallets, &wallet.Wallet{
-		Name:       "BTC",
-		WalletName: walletPayload.WalletName,
-		Address:    walletPayload.Address,
-	})
+			var wallets []*wallet.Wallet
 
-	userEntity.SetWallet(&wallets)
+			wallets = append(wallets, &wallet.Wallet{
+				Name:       "BTC",
+				WalletName: walletPayload.WalletName,
+				Address:    walletPayload.Address,
+			})
 
-	// map back to dto
-	userDTO = user.MapToDTO(userEntity)
+			userEntity.SetWallet(&wallets)
 
-	// update user entity in storage
-	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
-		svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
-		return nil, err
+			// map back to dto
+			userDTO = user.MapToDTO(userEntity)
+
+			// update user entity in storage
+			if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
+				svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
+				return nil, err
+			}
+		}
 	}
 
 	return &mnemonic, nil
@@ -262,4 +273,31 @@ func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*
 	}
 
 	return resultTxs, nil
+}
+
+func (svc *walletSvc) CreateTx(ctx context.Context, dto *CreateTxDTO) (string, string, error) {
+
+	var notSignTx string
+	var fee string
+
+	switch dto.Name {
+	case "BTC":
+		amount, err := btcutil.NewAmount(dto.Amount)
+		if err != nil {
+			return "", "", err
+		}
+
+		nstx, f, err := btc_transaction.CreateNotSignTx(dto.FromAddress, dto.ToAddress, dto.WalletId, big.NewInt(int64(amount)))
+		if err != nil {
+			return "", "", err
+		}
+
+		// TODO
+		fmt.Println(float64(f.Int64() / 1e8))
+		notSignTx = nstx
+		feeAmount, _ := btcutil.NewAmount(float64(f.Int64() / 1e8))
+		fee = feeAmount.String()
+	}
+
+	return notSignTx, fee, nil
 }
