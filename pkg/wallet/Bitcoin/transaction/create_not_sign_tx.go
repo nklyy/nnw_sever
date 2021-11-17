@@ -95,9 +95,9 @@ func CreateNotSignTx(fromWalletPublicAddress, destinationAddress, userWalletName
 	change := new(big.Int).Set(sourceUtxosAmount)
 	change = new(big.Int).Sub(change, amountToSend)
 	//change = new(big.Int).Sub(change, totalFee)
-	if change.Cmp(big.NewInt(0)) == -1 {
-		return "", nil, err
-	}
+	//if change.Cmp(big.NewInt(0)) == -1 {
+	//	return "", nil, err
+	//}
 
 	if change.Int64() != 0 {
 		// our change address

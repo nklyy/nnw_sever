@@ -2,10 +2,8 @@ package transaction
 
 import (
 	"errors"
-	"fmt"
 	"math/big"
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
-	"strings"
 )
 
 func SignAndSendTx(userWalletPassword, userWalletName, fromWalletPublicAddress, txHash string, amountToSend *big.Int) (string, error) {
@@ -54,26 +52,17 @@ func SignAndSendTx(userWalletPassword, userWalletName, fromWalletPublicAddress, 
 		return "", err
 	}
 
-	fmt.Printf("%-18s %s\n", "Private key:", privWif)
-	fmt.Println(strings.Repeat("-", 106))
-
 	// Sign Transaction
 	signTxHash, err := rpc.SignTx(txHash, privWif, unspentTxs)
 	if err != nil {
 		return "", err
 	}
 
-	fmt.Printf("%-18s %s\n", "SignTxHash:", signTxHash)
-	fmt.Println(strings.Repeat("-", 106))
-
 	// Send Transaction
 	transactionHash, err := rpc.SendTx(signTxHash)
 	if err != nil {
 		return "", err
 	}
-
-	fmt.Printf("%-18s %s\n", "TransactionHash:", transactionHash)
-	fmt.Println(strings.Repeat("-", 106))
 
 	return transactionHash, nil
 }

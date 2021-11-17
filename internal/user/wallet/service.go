@@ -293,7 +293,10 @@ func (svc *walletSvc) CreateTx(ctx context.Context, dto *CreateTxDTO) (string, s
 		}
 
 		notSignTx = nstx
-		feeAmount, _ := btcutil.NewAmount(float64(f.Int64()) / 1e8)
+		feeAmount, err := btcutil.NewAmount(float64(f.Int64()) / 1e8)
+		if err != nil {
+			return "", "", err
+		}
 		fee = feeAmount.String()
 	}
 

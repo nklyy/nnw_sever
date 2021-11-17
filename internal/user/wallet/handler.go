@@ -176,6 +176,9 @@ func (h *Handler) createTx(ctx echo.Context) error {
 	}
 
 	notSignedTx, fee, err := h.walletSvc.CreateTx(ctx.Request().Context(), &dto)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
+	}
 
 	return ctx.JSON(200, map[string]interface{}{"from": dto.FromAddress, "to": dto.ToAddress, "amount": dto.Amount, "fee": fee, "nstx": notSignedTx})
 }
