@@ -64,5 +64,10 @@ func SignAndSendTx(userWalletPassword, userWalletName, fromWalletPublicAddress, 
 		return "", err
 	}
 
+	err = rpc.LockWallet(userWalletName)
+	if err != nil {
+		return "", err
+	}
+
 	return transactionHash, nil
 }
