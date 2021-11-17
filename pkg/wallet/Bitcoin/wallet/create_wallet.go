@@ -1,15 +1,13 @@
 package wallet
 
 import (
-	"fmt"
 	"github.com/google/uuid"
-	"strings"
+	"nnw_s/pkg/wallet/Bitcoin/rpc"
 )
 
 type Payload struct {
 	WalletName string
 	Address    string
-	Mnemonic   string
 }
 
 func CreateBTCWallet(backup bool, password, mnemonic string) (*Payload, error) {
@@ -47,15 +45,38 @@ func CreateBTCWallet(backup bool, password, mnemonic string) (*Payload, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	wif, address, _, _, err := key.Encode(true)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("%-18s %-34s %s\n", key.GetPath(), address, wif)
-	fmt.Println(strings.Repeat("-", 106))
-
 	walletUuid, err := uuid.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+
+	createdWalletName, err := rpc.CreateWallet(walletUuid.String())
+	if err != nil {
+		return nil, err
+	}
+
+	err = rpc.EncryptWallet(password, createdWalletName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = rpc.UnLockWallet(password, createdWalletName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = rpc.ImportPrivateKey(wif, walletUuid.String(), false)
+	if err != nil {
+		return nil, err
+	}
+
+	err = rpc.LockWallet(walletUuid.String())
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +84,5 @@ func CreateBTCWallet(backup bool, password, mnemonic string) (*Payload, error) {
 	return &Payload{
 		WalletName: walletUuid.String(),
 		Address:    address,
-		Mnemonic:   km.GetMnemonic(),
 	}, nil
 }
