@@ -28,7 +28,7 @@ func TestGenerateEthHDWalletAndMakeTransaction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fromPrivKey := "2f5199067115f233332df47de048fe75e0df518b34ee0dafd4cfb5bc44cd212f"
+	fromPrivKey := "c30867c0109fe66e1eb6500e40c97a47aa2e256186049330dfb25698dd353926"
 	toAddress := crypto.PubkeyToAddress(privateKeyECDSA.PublicKey)
 	fmt.Println("\n toAddress:", &toAddress)
 
