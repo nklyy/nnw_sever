@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"nnw_s/pkg/errors"
 	"nnw_s/pkg/helpers"
+	"time"
 )
 
 const passwordMinLength = 8
@@ -48,10 +49,30 @@ type BalanceDTO struct {
 }
 
 type TxsDTO struct {
-	Address  string      `json:"address"`
-	Category string      `json:"category"`
-	Amount   interface{} `json:"amount"`
-	Txid     string      `json:"txid"`
+	//ToAddress   string  `json:"to_address"`
+	//FromAddress string  `json:"from_address"`
+	//Amount      float64 `json:"amount"`
+	//TxId        string  `json:"tx_id"`
+	//Address  string      `json:"address"`
+	//Category string      `json:"category"`
+	//Amount   interface{} `json:"amount"`
+	Txid          string        `json:"txid"`
+	Input         []*InputTxDTO `json:"input"`
+	Output        []*OutTxDTO   `json:"output"`
+	Time          time.Time     `json:"time"`
+	Confirmations int64         `json:"confirmations"`
+}
+
+type InputTxDTO struct {
+	//Vin     int64   `json:"vin"`
+	//TxId    string  `json:"txid"`
+	Address string  `json:"address"`
+	Value   float64 `json:"value"`
+}
+
+type OutTxDTO struct {
+	Address string  `json:"address"`
+	Value   float64 `json:"value"`
 }
 
 type CreateWalletDTO struct {
@@ -82,4 +103,24 @@ type GetWalletTxDTO struct {
 	Name     string `json:"name" validate:"required"`
 	WalletId string `json:"wallet_id" validate:"required"`
 	Address  string `json:"address" validate:"required"`
+}
+
+type CreateTxDTO struct {
+	Jwt         string  `json:"jwt" validate:"required"`
+	Name        string  `json:"name" validate:"required"`
+	WalletId    string  `json:"wallet_id" validate:"required"`
+	FromAddress string  `json:"from_address" validate:"required"`
+	ToAddress   string  `json:"to_address" validate:"required"`
+	Amount      float64 `json:"amount" validate:"required"`
+}
+
+type SendTxDTO struct {
+	Jwt         string  `json:"jwt" validate:"required"`
+	Name        string  `json:"name" validate:"required"`
+	WalletId    string  `json:"wallet_id" validate:"required"`
+	FromAddress string  `json:"from_address" validate:"required"`
+	NotSignTx   string  `json:"not_sign_tx" validate:"required"`
+	Amount      float64 `json:"amount" validate:"required"`
+	Password    string  `json:"password" validate:"required,password"`
+	TwoFaCode   string  `json:"two_fa_code" validate:"required"`
 }

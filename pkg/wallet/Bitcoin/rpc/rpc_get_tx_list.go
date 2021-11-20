@@ -69,5 +69,10 @@ func TransactionList(walletName string) ([]*UTXO, []*Txs, error) {
 		})
 	}
 
+	// Reverse arr, because we have old txs on first place, but we need new ones on first place
+	for i, j := 0, len(txs)-1; i < j; i, j = i+1, j-1 {
+		txs[i], txs[j] = txs[j], txs[i]
+	}
+
 	return utxos, txs, nil
 }
