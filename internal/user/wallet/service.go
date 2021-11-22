@@ -3,6 +3,7 @@ package wallet
 import (
 	"context"
 	"github.com/btcsuite/btcutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/sirupsen/logrus"
 	"github.com/tyler-smith/go-bip39"
 	"math/big"
@@ -16,6 +17,7 @@ import (
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
 	btc_transaction "nnw_s/pkg/wallet/Bitcoin/transaction"
 	btc_wallet "nnw_s/pkg/wallet/Bitcoin/wallet"
+	"nnw_s/pkg/wallet/Ethereum"
 )
 
 //go:generate mockgen -source=wallet_service.go -destination=mocks/wallet_service_mock.go
@@ -34,6 +36,7 @@ type walletSvc struct {
 	twoFaSvc       twofa.Service
 	jwtSvc         jwt.Service
 	credentialsSvc credentials.Service
+	ethWalletClient Ethereum.IWalletClient
 
 	log *logrus.Logger
 }
@@ -43,6 +46,7 @@ type ServiceDeps struct {
 	TwoFAService       twofa.Service
 	JWTService         jwt.Service
 	CredentialsService credentials.Service
+	EthWalletClient    Ethereum.IWalletClient
 }
 
 func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
@@ -61,6 +65,9 @@ func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 	if deps.CredentialsService == nil {
 		return nil, errors.NewInternal("invalid credentials service")
 	}
+	if deps.EthWalletClient == nil {
+		return nil, errors.NewInternal("invalid Eth Wallet Client")
+	}
 	if log == nil {
 		return nil, errors.NewInternal("invalid logger")
 	}
@@ -69,6 +76,7 @@ func NewWalletService(log *logrus.Logger, deps *ServiceDeps) (Service, error) {
 		twoFaSvc:       deps.TwoFAService,
 		jwtSvc:         deps.JWTService,
 		credentialsSvc: deps.CredentialsService,
+		ethWalletClient: deps.EthWalletClient,
 		log:            log,
 	}, nil
 }
@@ -81,7 +89,7 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 		return nil, err
 	}
 
-	walletNameMap := []string{"BTC"}
+	walletNameMap := []string{"BTC", "ETH"}
 	// Create BTC wallets
 	//var walletPayload *btc_wallet.Payload
 	//if *dto.Backup {
@@ -134,7 +142,39 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 				svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
 				return nil, err
 			}
+		case "ETH":
+			privateKey, err := svc.ethWalletClient.CreateWallet(mnemonic)
+			if err != nil {
+				return nil, err
+			}
+
+			toAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
+			// map dto to user
+			userEntity, err := user.MapToEntity(userDTO)
+			if err != nil {
+				return nil, err
+			}
+
+			var wallets []*wallet.Wallet
+
+			wallets = append(wallets, &wallet.Wallet{
+				Name:       "ETH",
+				WalletName: toAddress.String(),
+				Address:    toAddress.String(),
+			})
+
+			userEntity.SetWallet(&wallets)
+
+			// map back to dto
+			userDTO = user.MapToDTO(userEntity)
+
+			// update user entity in storage
+			if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
+				svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
+				return nil, err
+			}
 		}
+
 	}
 
 	return &mnemonic, nil

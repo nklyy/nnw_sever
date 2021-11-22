@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -17,6 +18,7 @@ import (
 	"nnw_s/pkg/mongodb"
 	"nnw_s/pkg/notificator"
 	"nnw_s/pkg/smtp"
+	"nnw_s/pkg/wallet/Ethereum"
 )
 
 func main() {
@@ -61,6 +63,15 @@ func main() {
 	if err != nil {
 		logger.Fatalf("failed to create user service: %v", err)
 	}
+
+	ethClient, err := ethclient.Dial("http://localhost:7545")
+	if err != nil {
+		logger.Fatalf("failed to create eth client: %v", err)
+	}
+
+	//ethTransactionClient := Ethereum.NewTransactionClient(*ethClient)
+	ethWalletClient := Ethereum.NewWalletClient(*ethClient)
+
 
 	verificationRepo, err := verification.NewRepository(db, logger)
 	if err != nil {
@@ -116,6 +127,7 @@ func main() {
 		TwoFAService:       twoFaSvc,
 		JWTService:         jwtSvc,
 		CredentialsService: credentialsSvc,
+		EthWalletClient:    ethWalletClient,
 	}
 
 	walletSvc, err := wallet.NewWalletService(logger, &walletDeps)
