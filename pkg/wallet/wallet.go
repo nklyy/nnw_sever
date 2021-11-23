@@ -6,4 +6,14 @@ type Wallet struct {
 	Address    string `bson:"address"`
 }
 
+type BTCWallet struct {
+	Address    string
+	PrivateKey string
+}
+
+type ETHWallet struct {
+	Address    string
+	PrivateKey string
+}
+
 var NilWallet *[]*Wallet = nil
