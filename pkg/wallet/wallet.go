@@ -11,9 +11,13 @@ type BTCWallet struct {
 	PrivateKey string
 }
 
+var BTCCoinType = uint32(1)
+
 type ETHWallet struct {
 	Address    string
 	PrivateKey string
 }
+
+var ETHCoinType = uint32(60)
 
 var NilWallet *[]*Wallet = nil
