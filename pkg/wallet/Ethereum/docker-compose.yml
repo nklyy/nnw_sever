@@ -24,9 +24,12 @@ services:
 #    container_name: ethereum-node
 #    image: ethereum/client-go:stable
 #    restart: always
+#    expose:
+#      - "8545"
+#      - "30303"
 #    ports:
 #      - "8545:8545"
 #      - "30303:30303"
 #    volumes:
 #      - ./data/ethereum:/root/.ethereum/
-#    command: --ropsten --http --http.addr "0.0.0.0" --http.port 30304 --http.api "admin,db,personal,eth,net,web3" --syncmode fast
+#    command: --ropsten --http --http.addr "0.0.0.0" --http.api "admin,db,personal,eth,net,web3" --http.corsdomain="*" --syncmode fast
