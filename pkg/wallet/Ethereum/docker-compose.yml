@@ -15,3 +15,18 @@ services:
     volumes:
       - ./data/ethereum:/root/.ethereum/
     command: --ropsten --rpc --rpcaddr "0.0.0.0" --rpcport 8545 --port 30303 --syncmode fast --rpcapi "admin,db,personal,eth,net,web3"
+
+
+
+#version: "3.3"
+#services:
+#  ethereum-node:
+#    container_name: ethereum-node
+#    image: ethereum/client-go:stable
+#    restart: always
+#    ports:
+#      - "8545:8545"
+#      - "30303:30303"
+#    volumes:
+#      - ./data/ethereum:/root/.ethereum/
+#    command: --ropsten --http --http.addr "0.0.0.0" --http.port 30304 --http.api "admin,db,personal,eth,net,web3" --syncmode fast
