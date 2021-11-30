@@ -82,6 +82,8 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 	}
 
 	walletNameMap := []string{"BTC"}
+	var wallets []*wallet.Wallet
+
 	// Create BTC wallets
 	//var walletPayload *btc_wallet.Payload
 	//if *dto.Backup {
@@ -96,6 +98,7 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 	//		return nil, err
 	//	}
 	//}
+
 	entropy, err := bip39.NewEntropy(256)
 	if err != nil {
 		return nil, err
@@ -108,33 +111,42 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 	for _, w := range walletNameMap {
 		switch w {
 		case "BTC":
-			walletPayload, err := btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, mnemonic)
 
-			// map dto to user
-			userEntity, err := user.MapToEntity(userDTO)
+			walletKey, err := wallet.CreateWallet(wallet.BTCCoinType, mnemonic)
 			if err != nil {
 				return nil, err
 			}
 
-			var wallets []*wallet.Wallet
+			walletPayload, err := wallet.ToBTCWallet(walletKey)
+			if err != nil {
+				return nil, err
+			}
+
+			userWalletPayload, err := btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, walletPayload.PrivateKey, walletPayload.Address, mnemonic)
 
 			wallets = append(wallets, &wallet.Wallet{
 				Name:       "BTC",
-				WalletName: walletPayload.WalletName,
-				Address:    walletPayload.Address,
+				WalletName: userWalletPayload.WalletName,
+				Address:    userWalletPayload.Address,
 			})
-
-			userEntity.SetWallet(&wallets)
-
-			// map back to dto
-			userDTO = user.MapToDTO(userEntity)
-
-			// update user entity in storage
-			if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
-				svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
-				return nil, err
-			}
 		}
+	}
+
+	// map dto to user
+	userEntity, err := user.MapToEntity(userDTO)
+	if err != nil {
+		return nil, err
+	}
+
+	userEntity.SetWallet(&wallets)
+
+	// map back to dto
+	userDTO = user.MapToDTO(userEntity)
+
+	// update user entity in storage
+	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
+		svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
+		return nil, err
 	}
 
 	return &mnemonic, nil
