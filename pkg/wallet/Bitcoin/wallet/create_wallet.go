@@ -10,7 +10,7 @@ type Payload struct {
 	Address    string
 }
 
-func CreateBTCWallet(backup bool, password, mnemonic string) (*Payload, error) {
+func CreateBTCWallet(backup bool, password, wif, address, mnemonic string) (*Payload, error) {
 	//var km *KeyManager
 	//var bError error
 
@@ -26,30 +26,30 @@ func CreateBTCWallet(backup bool, password, mnemonic string) (*Payload, error) {
 	//	}
 	//}
 
-	km, err := NewKeyManager(256, "", mnemonic)
-	if err != nil {
-		return nil, err
-	}
+	//km, err := NewKeyManager(256, "", mnemonic)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	//masterKey, err := km.GetMasterKey()
 	//if err != nil {
 	//	return nil, err
 	//}
 
-	passphrase := km.GetPassphrase()
-	if passphrase == "" {
-		passphrase = "<none>"
-	}
-
-	key, err := km.GetKey(PurposeBIP44, CoinTypeTestNetBTC, 0, 0, 1)
-	if err != nil {
-		return nil, err
-	}
-
-	wif, address, _, _, err := key.Encode(true)
-	if err != nil {
-		return nil, err
-	}
+	//passphrase := km.GetPassphrase()
+	//if passphrase == "" {
+	//	passphrase = "<none>"
+	//}
+	//
+	//key, err := km.GetKey(PurposeBIP44, CoinTypeTestNetBTC, 0, 0, 1)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//wif, address, _, _, err := key.Encode(true)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	walletUuid, err := uuid.NewUUID()
 	if err != nil {

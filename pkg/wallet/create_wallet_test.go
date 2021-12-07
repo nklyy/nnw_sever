@@ -33,6 +33,7 @@ func TestCreateWallet(t *testing.T) {
 
 	fmt.Printf("%-18s %s\n", "ETH Address:", ethWallet.Address)
 	fmt.Printf("%-18s %s\n", "ETH private key:", ethWallet.PrivateKey)
+	fmt.Printf("%-18s %s\n", "ETH private key:", ethWallet.PrivateKey[2:])
 	fmt.Println(strings.Repeat("-", 106))
 }
 

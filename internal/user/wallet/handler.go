@@ -37,7 +37,6 @@ func (h *Handler) SetupRoutes(router *echo.Echo) {
 	// Transaction
 	v1.POST("/create-tx", h.createTx)
 	v1.POST("/send-tx", h.sendTx)
-	//v1.POST("/unlock", h.unlockWallet)
 }
 
 func (h *Handler) createWallet(ctx echo.Context) error {
@@ -87,29 +86,6 @@ func (h *Handler) getWallet(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, walletPayload)
 }
-
-//func (h *Handler) unlockWallet(ctx echo.Context) error {
-//	var dto UnlockWalletDTO
-//
-//	if err := ctx.Bind(&dto); err != nil {
-//		return ctx.JSON(http.StatusBadRequest, errors.WithMessage(ErrInvalidRequest, err.Error()))
-//	}
-//
-//	if err := Validate(dto, h.shift); err != nil {
-//		return ctx.JSON(http.StatusBadRequest, err)
-//	}
-//
-//	jwtPayload, err := h.jwtSvc.VerifyJWT(ctx.Request().Context(), dto.Jwt)
-//	if err != nil {
-//		return ctx.JSON(http.StatusBadRequest, err)
-//	}
-//	switch dto.Name {
-//	case "BTC":
-//		// Call get unlock wallet from btc rpc
-//		fmt.Println("BTC")
-//	}
-//
-//}
 
 func (h *Handler) getBalance(ctx echo.Context) error {
 	var dto GetWalletBalanceDTO

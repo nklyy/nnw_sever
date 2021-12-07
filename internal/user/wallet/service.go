@@ -123,12 +123,32 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 			}
 
 			userWalletPayload, err := btc_wallet.CreateBTCWallet(*dto.Backup, decodePass, walletPayload.PrivateKey, walletPayload.Address, mnemonic)
+			if err != nil {
+				return nil, err
+			}
 
 			wallets = append(wallets, &wallet.Wallet{
 				Name:       "BTC",
 				WalletName: userWalletPayload.WalletName,
 				Address:    userWalletPayload.Address,
 			})
+		case "ETH":
+			// TODO
+			//walletKey, err := wallet.CreateWallet(wallet.ETHCoinType, mnemonic)
+			//if err != nil {
+			//	return nil, err
+			//}
+			//
+			//walletPayload, err := wallet.ToETHWallet(walletKey)
+			//if err != nil {
+			//	return nil, err
+			//}
+			//
+			//wallets = append(wallets, &wallet.Wallet{
+			//	Name:       "ETH",
+			//	WalletName: "",
+			//	Address:    "",
+			//})
 		}
 	}
 
