@@ -51,12 +51,12 @@ func CreateBTCWallet(backup bool, password, wif, address, mnemonic string) (*Pay
 	//	return nil, err
 	//}
 
-	walletUuid, err := uuid.NewUUID()
+	walletId, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err
 	}
 
-	createdWalletName, err := rpc.CreateWallet(walletUuid.String())
+	createdWalletName, err := rpc.CreateWallet(walletId.String())
 	if err != nil {
 		return nil, err
 	}
@@ -71,18 +71,18 @@ func CreateBTCWallet(backup bool, password, wif, address, mnemonic string) (*Pay
 		return nil, err
 	}
 
-	err = rpc.ImportPrivateKey(wif, walletUuid.String(), false)
+	err = rpc.ImportPrivateKey(wif, walletId.String(), false)
 	if err != nil {
 		return nil, err
 	}
 
-	err = rpc.LockWallet(walletUuid.String())
+	err = rpc.LockWallet(walletId.String())
 	if err != nil {
 		return nil, err
 	}
 
 	return &Payload{
-		WalletName: walletUuid.String(),
+		WalletName: walletId.String(),
 		Address:    address,
 	}, nil
 }
