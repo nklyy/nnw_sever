@@ -94,6 +94,21 @@ func (mr *MockServiceMockRecorder) GetUserByID(ctx, userID interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockService)(nil).GetUserByID), ctx, userID)
 }
 
+// GetUserByWalletID mocks base method.
+func (m *MockService) GetUserByWalletID(ctx context.Context, email, walletId string) (*user.DTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByWalletID", ctx, email, walletId)
+	ret0, _ := ret[0].(*user.DTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByWalletID indicates an expected call of GetUserByWalletID.
+func (mr *MockServiceMockRecorder) GetUserByWalletID(ctx, email, walletId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByWalletID", reflect.TypeOf((*MockService)(nil).GetUserByWalletID), ctx, email, walletId)
+}
+
 // UpdateUser mocks base method.
 func (m *MockService) UpdateUser(ctx context.Context, dto *user.DTO) error {
 	m.ctrl.T.Helper()

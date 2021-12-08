@@ -43,10 +43,16 @@ func NewResetPasswordService(log *logrus.Logger, emailSender string, deps *Servi
 		return nil, errors.NewInternal("invalid user service")
 	}
 	if deps.NotificatorService == nil {
-		return nil, errors.NewInternal("invalid notificator service")
+		return nil, errors.NewInternal("invalid notification service")
 	}
 	if deps.VerificationService == nil {
 		return nil, errors.NewInternal("invalid verification service")
+	}
+	if deps.TwoFAService == nil {
+		return nil, errors.NewInternal("invalid TwoFA service")
+	}
+	if deps.JWTService == nil {
+		return nil, errors.NewInternal("invalid JWT service")
 	}
 	if deps.CredentialsService == nil {
 		return nil, errors.NewInternal("invalid credentials service")

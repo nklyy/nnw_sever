@@ -50,6 +50,21 @@ func (mr *MockServiceMockRecorder) CreateCredentials(ctx, password, secretOTP in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCredentials", reflect.TypeOf((*MockService)(nil).CreateCredentials), ctx, password, secretOTP)
 }
 
+// DecodePassword mocks base method.
+func (m *MockService) DecodePassword(ctx context.Context, password string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DecodePassword", ctx, password)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DecodePassword indicates an expected call of DecodePassword.
+func (mr *MockServiceMockRecorder) DecodePassword(ctx, password interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecodePassword", reflect.TypeOf((*MockService)(nil).DecodePassword), ctx, password)
+}
+
 // ValidatePassword mocks base method.
 func (m *MockService) ValidatePassword(ctx context.Context, credentialsDTO *credentials.DTO, password string) error {
 	m.ctrl.T.Helper()
