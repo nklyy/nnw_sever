@@ -13,9 +13,11 @@ import (
 	"nnw_s/pkg/errors"
 	"nnw_s/pkg/helpers"
 	"nnw_s/pkg/wallet"
-	"nnw_s/pkg/wallet/Bitcoin/rpc"
+	btc_rpc "nnw_s/pkg/wallet/Bitcoin/rpc"
 	btc_transaction "nnw_s/pkg/wallet/Bitcoin/transaction"
 	btc_wallet "nnw_s/pkg/wallet/Bitcoin/wallet"
+	eth_rpc "nnw_s/pkg/wallet/Ethereum/rpc"
+	eth_wallet "nnw_s/pkg/wallet/Ethereum/wallet"
 )
 
 //go:generate mockgen -source=wallet_service.go -destination=mocks/wallet_service_mock.go
@@ -81,7 +83,7 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 		return nil, err
 	}
 
-	walletNameMap := []string{"BTC"}
+	walletNameMap := []string{"BTC", "ETH"}
 	var wallets []*wallet.Wallet
 
 	// Create BTC wallets
@@ -133,22 +135,26 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 				Address:    userWalletPayload.Address,
 			})
 		case "ETH":
-			// TODO
-			//walletKey, err := wallet.CreateWallet(wallet.ETHCoinType, mnemonic)
-			//if err != nil {
-			//	return nil, err
-			//}
-			//
-			//walletPayload, err := wallet.ToETHWallet(walletKey)
-			//if err != nil {
-			//	return nil, err
-			//}
-			//
-			//wallets = append(wallets, &wallet.Wallet{
-			//	Name:       "ETH",
-			//	WalletName: "",
-			//	Address:    "",
-			//})
+			walletKey, err := wallet.CreateWallet(wallet.ETHCoinType, mnemonic)
+			if err != nil {
+				return nil, err
+			}
+
+			walletPayload, err := wallet.ToETHWallet(walletKey)
+			if err != nil {
+				return nil, err
+			}
+
+			userWalletPayload, err := eth_wallet.CreateETHWallet(decodePass, walletPayload.PrivateKey)
+			if err != nil {
+				return nil, err
+			}
+
+			wallets = append(wallets, &wallet.Wallet{
+				Name:       "ETH",
+				WalletName: userWalletPayload.WalletName,
+				Address:    userWalletPayload.Address,
+			})
 		}
 	}
 
@@ -199,12 +205,13 @@ func (svc *walletSvc) GetWallet(ctx context.Context, email string, walletId stri
 
 func (svc *walletSvc) GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) (*BalanceDTO, error) {
 
+	var balance float64
 	var balanceInt *big.Int
-	var balanceStr *btcutil.Amount
+	//var balanceStr *btcutil.Amount
 
 	switch dto.Name {
 	case "BTC":
-		warning, err := rpc.LoadWallet(dto.WalletId)
+		warning, err := btc_rpc.LoadWallet(dto.WalletId)
 		if err != nil {
 			return nil, err
 		}
@@ -213,16 +220,25 @@ func (svc *walletSvc) GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) 
 			return nil, errors.NewInternal(warning)
 		}
 
-		balanceInt, balanceStr, err = rpc.GetBalance(dto.WalletId)
+		balanceInt, err = btc_rpc.GetBalance(dto.WalletId)
 		if err != nil {
 			return nil, err
 		}
+
+		//balance = float64(balanceStr.MulF64(1e-8))
+		balance = float64(balanceInt.Int64()) / 1e-8
+	case "ETH":
+		balanceInt, err := eth_rpc.GetBalance(dto.Address)
+		if err != nil {
+			return nil, err
+		}
+
+		balance = float64(*balanceInt) / 1e-81
 	}
 
 	return &BalanceDTO{
-		Balance:    float64(balanceStr.MulF64(1e-8)),
+		Balance:    balance,
 		BalanceInt: balanceInt,
-		BalanceStr: balanceStr.String(),
 	}, nil
 }
 
@@ -232,7 +248,7 @@ func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*
 
 	switch dto.Name {
 	case "BTC":
-		warning, err := rpc.LoadWallet(dto.WalletId)
+		warning, err := btc_rpc.LoadWallet(dto.WalletId)
 		if err != nil {
 			return nil, err
 		}
@@ -241,7 +257,7 @@ func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*
 			return nil, errors.NewInternal(warning)
 		}
 
-		_, txs, err := rpc.TransactionList(dto.WalletId)
+		_, txs, err := btc_rpc.TransactionList(dto.WalletId)
 		if err != nil {
 			return nil, err
 		}
@@ -266,13 +282,13 @@ func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*
 			var inputTx []*InputTxDTO
 			var outputTx []*OutTxDTO
 
-			rt, err := rpc.GetRawTransaction(dto.WalletId, dto.Address, tx)
+			rt, err := btc_rpc.GetRawTransaction(dto.WalletId, dto.Address, tx)
 			if err != nil {
 				return nil, err
 			}
 
 			for _, in := range rt.Vin {
-				rt, err := rpc.GetRawTransaction(dto.WalletId, dto.Address, in.Txid)
+				rt, err := btc_rpc.GetRawTransaction(dto.WalletId, dto.Address, in.Txid)
 				if err != nil {
 					return nil, err
 				}
