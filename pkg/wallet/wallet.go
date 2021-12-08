@@ -1,9 +1,9 @@
 package wallet
 
 type Wallet struct {
-	Name       string `bson:"name"`
-	WalletName string `bson:"wallet_name"`
-	Address    string `bson:"address"`
+	Name     string `bson:"name"`
+	WalletId string `bson:"wallet_id"`
+	Address  string `bson:"address"`
 }
 
 type BTCWallet struct {

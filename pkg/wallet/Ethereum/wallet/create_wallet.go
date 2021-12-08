@@ -7,8 +7,8 @@ import (
 )
 
 type Payload struct {
-	WalletName string
-	Address    string
+	WalletId string
+	Address  string
 }
 
 func CreateETHWallet(password, privateKey string) (*Payload, error) {
@@ -32,7 +32,7 @@ func CreateETHWallet(password, privateKey string) (*Payload, error) {
 	}
 
 	return &Payload{
-		WalletName: walletId.String(),
-		Address:    address,
+		WalletId: walletId.String(),
+		Address:  address,
 	}, nil
 }

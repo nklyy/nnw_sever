@@ -6,8 +6,8 @@ import (
 )
 
 type Payload struct {
-	WalletName string
-	Address    string
+	WalletId string
+	Address  string
 }
 
 func CreateBTCWallet(backup bool, password, wif, address, mnemonic string) (*Payload, error) {
@@ -56,17 +56,17 @@ func CreateBTCWallet(backup bool, password, wif, address, mnemonic string) (*Pay
 		return nil, err
 	}
 
-	createdWalletName, err := rpc.CreateWallet(walletId.String())
+	wallet, err := rpc.CreateWallet(walletId.String())
 	if err != nil {
 		return nil, err
 	}
 
-	err = rpc.EncryptWallet(password, createdWalletName)
+	err = rpc.EncryptWallet(password, wallet)
 	if err != nil {
 		return nil, err
 	}
 
-	err = rpc.UnLockWallet(password, createdWalletName)
+	err = rpc.UnLockWallet(password, wallet)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func CreateBTCWallet(backup bool, password, wif, address, mnemonic string) (*Pay
 	}
 
 	return &Payload{
-		WalletName: walletId.String(),
-		Address:    address,
+		WalletId: walletId.String(),
+		Address:  address,
 	}, nil
 }

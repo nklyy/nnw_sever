@@ -23,7 +23,7 @@ type TxInfo struct {
 	Confirmations int64     `json:"confirmations"`
 }
 
-func GetRawTransaction(walletName, address, tx string) (*TxInfo, error) {
+func GetRawTransaction(walletId, address, tx string) (*TxInfo, error) {
 	req := struct {
 		JsonRPC string        `json:"json_rpc"`
 		Method  string        `json:"method"`
@@ -56,7 +56,7 @@ func GetRawTransaction(walletName, address, tx string) (*TxInfo, error) {
 		} `json:"error"`
 	}{}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		fmt.Println(err)
 		return nil, errors.New("could not get transaction list")

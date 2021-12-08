@@ -92,31 +92,31 @@ func TestWalletAndTransaction(t *testing.T) {
 	fmt.Printf("%-18s %-34s %s\n", key.GetPath(), address, wif)
 	fmt.Println(strings.Repeat("-", 106))
 
-	createdWalletName, err := rpc.CreateWallet("ninth")
+	wallet, err := rpc.CreateWallet("ninth")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = rpc.EncryptWallet("password", createdWalletName)
+	err = rpc.EncryptWallet("password", wallet)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = rpc.UnLockWallet("password", createdWalletName)
+	err = rpc.UnLockWallet("password", wallet)
 	if err != nil {
 		t.Error(err)
 	}
 
 	if backUp {
 		go func() {
-			err := rpc.ImportPrivateKey(wif, createdWalletName, true)
+			err := rpc.ImportPrivateKey(wif, wallet, true)
 			if err != nil {
 				t.Error(err)
 			}
 		}()
 		time.Sleep(2 * time.Second)
 	} else {
-		err := rpc.ImportPrivateKey(wif, createdWalletName, false)
+		err := rpc.ImportPrivateKey(wif, wallet, false)
 		if err != nil {
 			t.Error(err)
 		}

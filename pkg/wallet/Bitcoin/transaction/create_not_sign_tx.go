@@ -13,7 +13,7 @@ import (
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
 )
 
-func CreateNotSignTx(fromWalletPublicAddress, destinationAddress, userWalletName string, amountToSend *big.Int) (string, *big.Int, error) {
+func CreateNotSignTx(fromWalletPublicAddress, destinationAddress, userWalletId string, amountToSend *big.Int) (string, *big.Int, error) {
 	//chainParams := &chaincfg.MainNetParams
 	chainParams := &chaincfg.TestNet3Params
 
@@ -24,7 +24,7 @@ func CreateNotSignTx(fromWalletPublicAddress, destinationAddress, userWalletName
 	}
 
 	// List unspent
-	unspentTXOsList, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
+	unspentTXOsList, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletId)
 	if err != nil {
 		return "", nil, err
 	}

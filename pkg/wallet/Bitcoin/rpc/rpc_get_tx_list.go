@@ -16,7 +16,7 @@ type Txs struct {
 	Txid     string      `json:"txid"`
 }
 
-func TransactionList(walletName string) ([]*UTXO, []*Txs, error) {
+func TransactionList(walletId string) ([]*UTXO, []*Txs, error) {
 	req := struct {
 		JsonRPC string        `json:"json_rpc"`
 		Method  string        `json:"method"`
@@ -42,7 +42,7 @@ func TransactionList(walletName string) ([]*UTXO, []*Txs, error) {
 		} `json:"error"`
 	}{}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return nil, nil, errors.New("could not get transaction list")
 	}

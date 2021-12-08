@@ -6,7 +6,7 @@ import (
 	"math/big"
 )
 
-func GetBalance(walletName string) (*big.Int, error) {
+func GetBalance(walletId string) (*big.Int, error) {
 	req := struct {
 		JsonRPC string        `json:"json_rpc"`
 		Method  string        `json:"method"`
@@ -24,7 +24,7 @@ func GetBalance(walletName string) (*big.Int, error) {
 		} `json:"error"`
 	}{}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return nil, errors.New("could not get address info")
 	}

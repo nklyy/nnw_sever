@@ -8,14 +8,14 @@ import (
 	"net/http"
 )
 
-func Client(body, res interface{}, walletInfo bool, walletName string) error {
+func Client(body, res interface{}, walletInfo bool, walletId string) error {
 	remoteURL := "http://159.89.6.17:8332"
 	//localURL := "http://127.0.0.1:8332"
 
 	var serverAddr string
 
 	if walletInfo {
-		serverAddr = remoteURL + "/wallet/" + walletName // testnet/main net
+		serverAddr = remoteURL + "/wallet/" + walletId // testnet/main net
 	} else {
 		serverAddr = remoteURL
 	}

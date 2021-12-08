@@ -14,7 +14,7 @@ import (
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
 )
 
-func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletName, userWalletPassword string, amountToSend *big.Int) {
+func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletId, userWalletPassword string, amountToSend *big.Int) {
 	//chainParams := &chaincfg.MainNetParams
 	chainParams := &chaincfg.TestNet3Params
 
@@ -26,7 +26,7 @@ func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletNam
 	}
 
 	// List unspent
-	unspentTXOsList, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
+	unspentTXOsList, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -157,13 +157,13 @@ func BuildTransaction(fromWalletPublicAddress, destinationAddress, userWalletNam
 
 	// Prepare to sign tx
 	// Unlock wallet
-	err = rpc.UnLockWallet(userWalletPassword, userWalletName)
+	err = rpc.UnLockWallet(userWalletPassword, userWalletId)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Get Private key
-	privWif, err := rpc.GetAddressPrivateKey(fromWalletPublicAddress, userWalletName)
+	privWif, err := rpc.GetAddressPrivateKey(fromWalletPublicAddress, userWalletId)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -15,7 +15,7 @@ type UTXO struct {
 	PKScript string
 }
 
-func ListUnspentTXOs(address string, walletName string) ([]*UTXO, error) {
+func ListUnspentTXOs(address string, walletId string) ([]*UTXO, error) {
 	addressArray := []string{address}
 
 	req := struct {
@@ -50,7 +50,7 @@ func ListUnspentTXOs(address string, walletName string) ([]*UTXO, error) {
 		} `json:"error"`
 	}{}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return nil, errors.New("could not get utxos")
 	}

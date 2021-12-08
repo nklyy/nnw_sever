@@ -2,7 +2,7 @@ package rpc
 
 import "errors"
 
-func ImportPrivateKey(key, walletName string, scan bool) error {
+func ImportPrivateKey(key, walletId string, scan bool) error {
 	msg := struct {
 		Result string `json:"result"`
 		Error  struct {
@@ -21,7 +21,7 @@ func ImportPrivateKey(key, walletName string, scan bool) error {
 		Params:  []interface{}{key, "", scan},
 	}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return errors.New(msg.Error.Message)
 	}

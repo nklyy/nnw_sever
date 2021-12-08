@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-func CreateWallet(walletName string) (string, error) {
+func CreateWallet(walletId string) (string, error) {
 	msg := struct {
 		Result struct {
 			Name string `json:"name"`
@@ -22,7 +22,7 @@ func CreateWallet(walletName string) (string, error) {
 	}{
 		JsonRPC: "2.0",
 		Method:  "createwallet",
-		Params:  []string{walletName},
+		Params:  []string{walletId},
 	}
 
 	err := Client(req, &msg, false, "")

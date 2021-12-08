@@ -6,9 +6,9 @@ import (
 	"nnw_s/pkg/wallet/Bitcoin/rpc"
 )
 
-func SignAndSendTx(userWalletPassword, userWalletName, fromWalletPublicAddress, txHash string, amountToSend *big.Int) (string, error) {
+func SignAndSendTx(userWalletPassword, userWalletId, fromWalletPublicAddress, txHash string, amountToSend *big.Int) (string, error) {
 	// List unspent
-	unspentTXOsList, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
+	unspentTXOsList, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletId)
 	if err != nil {
 		return "", err
 	}
@@ -41,19 +41,19 @@ func SignAndSendTx(userWalletPassword, userWalletName, fromWalletPublicAddress, 
 		})
 	}
 
-	err = rpc.UnLockWallet(userWalletPassword, userWalletName)
+	err = rpc.UnLockWallet(userWalletPassword, userWalletId)
 	if err != nil {
 		return "", errors.New("Wrong password! ")
 	}
 
 	// Get Private key
-	privWif, err := rpc.GetAddressPrivateKey(fromWalletPublicAddress, userWalletName)
+	privateKey, err := rpc.GetAddressPrivateKey(fromWalletPublicAddress, userWalletId)
 	if err != nil {
 		return "", err
 	}
 
 	// Sign Transaction
-	signTxHash, err := rpc.SignTx(txHash, privWif, unspentTxs)
+	signTxHash, err := rpc.SignTx(txHash, privateKey, unspentTxs)
 	if err != nil {
 		return "", err
 	}
@@ -64,7 +64,7 @@ func SignAndSendTx(userWalletPassword, userWalletName, fromWalletPublicAddress, 
 		return "", err
 	}
 
-	err = rpc.LockWallet(userWalletName)
+	err = rpc.LockWallet(userWalletId)
 	if err != nil {
 		return "", err
 	}

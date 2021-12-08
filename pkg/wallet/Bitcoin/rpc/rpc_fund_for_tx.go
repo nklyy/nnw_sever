@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func FundForTransaction(createTxHash, changeAddress, walletName string) (string, error) {
+func FundForTransaction(createTxHash, changeAddress, walletId string) (string, error) {
 	subtractFeeFromOutputs := []int64{0}
 
 	params := map[string]interface{}{
@@ -35,7 +35,7 @@ func FundForTransaction(createTxHash, changeAddress, walletName string) (string,
 		} `json:"error"`
 	}{}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return "", errors.New("could not fund for transaction")
 	}

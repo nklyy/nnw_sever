@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-func UnLockWallet(password, walletName string) error {
+func UnLockWallet(password, walletId string) error {
 	msg := struct {
 		Result interface{} `json:"result"`
 		Error  struct {
@@ -23,7 +23,7 @@ func UnLockWallet(password, walletName string) error {
 		Params:  []interface{}{password, 60},
 	}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return errors.New(msg.Error.Message)
 	}

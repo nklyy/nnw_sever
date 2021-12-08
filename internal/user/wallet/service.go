@@ -130,9 +130,9 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 			}
 
 			wallets = append(wallets, &wallet.Wallet{
-				Name:       "BTC",
-				WalletName: userWalletPayload.WalletName,
-				Address:    userWalletPayload.Address,
+				Name:     "BTC",
+				WalletId: userWalletPayload.WalletId,
+				Address:  userWalletPayload.Address,
 			})
 		case "ETH":
 			walletKey, err := wallet.CreateWallet(wallet.ETHCoinType, mnemonic)
@@ -151,9 +151,9 @@ func (svc *walletSvc) CreateWallet(ctx context.Context, dto *CreateWalletDTO, em
 			}
 
 			wallets = append(wallets, &wallet.Wallet{
-				Name:       "ETH",
-				WalletName: userWalletPayload.WalletName,
-				Address:    userWalletPayload.Address,
+				Name:     "ETH",
+				WalletId: userWalletPayload.WalletId,
+				Address:  userWalletPayload.Address,
 			})
 		}
 	}
@@ -192,9 +192,9 @@ func (svc *walletSvc) GetWallet(ctx context.Context, email string, walletId stri
 
 	var walletPayload wallet.Wallet
 	for _, w := range *userEntity.Wallet {
-		if w.WalletName == walletId {
+		if w.WalletId == walletId {
 			walletPayload.Name = w.Name
-			walletPayload.WalletName = w.WalletName
+			walletPayload.WalletId = w.WalletId
 			walletPayload.Address = w.Address
 			break
 		}

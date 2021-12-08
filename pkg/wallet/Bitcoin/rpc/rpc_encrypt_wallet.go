@@ -2,7 +2,7 @@ package rpc
 
 import "errors"
 
-func EncryptWallet(password, walletName string) error {
+func EncryptWallet(password, walletId string) error {
 	msg := struct {
 		Result string `json:"result"`
 		Error  struct {
@@ -21,7 +21,7 @@ func EncryptWallet(password, walletName string) error {
 		Params:  []string{password},
 	}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return errors.New(msg.Error.Message)
 	}

@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-func GetAddressPrivateKey(address, walletName string) (string, error) {
+func GetAddressPrivateKey(address, walletId string) (string, error) {
 	msg := struct {
 		Result string `json:"result"`
 		Error  struct {
@@ -22,7 +22,7 @@ func GetAddressPrivateKey(address, walletName string) (string, error) {
 		Params:  []string{address},
 	}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return "", errors.New("could not sent transaction")
 	}

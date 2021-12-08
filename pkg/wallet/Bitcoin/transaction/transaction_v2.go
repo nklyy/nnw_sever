@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletName, userWalletPassword string, amountToSend *big.Int) {
+func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletId, userWalletPassword string, amountToSend *big.Int) {
 	//chainParams := &chaincfg.TestNet3Params
 
 	// Get smart fee
@@ -20,7 +20,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	fmt.Println(strings.Repeat("-", 106))
 
 	// Get list unspent tx
-	utxos, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletName)
+	utxos, err := rpc.ListUnspentTXOs(fromWalletPublicAddress, userWalletId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	fmt.Println(strings.Repeat("-", 106))
 
 	// Fund for transaction
-	fundTxHash, err := rpc.FundForTransaction(createTxHash, fromWalletPublicAddress, userWalletName)
+	fundTxHash, err := rpc.FundForTransaction(createTxHash, fromWalletPublicAddress, userWalletId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -45,13 +45,13 @@ func BuildTransactionV2(fromWalletPublicAddress, destinationAddress, userWalletN
 	fmt.Println(strings.Repeat("-", 106))
 
 	// Unlock wallet
-	err = rpc.UnLockWallet(userWalletPassword, userWalletName)
+	err = rpc.UnLockWallet(userWalletPassword, userWalletId)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Get Private key
-	privWif, err := rpc.GetAddressPrivateKey(fromWalletPublicAddress, userWalletName)
+	privWif, err := rpc.GetAddressPrivateKey(fromWalletPublicAddress, userWalletId)
 	if err != nil {
 		log.Fatal(err)
 	}

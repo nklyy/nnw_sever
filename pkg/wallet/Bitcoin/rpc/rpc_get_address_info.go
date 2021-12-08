@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-func AddressInfo(address, walletName string) (string, error) {
+func AddressInfo(address, walletId string) (string, error) {
 	req := struct {
 		JsonRPC string   `json:"json_rpc"`
 		Method  string   `json:"method"`
@@ -25,7 +25,7 @@ func AddressInfo(address, walletName string) (string, error) {
 		} `json:"error"`
 	}{}
 
-	err := Client(req, &msg, true, walletName)
+	err := Client(req, &msg, true, walletId)
 	if err != nil {
 		return "", errors.New("could not get address info")
 	}
