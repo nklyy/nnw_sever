@@ -208,7 +208,7 @@ func TestLoginSvc_Login(t *testing.T) {
 	loginUserDTO.Email = "some@mail.com"
 	loginUserDTO.Password = "==WvZitmZDgzSHgAWvKs"
 
-	// Cred
+	// Test Cred
 	secretKey := "secret"
 	var testCred credentials.Credentials
 	testCred.Password = "==WvZitmZDgzSHgAWvKs"

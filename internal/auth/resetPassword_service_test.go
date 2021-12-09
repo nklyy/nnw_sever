@@ -1,15 +1,21 @@
 package auth
 
 import (
+	"context"
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	mock_jwt "nnw_s/internal/auth/jwt/mocks"
 	mock_twofa "nnw_s/internal/auth/twofa/mocks"
 	mock_verification "nnw_s/internal/auth/verification/mocks"
+	"nnw_s/internal/user"
+	"nnw_s/internal/user/credentials"
 	mock_credentials "nnw_s/internal/user/credentials/mocks"
 	mock_user "nnw_s/internal/user/mocks"
+	"nnw_s/pkg/errors"
+	"nnw_s/pkg/notificator"
 	mock_notificator "nnw_s/pkg/notificator/mocks"
+	"nnw_s/pkg/wallet"
 	"testing"
 )
 
@@ -191,6 +197,169 @@ func TestNewResetPasswordService(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			svc, err := NewResetPasswordService(tc.log, tc.emailSender, &tc.deps)
 			tc.expect(t, svc, err)
+		})
+	}
+}
+
+func TestResetPasswordSvc_ResetPassword(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	log := logrus.New()
+
+	mockUserSvc := mock_user.NewMockService(controller)
+	mockVerificationSvc := mock_verification.NewMockService(controller)
+	mockNotificationSvc := mock_notificator.NewMockService(controller)
+
+	deps := &ServiceDeps{
+		UserService:         mockUserSvc,
+		NotificatorService:  mockNotificationSvc,
+		VerificationService: mockVerificationSvc,
+		TwoFAService:        mock_twofa.NewMockService(controller),
+		JWTService:          mock_jwt.NewMockService(controller),
+		CredentialsService:  mock_credentials.NewMockService(controller),
+	}
+
+	// Test Data
+	emailSender := "example@example.com"
+	userEmail := "user@example.com"
+	code := "ASDDSA"
+
+	service, _ := NewResetPasswordService(log, emailSender, deps)
+
+	var resetPasswordDTO ResetPasswordDTO
+	resetPasswordDTO.Email = userEmail
+
+	// Test Email Data
+	emailData := notificator.Email{
+		Subject:   emailResetPasswordSubject,
+		Recipient: userEmail,
+		Sender:    emailSender,
+		Template:  emailResetPasswordTemplateName,
+		Data: map[string]interface{}{
+			"topic":   emailResetPasswordTopic,
+			"message": emailResetPasswordMessage,
+			"code":    code,
+		},
+	}
+
+	// Test Cred
+	secretKey := "secret"
+	var testCred credentials.Credentials
+	testCred.Password = "==WvZitmZDgzSHgAWvKs"
+	testCred.SecretOTP = &secretKey
+	//credDTO := credentials.MapToDTO(&testCred)
+
+	// Test wallet
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
+	// Test user
+	testUser, _ := user.NewUser(userEmail, &testWallet, &testCred)
+
+	notActiveUser := user.MapToDTO(testUser)
+
+	testUser.SetToActive()
+	testUser.SetToVerified()
+	testUserDTO := user.MapToDTO(testUser)
+
+	wrongUserDTO := user.MapToDTO(testUser)
+	wrongUserDTO.ID = "example"
+
+	tests := []struct {
+		name   string
+		ctx    context.Context
+		dto    *ResetPasswordDTO
+		setup  func(context.Context, *ResetPasswordDTO)
+		expect func(*testing.T, error)
+	}{
+		{
+			name: "should return permission_denied",
+			ctx:  context.Background(),
+			dto:  &resetPasswordDTO,
+			setup: func(ctx context.Context, dto *ResetPasswordDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(nil, ErrPermissionDenied)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.WithMessage(ErrPermissionDenied, "code: 403; status: permission_denied"), err)
+			},
+		},
+		{
+			name: "should return wrong object id",
+			ctx:  context.Background(),
+			dto:  &resetPasswordDTO,
+			setup: func(ctx context.Context, dto *ResetPasswordDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(wrongUserDTO, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("the provided hex string is not a valid ObjectID"), err)
+			},
+		},
+		{
+			name: "should return permission_denied not active user",
+			ctx:  context.Background(),
+			dto:  &resetPasswordDTO,
+			setup: func(ctx context.Context, dto *ResetPasswordDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(notActiveUser, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.WithMessage(ErrPermissionDenied, ""), err)
+			},
+		},
+		{
+			name: "should return failed to create reset password code",
+			ctx:  context.Background(),
+			dto:  &resetPasswordDTO,
+			setup: func(ctx context.Context, dto *ResetPasswordDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(testUserDTO, nil)
+				mockVerificationSvc.EXPECT().CreateResetPasswordCode(ctx, dto.Email).Return("", errors.NewInternal("Failed to create reset password code"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Failed to create reset password code"), err)
+			},
+		},
+		{
+			name: "should return failed to send email",
+			ctx:  context.Background(),
+			dto:  &resetPasswordDTO,
+			setup: func(ctx context.Context, dto *ResetPasswordDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(testUserDTO, nil)
+				mockVerificationSvc.EXPECT().CreateResetPasswordCode(ctx, dto.Email).Return(code, nil)
+				mockNotificationSvc.EXPECT().SendEmail(ctx, &emailData).Return(errors.NewInternal("Failed to send email"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Failed to send email"), err)
+			},
+		},
+		{
+			name: "should return ok",
+			ctx:  context.Background(),
+			dto:  &resetPasswordDTO,
+			setup: func(ctx context.Context, dto *ResetPasswordDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(testUserDTO, nil)
+				mockVerificationSvc.EXPECT().CreateResetPasswordCode(ctx, dto.Email).Return(code, nil)
+				mockNotificationSvc.EXPECT().SendEmail(ctx, &emailData).Return(nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.Nil(t, err)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setup(tc.ctx, tc.dto)
+			err := service.ResetPassword(tc.ctx, tc.dto)
+			tc.expect(t, err)
 		})
 	}
 }
