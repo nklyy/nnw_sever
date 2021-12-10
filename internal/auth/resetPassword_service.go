@@ -205,6 +205,11 @@ func (svc *resetPasswordSvc) SetupNewPassword(ctx context.Context, dto *SetupNew
 		return err
 	}
 
+	// if user does not active or not verified return ErrPermissionDenied
+	if !userEntity.IsActive() || !userEntity.IsVerified {
+		return ErrPermissionDenied
+	}
+
 	// Create new credentials
 	userCredentialsDTO, err := svc.credentialsSvc.CreateCredentials(ctx, dto.Password, userEntity.Credentials.SecretOTP)
 	if err != nil {
