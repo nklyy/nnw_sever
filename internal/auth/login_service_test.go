@@ -48,7 +48,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid user service'",
+			name: "should return invalid service dependencies",
 			log:  logrus.New(),
 			deps: nil,
 			expect: func(t *testing.T, service LoginService, err error) {
@@ -58,7 +58,17 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid user service'",
+			name: "should return invalid user service",
+			log:  logrus.New(),
+			deps: nil,
+			expect: func(t *testing.T, service LoginService, err error) {
+				assert.Nil(t, service)
+				assert.NotNil(t, err)
+				assert.EqualError(t, err, "code: 500; status: internal_error; message: invalid service dependencies")
+			},
+		},
+		{
+			name: "should return invalid user service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         nil,
@@ -75,7 +85,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid notification service'",
+			name: "should return invalid notification service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -92,7 +102,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid verification service'",
+			name: "should return invalid verification service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -109,7 +119,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid TwoFA service'",
+			name: "should return invalid TwoFA service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -126,7 +136,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid JWT service'",
+			name: "should return invalid JWT service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -143,7 +153,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid credentials service'",
+			name: "should return invalid credentials service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -160,7 +170,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid logger'",
+			name: "should return invalid logger",
 			log:  nil,
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),

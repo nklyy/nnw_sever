@@ -25,17 +25,19 @@ func TestNewResetPasswordService(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 
+	emailSender := "example@example.com"
+
 	tests := []struct {
 		name        string
 		log         *logrus.Logger
-		deps        ServiceDeps
+		deps        *ServiceDeps
 		emailSender string
 		expect      func(*testing.T, ResetPasswordService, error)
 	}{
 		{
 			name: "should return reset password service",
 			log:  logrus.New(),
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
 				NotificatorService:  mock_notificator.NewMockService(controller),
 				VerificationService: mock_verification.NewMockService(controller),
@@ -43,16 +45,27 @@ func TestNewResetPasswordService(t *testing.T) {
 				JWTService:          mock_jwt.NewMockService(controller),
 				CredentialsService:  mock_credentials.NewMockService(controller),
 			},
-			emailSender: "example@example.com",
+			emailSender: emailSender,
 			expect: func(t *testing.T, service ResetPasswordService, err error) {
 				assert.NotNil(t, service)
 				assert.Nil(t, err)
 			},
 		},
 		{
-			name: "should return 'invalid user service'",
+			name:        "should return invalid service dependencies",
+			log:         logrus.New(),
+			deps:        nil,
+			emailSender: emailSender,
+			expect: func(t *testing.T, service ResetPasswordService, err error) {
+				assert.Nil(t, service)
+				assert.NotNil(t, err)
+				assert.EqualError(t, err, "code: 500; status: internal_error; message: invalid service dependencies")
+			},
+		},
+		{
+			name: "should return invalid user service",
 			log:  logrus.New(),
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         nil,
 				NotificatorService:  mock_notificator.NewMockService(controller),
 				VerificationService: mock_verification.NewMockService(controller),
@@ -60,7 +73,7 @@ func TestNewResetPasswordService(t *testing.T) {
 				JWTService:          mock_jwt.NewMockService(controller),
 				CredentialsService:  mock_credentials.NewMockService(controller),
 			},
-			emailSender: "example@example.com",
+			emailSender: emailSender,
 			expect: func(t *testing.T, service ResetPasswordService, err error) {
 				assert.Nil(t, service)
 				assert.NotNil(t, err)
@@ -68,9 +81,9 @@ func TestNewResetPasswordService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid notification service'",
+			name: "should return invalid notification service",
 			log:  logrus.New(),
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
 				NotificatorService:  nil,
 				VerificationService: mock_verification.NewMockService(controller),
@@ -78,7 +91,7 @@ func TestNewResetPasswordService(t *testing.T) {
 				JWTService:          mock_jwt.NewMockService(controller),
 				CredentialsService:  mock_credentials.NewMockService(controller),
 			},
-			emailSender: "example@example.com",
+			emailSender: emailSender,
 			expect: func(t *testing.T, service ResetPasswordService, err error) {
 				assert.Nil(t, service)
 				assert.NotNil(t, err)
@@ -86,9 +99,9 @@ func TestNewResetPasswordService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid verification service'",
+			name: "should return invalid verification service",
 			log:  logrus.New(),
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
 				NotificatorService:  mock_notificator.NewMockService(controller),
 				VerificationService: nil,
@@ -96,7 +109,7 @@ func TestNewResetPasswordService(t *testing.T) {
 				JWTService:          mock_jwt.NewMockService(controller),
 				CredentialsService:  mock_credentials.NewMockService(controller),
 			},
-			emailSender: "example@example.com",
+			emailSender: emailSender,
 			expect: func(t *testing.T, service ResetPasswordService, err error) {
 				assert.Nil(t, service)
 				assert.NotNil(t, err)
@@ -104,9 +117,9 @@ func TestNewResetPasswordService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid TwoFA service'",
+			name: "should return invalid TwoFA service",
 			log:  logrus.New(),
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
 				NotificatorService:  mock_notificator.NewMockService(controller),
 				VerificationService: mock_verification.NewMockService(controller),
@@ -114,7 +127,7 @@ func TestNewResetPasswordService(t *testing.T) {
 				JWTService:          mock_jwt.NewMockService(controller),
 				CredentialsService:  mock_credentials.NewMockService(controller),
 			},
-			emailSender: "example@example.com",
+			emailSender: emailSender,
 			expect: func(t *testing.T, service ResetPasswordService, err error) {
 				assert.Nil(t, service)
 				assert.NotNil(t, err)
@@ -122,9 +135,9 @@ func TestNewResetPasswordService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid JWT service'",
+			name: "should return invalid JWT service",
 			log:  logrus.New(),
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
 				NotificatorService:  mock_notificator.NewMockService(controller),
 				VerificationService: mock_verification.NewMockService(controller),
@@ -132,7 +145,7 @@ func TestNewResetPasswordService(t *testing.T) {
 				JWTService:          nil,
 				CredentialsService:  mock_credentials.NewMockService(controller),
 			},
-			emailSender: "example@example.com",
+			emailSender: emailSender,
 			expect: func(t *testing.T, service ResetPasswordService, err error) {
 				assert.Nil(t, service)
 				assert.NotNil(t, err)
@@ -140,9 +153,9 @@ func TestNewResetPasswordService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid credentials service'",
+			name: "should return invalid credentials service",
 			log:  logrus.New(),
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
 				NotificatorService:  mock_notificator.NewMockService(controller),
 				VerificationService: mock_verification.NewMockService(controller),
@@ -150,7 +163,7 @@ func TestNewResetPasswordService(t *testing.T) {
 				JWTService:          mock_jwt.NewMockService(controller),
 				CredentialsService:  nil,
 			},
-			emailSender: "example@example.com",
+			emailSender: emailSender,
 			expect: func(t *testing.T, service ResetPasswordService, err error) {
 				assert.Nil(t, service)
 				assert.NotNil(t, err)
@@ -158,9 +171,9 @@ func TestNewResetPasswordService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid credentials service'",
+			name: "should return invalid logger",
 			log:  nil,
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
 				NotificatorService:  mock_notificator.NewMockService(controller),
 				VerificationService: mock_verification.NewMockService(controller),
@@ -168,7 +181,7 @@ func TestNewResetPasswordService(t *testing.T) {
 				JWTService:          mock_jwt.NewMockService(controller),
 				CredentialsService:  mock_credentials.NewMockService(controller),
 			},
-			emailSender: "example@example.com",
+			emailSender: emailSender,
 			expect: func(t *testing.T, service ResetPasswordService, err error) {
 				assert.Nil(t, service)
 				assert.NotNil(t, err)
@@ -176,9 +189,9 @@ func TestNewResetPasswordService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid credentials service'",
+			name: "should return invalid sender's email",
 			log:  logrus.New(),
-			deps: ServiceDeps{
+			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
 				NotificatorService:  mock_notificator.NewMockService(controller),
 				VerificationService: mock_verification.NewMockService(controller),
@@ -197,7 +210,7 @@ func TestNewResetPasswordService(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, err := NewResetPasswordService(tc.log, tc.emailSender, &tc.deps)
+			svc, err := NewResetPasswordService(tc.log, tc.emailSender, tc.deps)
 			tc.expect(t, svc, err)
 		})
 	}

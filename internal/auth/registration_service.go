@@ -46,13 +46,19 @@ func NewRegistrationService(log *logrus.Logger, emailSender string, deps *Servic
 		return nil, errors.NewInternal("invalid user service")
 	}
 	if deps.NotificatorService == nil {
-		return nil, errors.NewInternal("invalid notificator service")
+		return nil, errors.NewInternal("invalid notification service")
 	}
 	if deps.VerificationService == nil {
 		return nil, errors.NewInternal("invalid verification service")
 	}
 	if deps.TwoFAService == nil {
 		return nil, errors.NewInternal("invalid TwoFA service")
+	}
+	if deps.JWTService == nil {
+		return nil, errors.NewInternal("invalid JWT service")
+	}
+	if deps.CredentialsService == nil {
+		return nil, errors.NewInternal("invalid credentials service")
 	}
 	if log == nil {
 		return nil, errors.NewInternal("invalid logger")
@@ -79,7 +85,7 @@ func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserD
 			svc.log.WithContext(ctx).Errorf("failed to register user: %v", err)
 			return err
 		}
-	} else if userDTO != nil && userDTO.Status == "disabled" {
+	} else if userDTO.Status == "disabled" {
 		err := svc.userSvc.DeleteUserByEmail(ctx, dto.Email)
 		if err != nil {
 			svc.log.WithContext(ctx).Errorf("failed to delete user: %v", err)
