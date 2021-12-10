@@ -272,10 +272,7 @@ func TestRegistrationSvc_RegisterUser(t *testing.T) {
 	notActiveUser := user.MapToDTO(testUser)
 
 	testUser.SetToActive()
-	//activeUserDTO := user.MapToDTO(testUser)
-
 	testUser.SetToVerified()
-	//verifyUserDTO := user.MapToDTO(testUser)
 
 	testUserDTO := user.MapToDTO(testUser)
 
@@ -418,6 +415,160 @@ func TestRegistrationSvc_RegisterUser(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.setup(tc.ctx, tc.dto)
 			err := service.RegisterUser(tc.ctx, tc.dto)
+			tc.expect(t, err)
+		})
+	}
+}
+
+func TestRegistrationSvc_VerifyUser(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	log := logrus.New()
+
+	mockUserSvc := mock_user.NewMockService(controller)
+	mockVerificationSvc := mock_verification.NewMockService(controller)
+
+	deps := &ServiceDeps{
+		UserService:         mockUserSvc,
+		NotificatorService:  mock_notificator.NewMockService(controller),
+		VerificationService: mockVerificationSvc,
+		TwoFAService:        mock_twofa.NewMockService(controller),
+		JWTService:          mock_jwt.NewMockService(controller),
+		CredentialsService:  mock_credentials.NewMockService(controller),
+	}
+
+	// Test Data
+	emailSender := "example@example.com"
+	userEmail := "user@example.com"
+	code := "ASDDSA"
+
+	service, _ := NewRegistrationService(log, emailSender, deps)
+
+	// Test DTO
+	var verifyUserDTO VerifyUserDTO
+	verifyUserDTO.Code = code
+	verifyUserDTO.Email = userEmail
+
+	// Test Cred
+	secretKey := "secret"
+	var testCred credentials.Credentials
+	testCred.Password = "==WvZitmZDgzSHgAWvKs"
+	testCred.SecretOTP = &secretKey
+
+	// Test wallet
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
+	// Test user
+	testUser, _ := user.NewUser(userEmail, &testWallet, &testCred)
+
+	wrongUserDTO := user.MapToDTO(testUser)
+	wrongUserDTO.ID = "example"
+	notActiveAndVerifiedUserDTO := user.MapToDTO(testUser)
+
+	testUser.SetToVerified()
+	verifiedUserDTO := user.MapToDTO(testUser)
+
+	testUser.SetToActive()
+
+	testUserDTO := user.MapToDTO(testUser)
+
+	tests := []struct {
+		name   string
+		ctx    context.Context
+		dto    *VerifyUserDTO
+		setup  func(context.Context, *VerifyUserDTO)
+		expect func(*testing.T, error)
+	}{
+		{
+			name: "should return invalid code",
+			ctx:  context.Background(),
+			dto:  &verifyUserDTO,
+			setup: func(ctx context.Context, dto *VerifyUserDTO) {
+				mockVerificationSvc.EXPECT().CheckVerificationCode(ctx, dto.Email, dto.Code).Return(errors.NewInternal("Invalid code"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Invalid code"), err)
+			},
+		},
+		{
+			name: "should return not found user",
+			ctx:  context.Background(),
+			dto:  &verifyUserDTO,
+			setup: func(ctx context.Context, dto *VerifyUserDTO) {
+				mockVerificationSvc.EXPECT().CheckVerificationCode(ctx, dto.Email, dto.Code).Return(nil)
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(nil, errors.NewInternal("User not found"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("User not found"), err)
+			},
+		},
+		{
+			name: "should return user already verify",
+			ctx:  context.Background(),
+			dto:  &verifyUserDTO,
+			setup: func(ctx context.Context, dto *VerifyUserDTO) {
+				mockVerificationSvc.EXPECT().CheckVerificationCode(ctx, dto.Email, dto.Code).Return(nil)
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(testUserDTO, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, ErrAlreadyVerify, err)
+			},
+		},
+		{
+			name: "should return wrong object id",
+			ctx:  context.Background(),
+			dto:  &verifyUserDTO,
+			setup: func(ctx context.Context, dto *VerifyUserDTO) {
+				mockVerificationSvc.EXPECT().CheckVerificationCode(ctx, dto.Email, dto.Code).Return(nil)
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(wrongUserDTO, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("the provided hex string is not a valid ObjectID"), err)
+			},
+		},
+		{
+			name: "should return failed to update user",
+			ctx:  context.Background(),
+			dto:  &verifyUserDTO,
+			setup: func(ctx context.Context, dto *VerifyUserDTO) {
+				mockVerificationSvc.EXPECT().CheckVerificationCode(ctx, dto.Email, dto.Code).Return(nil)
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(notActiveAndVerifiedUserDTO, nil)
+				mockUserSvc.EXPECT().UpdateUser(ctx, gomock.AssignableToTypeOf(verifiedUserDTO)).Return(errors.NewInternal("Failed to update user"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Failed to update user"), err)
+			},
+		},
+		{
+			name: "should return ok",
+			ctx:  context.Background(),
+			dto:  &verifyUserDTO,
+			setup: func(ctx context.Context, dto *VerifyUserDTO) {
+				mockVerificationSvc.EXPECT().CheckVerificationCode(ctx, dto.Email, dto.Code).Return(nil)
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(notActiveAndVerifiedUserDTO, nil)
+				mockUserSvc.EXPECT().UpdateUser(ctx, gomock.AssignableToTypeOf(verifiedUserDTO)).Return(nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.Nil(t, err)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setup(tc.ctx, tc.dto)
+			err := service.VerifyUser(tc.ctx, tc.dto)
 			tc.expect(t, err)
 		})
 	}
