@@ -1,15 +1,21 @@
 package auth
 
 import (
+	"context"
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	mock_jwt "nnw_s/internal/auth/jwt/mocks"
 	mock_twofa "nnw_s/internal/auth/twofa/mocks"
 	mock_verification "nnw_s/internal/auth/verification/mocks"
+	"nnw_s/internal/user"
+	"nnw_s/internal/user/credentials"
 	mock_credentials "nnw_s/internal/user/credentials/mocks"
 	mock_user "nnw_s/internal/user/mocks"
+	"nnw_s/pkg/errors"
+	"nnw_s/pkg/notificator"
 	mock_notificator "nnw_s/pkg/notificator/mocks"
+	"nnw_s/pkg/wallet"
 	"testing"
 )
 
@@ -204,6 +210,215 @@ func TestNewRegistrationService(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			svc, err := NewRegistrationService(tc.log, tc.emailSender, tc.deps)
 			tc.expect(t, svc, err)
+		})
+	}
+}
+
+func TestRegistrationSvc_RegisterUser(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	log := logrus.New()
+
+	mockUserSvc := mock_user.NewMockService(controller)
+	mockVerificationSvc := mock_verification.NewMockService(controller)
+	mockNotificationSvc := mock_notificator.NewMockService(controller)
+
+	deps := &ServiceDeps{
+		UserService:         mockUserSvc,
+		NotificatorService:  mockNotificationSvc,
+		VerificationService: mockVerificationSvc,
+		TwoFAService:        mock_twofa.NewMockService(controller),
+		JWTService:          mock_jwt.NewMockService(controller),
+		CredentialsService:  mock_credentials.NewMockService(controller),
+	}
+
+	// Test Data
+	emailSender := "example@example.com"
+	userEmail := "user@example.com"
+	userPassword := "==WvZitmZDgzSHgAWvKs"
+	code := "ASDDSA"
+
+	service, _ := NewRegistrationService(log, emailSender, deps)
+
+	var registerUserDTO RegisterUserDTO
+	registerUserDTO.Email = userEmail
+	registerUserDTO.Password = userPassword
+
+	// Test DTO
+	var setupNewPasswordDTO SetupNewPasswordDTO
+	setupNewPasswordDTO.Email = userEmail
+	setupNewPasswordDTO.Password = userPassword
+
+	// Test Cred
+	secretKey := "secret"
+	var testCred credentials.Credentials
+	testCred.Password = "==WvZitmZDgzSHgAWvKs"
+	testCred.SecretOTP = &secretKey
+
+	//testCredDTO := credentials.MapToDTO(&testCred)
+
+	// Test wallet
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
+	// Test user
+	testUser, _ := user.NewUser(userEmail, &testWallet, &testCred)
+
+	notActiveUser := user.MapToDTO(testUser)
+
+	testUser.SetToActive()
+	//activeUserDTO := user.MapToDTO(testUser)
+
+	testUser.SetToVerified()
+	//verifyUserDTO := user.MapToDTO(testUser)
+
+	testUserDTO := user.MapToDTO(testUser)
+
+	wrongUserDTO := user.MapToDTO(testUser)
+	wrongUserDTO.ID = "example"
+
+	// Test Email data
+	testEmailData := notificator.Email{
+		Subject:   emailVerificationSubject,
+		Recipient: userEmail,
+		Sender:    emailSender,
+		Template:  emailVerificationTemplateName,
+		Data: map[string]interface{}{
+			"topic":   emailVerificationTopic,
+			"message": emailVerificationMessage,
+			"code":    code,
+		},
+	}
+
+	tests := []struct {
+		name   string
+		ctx    context.Context
+		dto    *RegisterUserDTO
+		setup  func(context.Context, *RegisterUserDTO)
+		expect func(*testing.T, error)
+	}{
+		{
+			name: "should return failed to register doesn't exist user",
+			ctx:  context.Background(),
+			dto:  &registerUserDTO,
+			setup: func(ctx context.Context, dto *RegisterUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(nil, nil)
+				mockUserSvc.EXPECT().CreateUser(ctx, &user.CreateUserDTO{
+					Email:    dto.Email,
+					Password: dto.Password,
+				}).Return("", errors.NewInternal("Failed to create user"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Failed to create user"), err)
+			},
+		},
+		{
+			name: "should return failed to delete user",
+			ctx:  context.Background(),
+			dto:  &registerUserDTO,
+			setup: func(ctx context.Context, dto *RegisterUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(notActiveUser, nil)
+				mockUserSvc.EXPECT().DeleteUserByEmail(ctx, dto.Email).Return(errors.NewInternal("Failed to delete user"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Failed to delete user"), err)
+			},
+		},
+		{
+			name: "should return failed to register exist user",
+			ctx:  context.Background(),
+			dto:  &registerUserDTO,
+			setup: func(ctx context.Context, dto *RegisterUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(notActiveUser, nil)
+				mockUserSvc.EXPECT().DeleteUserByEmail(ctx, dto.Email).Return(nil)
+				mockUserSvc.EXPECT().CreateUser(ctx, &user.CreateUserDTO{
+					Email:    dto.Email,
+					Password: dto.Password,
+				}).Return("", errors.NewInternal("Failed to create user"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Failed to create user"), err)
+			},
+		},
+		{
+			name: "should return user already exist",
+			ctx:  context.Background(),
+			dto:  &registerUserDTO,
+			setup: func(ctx context.Context, dto *RegisterUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(testUserDTO, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, user.ErrAlreadyExists, err)
+			},
+		},
+		{
+			name: "should return failed to create verification code",
+			ctx:  context.Background(),
+			dto:  &registerUserDTO,
+			setup: func(ctx context.Context, dto *RegisterUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(nil, nil)
+				mockUserSvc.EXPECT().CreateUser(ctx, &user.CreateUserDTO{
+					Email:    dto.Email,
+					Password: dto.Password,
+				}).Return("", nil)
+				mockVerificationSvc.EXPECT().CreateVerificationCode(ctx, dto.Email).Return("", errors.NewInternal("Failed to create verification code"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Failed to create verification code"), err)
+			},
+		},
+		{
+			name: "should return failed to send email",
+			ctx:  context.Background(),
+			dto:  &registerUserDTO,
+			setup: func(ctx context.Context, dto *RegisterUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(nil, nil)
+				mockUserSvc.EXPECT().CreateUser(ctx, &user.CreateUserDTO{
+					Email:    dto.Email,
+					Password: dto.Password,
+				}).Return("", nil)
+				mockVerificationSvc.EXPECT().CreateVerificationCode(ctx, dto.Email).Return(code, nil)
+				mockNotificationSvc.EXPECT().SendEmail(ctx, &testEmailData).Return(errors.NewInternal("Failed to send email to user"))
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.NewInternal("Failed to send email to user"), err)
+			},
+		},
+		{
+			name: "should return ok",
+			ctx:  context.Background(),
+			dto:  &registerUserDTO,
+			setup: func(ctx context.Context, dto *RegisterUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(nil, nil)
+				mockUserSvc.EXPECT().CreateUser(ctx, &user.CreateUserDTO{
+					Email:    dto.Email,
+					Password: dto.Password,
+				}).Return("", nil)
+				mockVerificationSvc.EXPECT().CreateVerificationCode(ctx, dto.Email).Return(code, nil)
+				mockNotificationSvc.EXPECT().SendEmail(ctx, &testEmailData).Return(nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.Nil(t, err)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setup(tc.ctx, tc.dto)
+			err := service.RegisterUser(tc.ctx, tc.dto)
+			tc.expect(t, err)
 		})
 	}
 }
