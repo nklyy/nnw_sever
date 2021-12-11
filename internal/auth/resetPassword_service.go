@@ -162,7 +162,7 @@ func (svc *resetPasswordSvc) ResendResetPasswordEmail(ctx context.Context, dto *
 		return err
 	}
 
-	svc.log.WithContext(ctx).Infof("reset password code successfully sent to: %s", dto.Email)
+	svc.log.WithContext(ctx).Infof("reset password code successfully resend to: %s", dto.Email)
 	return nil
 }
 
