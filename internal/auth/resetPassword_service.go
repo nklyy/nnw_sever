@@ -89,7 +89,7 @@ func (svc *resetPasswordSvc) ResetPassword(ctx context.Context, dto *ResetPasswo
 
 	// if user does not active or not verified return ErrPermissionDenied
 	if !userEntity.IsActive() || !userEntity.IsVerified {
-		return ErrPermissionDenied
+		return user.ErrUserDoesNotVerify
 	}
 
 	newResetPasswordCode, err := svc.verificationSvc.CreateResetPasswordCode(ctx, userEntity.Email)
@@ -135,7 +135,7 @@ func (svc *resetPasswordSvc) ResendResetPasswordEmail(ctx context.Context, dto *
 
 	// if user does not active or not verified return ErrPermissionDenied
 	if !userEntity.IsActive() || !userEntity.IsVerified {
-		return ErrPermissionDenied
+		return user.ErrUserDoesNotVerify
 	}
 
 	newResetPasswordCode, err := svc.verificationSvc.CreateResetPasswordCode(ctx, userEntity.Email)

@@ -314,7 +314,7 @@ func TestResetPasswordSvc_ResetPassword(t *testing.T) {
 			},
 		},
 		{
-			name: "should return permission_denied not active user",
+			name: "should return user_does_not_verify",
 			ctx:  context.Background(),
 			dto:  &resetPasswordDTO,
 			setup: func(ctx context.Context, dto *ResetPasswordDTO) {
@@ -322,7 +322,7 @@ func TestResetPasswordSvc_ResetPassword(t *testing.T) {
 			},
 			expect: func(t *testing.T, err error) {
 				assert.NotNil(t, err)
-				assert.Equal(t, errors.WithMessage(ErrPermissionDenied, ""), err)
+				assert.Equal(t, errors.WithMessage(user.ErrUserDoesNotVerify, ""), err)
 			},
 		},
 		{
@@ -476,7 +476,7 @@ func TestResetPasswordSvc_ResendResetPasswordEmail(t *testing.T) {
 			},
 		},
 		{
-			name: "should return permission_denied not active user",
+			name: "should return user_does_not_verify",
 			ctx:  context.Background(),
 			dto:  &resendPasswordDTO,
 			setup: func(ctx context.Context, dto *ResendResetPasswordDTO) {
@@ -484,7 +484,7 @@ func TestResetPasswordSvc_ResendResetPasswordEmail(t *testing.T) {
 			},
 			expect: func(t *testing.T, err error) {
 				assert.NotNil(t, err)
-				assert.Equal(t, errors.WithMessage(ErrPermissionDenied, ""), err)
+				assert.Equal(t, errors.WithMessage(user.ErrUserDoesNotVerify, ""), err)
 			},
 		},
 		{
