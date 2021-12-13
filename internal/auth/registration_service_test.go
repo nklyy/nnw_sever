@@ -895,3 +895,156 @@ func TestRegistrationSvc_SetupTwoFA(t *testing.T) {
 		})
 	}
 }
+
+func TestRegistrationSvc_ActivateUser(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	log := logrus.New()
+
+	mockUserSvc := mock_user.NewMockService(controller)
+	mockTwoFaSvc := mock_twofa.NewMockService(controller)
+
+	deps := &ServiceDeps{
+		UserService:         mockUserSvc,
+		NotificatorService:  mock_notificator.NewMockService(controller),
+		VerificationService: mock_verification.NewMockService(controller),
+		TwoFAService:        mockTwoFaSvc,
+		JWTService:          mock_jwt.NewMockService(controller),
+		CredentialsService:  mock_credentials.NewMockService(controller),
+	}
+
+	// Test Data
+	emailSender := "example@example.com"
+	userEmail := "user@example.com"
+	code := "ASDDSA"
+	secret := "secret"
+
+	service, _ := NewRegistrationService(log, emailSender, deps)
+
+	var activateUserDTO ActivateUserDTO
+	activateUserDTO.Email = userEmail
+	activateUserDTO.Code = code
+
+	// Test Cred
+	secretKey := "secret"
+	var testCred credentials.Credentials
+	testCred.Password = "==WvZitmZDgzSHgAWvKs"
+	testCred.SecretOTP = &secretKey
+
+	// Test wallet
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
+	// Test user
+	testUser, _ := user.NewUser(userEmail, &testWallet, &testCred)
+
+	//notActiveUser := user.MapToDTO(testUser)
+
+	testUser.SetToVerified()
+	verifiedUser := user.MapToDTO(testUser)
+
+	testUser.SetToActive()
+
+	testUserDTO := user.MapToDTO(testUser)
+
+	wrongUserDTO := user.MapToDTO(testUser)
+	wrongUserDTO.ID = "example"
+
+	tests := []struct {
+		name   string
+		ctx    context.Context
+		dto    *ActivateUserDTO
+		setup  func(context.Context, *ActivateUserDTO)
+		expect func(*testing.T, error)
+	}{
+		{
+			name: "should return user not found",
+			ctx:  context.Background(),
+			dto:  &activateUserDTO,
+			setup: func(ctx context.Context, dto *ActivateUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(nil, user.ErrNotFound)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, user.ErrNotFound, err)
+			},
+		},
+		{
+			name: "should return invalid dto",
+			ctx:  context.Background(),
+			dto:  &activateUserDTO,
+			setup: func(ctx context.Context, dto *ActivateUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(wrongUserDTO, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, ErrInvalidDTO, err)
+			},
+		},
+		{
+			name: "should return already_active user",
+			ctx:  context.Background(),
+			dto:  &activateUserDTO,
+			setup: func(ctx context.Context, dto *ActivateUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(testUserDTO, nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.WithMessage(user.ErrUserAlreadyActive, ""), err)
+			},
+		},
+		{
+			name: "should return invalid_code",
+			ctx:  context.Background(),
+			dto:  &activateUserDTO,
+			setup: func(ctx context.Context, dto *ActivateUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(verifiedUser, nil)
+				mockTwoFaSvc.EXPECT().CheckTwoFACode(ctx, dto.Code, secret).Return(ErrInvalidCode)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.WithMessage(ErrInvalidCode, ""), err)
+			},
+		},
+		{
+			name: "should return failed update user",
+			ctx:  context.Background(),
+			dto:  &activateUserDTO,
+			setup: func(ctx context.Context, dto *ActivateUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(verifiedUser, nil)
+				mockTwoFaSvc.EXPECT().CheckTwoFACode(ctx, dto.Code, secret).Return(nil)
+				mockUserSvc.EXPECT().UpdateUser(ctx, gomock.AssignableToTypeOf(testUserDTO)).Return(user.ErrFailedUpdateUser)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
+				assert.Equal(t, errors.WithMessage(user.ErrFailedUpdateUser, ""), err)
+			},
+		},
+		{
+			name: "should return ok",
+			ctx:  context.Background(),
+			dto:  &activateUserDTO,
+			setup: func(ctx context.Context, dto *ActivateUserDTO) {
+				mockUserSvc.EXPECT().GetUserByEmail(ctx, dto.Email).Return(verifiedUser, nil)
+				mockTwoFaSvc.EXPECT().CheckTwoFACode(ctx, dto.Code, secret).Return(nil)
+				mockUserSvc.EXPECT().UpdateUser(ctx, gomock.AssignableToTypeOf(testUserDTO)).Return(nil)
+			},
+			expect: func(t *testing.T, err error) {
+				assert.Nil(t, err)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setup(tc.ctx, tc.dto)
+			err := service.ActivateUser(tc.ctx, tc.dto)
+			tc.expect(t, err)
+		})
+	}
+}

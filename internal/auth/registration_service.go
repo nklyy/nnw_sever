@@ -260,23 +260,23 @@ func (svc *registrationSvc) ActivateUser(ctx context.Context, dto *ActivateUserD
 	// find user
 	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
-		return err
+		return user.ErrNotFound
 	}
 
 	// map userDTO to user
 	userEntity, err := user.MapToEntity(userDTO)
 	if err != nil {
-		return err
+		return ErrInvalidDTO
 	}
 
 	// check if user is active or not verified, if yes - return ErrPermissionDenied
-	if userEntity.IsActive() || !userEntity.IsVerified {
-		return ErrPermissionDenied
+	if userEntity.IsActive() && userEntity.IsVerified {
+		return user.ErrUserAlreadyActive
 	}
 
 	// check TwoFA Code
 	if err = svc.twoFaSvc.CheckTwoFACode(ctx, dto.Code, *userEntity.Credentials.SecretOTP); err != nil {
-		return err
+		return ErrInvalidCode
 	}
 
 	// activate user
@@ -287,7 +287,7 @@ func (svc *registrationSvc) ActivateUser(ctx context.Context, dto *ActivateUserD
 
 	// update user in storage
 	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
-		return err
+		return user.ErrFailedUpdateUser
 	}
 
 	svc.log.WithContext(ctx).Infof("user '%s' successfully activated TwoFA authentication", userEntity.Email)
