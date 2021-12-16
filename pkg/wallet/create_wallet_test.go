@@ -2,7 +2,7 @@ package wallet
 
 import (
 	"fmt"
-	"strconv"
+	"math/big"
 	"strings"
 	"testing"
 )
@@ -38,12 +38,25 @@ func TestCreateWallet(t *testing.T) {
 }
 
 func TestHexadecimalToDecimal(t *testing.T) {
-	numberStr := strings.Replace("0x72966d", "0x", "", -1)
+	numberStr := strings.Replace("0x768d0e3d72f76117e9e", "0x", "", -1)
 	numberStr = strings.Replace(numberStr, "0X", "", -1)
 
-	output, err := strconv.ParseInt(numberStr, 16, 64)
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Printf("Output %d\n", output)
+	fmt.Println(numberStr)
+
+	i := new(big.Int)
+	i.SetString(numberStr, 16)
+	fmt.Println(i)
+	fmt.Printf("Output float %v.6\n", float64(i.Int64())/1e-18)
+
+	//num, err := strconv.ParseUint("214cee87a5b0eb10b97ea", 16, 64)
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//fmt.Println(num)
+
+	//output, err := strconv.ParseInt(numberStr, 16, 64)
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//fmt.Printf("Output %d\n", output)
 }
