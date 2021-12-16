@@ -382,6 +382,7 @@ func (svc *walletSvc) SendTx(ctx context.Context, dto *SendTxDTO, email string) 
 		}
 
 		txHash = h
+		// TODO save transaction info to user {from, to, amount, txHash}
 	}
 
 	return txHash, nil
