@@ -233,7 +233,7 @@ func (svc *walletSvc) GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) 
 			return nil, err
 		}
 
-		balance = float64(*balanceInt) / 1e-81
+		balance = float64(*balanceInt) / 1e-18
 	}
 
 	return &BalanceDTO{
@@ -261,15 +261,6 @@ func (svc *walletSvc) GetWalletTx(ctx context.Context, dto *GetWalletTxDTO) ([]*
 		if err != nil {
 			return nil, err
 		}
-
-		//for _, tx := range txs {
-		//	arrTxs = append(arrTxs, &TxsDTO{
-		//		Address:  tx.Address,
-		//		Category: tx.Category,
-		//		Amount:   tx.Amount,
-		//		Txid:     tx.Txid,
-		//	})
-		//}
 
 		var sortedTx []string
 		for _, tx := range txs {
