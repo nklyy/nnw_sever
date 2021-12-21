@@ -6,7 +6,7 @@ import (
 	"nnw_s/pkg/helpers"
 )
 
-func GetBalance(address string) (*big.Int, error) {
+func GetBlockNumber() (*big.Int, error) {
 	msg := struct {
 		JsonRPC string `json:"jsonrpc"`
 		Id      int64  `json:"id"`
@@ -24,14 +24,14 @@ func GetBalance(address string) (*big.Int, error) {
 		Id      int64    `json:"id"`
 	}{
 		JsonRPC: "2.0",
-		Method:  "eth_getBalance",
-		Params:  []string{address, "latest"},
+		Method:  "eth_blockNumber",
+		Params:  []string{},
 		Id:      1,
 	}
 
 	err := Client(req, &msg)
 	if err != nil {
-		return nil, errors.New("could not get address info")
+		return nil, errors.New(msg.Error.Message)
 	}
 
 	if msg.Error.Message != "" {
@@ -39,11 +39,6 @@ func GetBalance(address string) (*big.Int, error) {
 	}
 
 	res := helpers.ConvertHexToDecimal(msg.Result)
-
-	//balance, err := strconv.ParseInt(numberStr, 16, 64)
-	//if err != nil {
-	//	return nil, err
-	//}
 
 	return res, nil
 }

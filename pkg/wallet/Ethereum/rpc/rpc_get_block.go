@@ -22,33 +22,35 @@ type Transaction struct {
 	S                string `json:"s"`
 }
 
-func GetBlock(block string, full bool) (*string, error) {
+type Block struct {
+	Difficulty       string        `json:"difficulty"`
+	ExtraData        string        `json:"extraData"`
+	GasLimit         string        `json:"gas_limit"`
+	GasUsed          string        `json:"gasUsed"`
+	Hash             string        `json:"hash"`
+	LogsBloom        string        `json:"logsBloom"`
+	Miner            string        `json:"miner"`
+	MixHash          string        `json:"mixHash"`
+	Nonce            string        `json:"nonce"`
+	Number           string        `json:"number"`
+	ParentHash       string        `json:"parentHash"`
+	ReceiptsRoot     string        `json:"receiptsRoot"`
+	Sha3Uncles       string        `json:"sha3Uncles"`
+	Size             string        `json:"size"`
+	StateRoot        string        `json:"stateRoot"`
+	Timestamp        string        `json:"timestamp"`
+	TotalDifficulty  string        `json:"totalDifficulty"`
+	Transactions     []Transaction `json:"transactions"`
+	TransactionsRoot string        `json:"transactionsRoot"`
+	//Uncles           []string      `json:"uncles"`
+}
+
+func GetBlock(block string, full bool) (*Block, error) {
 	msg := struct {
 		JsonRPC string `json:"jsonrpc"`
 		Id      int64  `json:"id"`
-		Result  struct {
-			Difficulty       string        `json:"difficulty"`
-			ExtraData        string        `json:"extraData"`
-			GasLimit         string        `json:"gas_limit"`
-			GasUsed          string        `json:"gasUsed"`
-			Hash             string        `json:"hash"`
-			LogsBloom        string        `json:"logsBloom"`
-			Miner            string        `json:"miner"`
-			MixHash          string        `json:"mixHash"`
-			Nonce            string        `json:"nonce"`
-			Number           string        `json:"number"`
-			ParentHash       string        `json:"parentHash"`
-			ReceiptsRoot     string        `json:"receiptsRoot"`
-			Sha3Uncles       string        `json:"sha3Uncles"`
-			Size             string        `json:"size"`
-			StateRoot        string        `json:"stateRoot"`
-			Timestamp        string        `json:"timestamp"`
-			TotalDifficulty  string        `json:"totalDifficulty"`
-			Transactions     []Transaction `json:"transactions"`
-			TransactionsRoot string        `json:"transactionsRoot"`
-			//Uncles           []string      `json:"uncles"`
-		} `json:"result"`
-		Error struct {
+		Result  Block  `json:"result"`
+		Error   struct {
 			Code    interface{} `json:"code"`
 			Message string      `json:"message"`
 		} `json:"error"`
@@ -75,5 +77,5 @@ func GetBlock(block string, full bool) (*string, error) {
 		return nil, errors.New(msg.Error.Message)
 	}
 
-	return nil, nil
+	return &msg.Result, nil
 }
