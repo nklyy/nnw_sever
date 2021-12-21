@@ -11,6 +11,7 @@ import (
 )
 
 func TestCreateETHWallet(t *testing.T) {
+	//41de38e01e053b1d425b73d8fa202f3e9aa8a2be1c3ee3ca180a7ccb96cc7ab3
 	address, err := rpc.ImportPrivateKey("67d0fc18baac0fa03451ccd108c451119929ab6e7467665965b7117fa127896c", "asd")
 	if err != nil {
 		t.Fatal(err)
