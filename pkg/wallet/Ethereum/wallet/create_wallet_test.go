@@ -38,6 +38,8 @@ func TestGetBalance(t *testing.T) {
 	}
 
 	fmt.Println(balance)
+	//balance := new(big.Int)
+	//balance.SetString("99999999999919610092", 10)
 	fmt.Println(new(big.Float).Quo(new(big.Float).SetInt(balance), big.NewFloat(params.Ether)))
 }
 
