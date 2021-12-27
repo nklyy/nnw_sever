@@ -26,7 +26,8 @@ func GetBalance(address string) (*big.Int, error) {
 		JsonRPC: "2.0",
 		Method:  "eth_getBalance",
 		Params:  []string{address, "latest"},
-		Id:      1,
+		// TODO use uuid in Id field and then check it in result
+		Id: 1,
 	}
 
 	err := Client(req, &msg)
