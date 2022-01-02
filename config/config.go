@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	PORT        string `required:"true" default:"4000" envconfig:"PORT"`
+	PROMETHEUS  string `required:"true" default:"9090" envconfig:"PROMETHEUS"`
 	Environment string `required:"true" default:"development" envconfig:"APP_ENV"`
 	EmailFrom   string `required:"true" envconfig:"EMAIL_FROM"`
 	TwoFAIssuer string `required:"true" envconfig:"TWO_FA_ISSUER" default:"NNW"`

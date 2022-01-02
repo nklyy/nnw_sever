@@ -9,6 +9,7 @@ import (
 func TestInit(t *testing.T) {
 	type env struct {
 		port            string
+		prometheus      string
 		environment     string
 		mongoDbUrl      string
 		mongoDbUser     string
@@ -33,6 +34,7 @@ func TestInit(t *testing.T) {
 
 	setEnv := func(env env) {
 		os.Setenv("PORT", env.port)
+		os.Setenv("PROMETHEUS", env.prometheus)
 		os.Setenv("ENVIRONMENT", env.environment)
 		os.Setenv("MONGO_DB_NAME", env.mongoDbName)
 		os.Setenv("MONGO_DB_USER", env.mongoDbUser)
@@ -62,6 +64,7 @@ func TestInit(t *testing.T) {
 			args: args{
 				env: env{
 					port:            "4000",
+					prometheus:      "9090",
 					environment:     "development",
 					mongoDbUrl:      "mongodb+srv://user:user@cluster0.database.mongodb.net/name?retryWrites=true&w=majority",
 					mongoDbUser:     "admin",
@@ -82,6 +85,7 @@ func TestInit(t *testing.T) {
 			},
 			want: &Config{
 				PORT:        "4000",
+				PROMETHEUS:  "9090",
 				Environment: "development",
 				EmailFrom:   "example@example.com",
 				TwoFAIssuer: "Example",

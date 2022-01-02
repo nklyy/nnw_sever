@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -145,6 +146,24 @@ func main() {
 			"msg":      "Sorry, endpoint is not found",
 		})
 	}
+
+	// Setup metrics
+	echoPrometheus := echo.New()
+	echoPrometheus.HideBanner = true
+	prom := prometheus.NewPrometheus("echo", nil)
+
+	// Scrape metrics from Main Server
+	router.Use(prom.HandlerFunc)
+	// Setup metrics endpoint at another server
+	prom.SetMetricsPath(echoPrometheus)
+
+	go func() {
+		logger.Info("starting NNW Prometheus server at :%s...", cfg.PROMETHEUS)
+		if err = echoPrometheus.Start(":" + cfg.PROMETHEUS); err != nil {
+			logger.Errorf("failed to start Prometheus server: %v", err)
+			return
+		}
+	}()
 
 	// Starting App
 	logger.Info("starting NNW server at :%s...", cfg.PORT)
