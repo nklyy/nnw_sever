@@ -6,7 +6,7 @@ COPY go.mod /app
 RUN go mod download
 
 COPY . /app
-RUN go build -o server .
+RUN go build -o server ./cmd
 
 FROM scratch
 ENV APP_ENV=PRODUCTION
