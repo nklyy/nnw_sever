@@ -147,23 +147,8 @@ func main() {
 		})
 	}
 
-	// Setup metrics
-	echoPrometheus := echo.New()
-	echoPrometheus.HideBanner = true
-	prom := prometheus.NewPrometheus("echo", nil)
-
-	// Scrape metrics from Main Server
-	router.Use(prom.HandlerFunc)
-	// Setup metrics endpoint at another server
-	prom.SetMetricsPath(echoPrometheus)
-
-	go func() {
-		logger.Info("starting NNW Prometheus server at :%s...", cfg.PROMETHEUS)
-		if err = echoPrometheus.Start(":" + cfg.PROMETHEUS); err != nil {
-			logger.Errorf("failed to start Prometheus server: %v", err)
-			return
-		}
-	}()
+	p := prometheus.NewPrometheus("echo", nil)
+	p.Use(router)
 
 	// Starting App
 	logger.Info("starting NNW server at :%s...", cfg.PORT)
