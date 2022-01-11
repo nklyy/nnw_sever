@@ -7,6 +7,7 @@ import (
 	mock_credentials "nnw_s/internal/user/credentials/mocks"
 	mock_user "nnw_s/internal/user/mocks"
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/wallet"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -92,7 +93,15 @@ func TestGetUserByID(t *testing.T) {
 	testCred.SecretOTP = &secretKey
 
 	service, _ := user.NewService(mockRepo, mockCred, log)
-	testUser, _ := user.NewUser("some@mail.com", &testCred)
+
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
+	testUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	userDto := user.MapToDTO(testUser)
 
 	tests := []struct {
@@ -164,7 +173,15 @@ func TestGetUserByEmail(t *testing.T) {
 	testCred.SecretOTP = &secretKey
 
 	service, _ := user.NewService(mockRepo, mockCred, log)
-	testUser, _ := user.NewUser("some@mail.com", &testCred)
+
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
+	testUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	userDTO := user.MapToDTO(testUser)
 
 	tests := []struct {
@@ -237,7 +254,15 @@ func TestCreateUser(t *testing.T) {
 	testCred.SecretOTP = &secretKey
 
 	service, _ := user.NewService(mockRepo, mockCred, log)
-	testUser, _ := user.NewUser("some@mail.com", &testCred)
+
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
+	testUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	userDTO := user.MapToDTO(testUser)
 	encodedPass := "==WvZitmZDgzSHgAWvKs"
 

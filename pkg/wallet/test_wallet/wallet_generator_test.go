@@ -1,4 +1,4 @@
-package wallet
+package test_wallet
 
 import (
 	"fmt"

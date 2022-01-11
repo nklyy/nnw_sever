@@ -43,10 +43,16 @@ func NewResetPasswordService(log *logrus.Logger, emailSender string, deps *Servi
 		return nil, errors.NewInternal("invalid user service")
 	}
 	if deps.NotificatorService == nil {
-		return nil, errors.NewInternal("invalid notificator service")
+		return nil, errors.NewInternal("invalid notification service")
 	}
 	if deps.VerificationService == nil {
 		return nil, errors.NewInternal("invalid verification service")
+	}
+	if deps.TwoFAService == nil {
+		return nil, errors.NewInternal("invalid TwoFA service")
+	}
+	if deps.JWTService == nil {
+		return nil, errors.NewInternal("invalid JWT service")
 	}
 	if deps.CredentialsService == nil {
 		return nil, errors.NewInternal("invalid credentials service")
@@ -76,17 +82,17 @@ func (svc *resetPasswordSvc) ResetPassword(ctx context.Context, dto *ResetPasswo
 	}
 
 	// map dto to user
-	resetPasswordUser, err := user.MapToEntity(userDTO)
+	userEntity, err := user.MapToEntity(userDTO)
 	if err != nil {
 		return err
 	}
 
 	// if user does not active or not verified return ErrPermissionDenied
-	if !resetPasswordUser.IsActive() || !resetPasswordUser.IsVerified {
-		return ErrPermissionDenied
+	if !userEntity.IsActive() || !userEntity.IsVerified {
+		return user.ErrUserDoesNotVerify
 	}
 
-	newResetPasswordCode, err := svc.verificationSvc.CreateResetPasswordCode(ctx, resetPasswordUser.Email)
+	newResetPasswordCode, err := svc.verificationSvc.CreateResetPasswordCode(ctx, userEntity.Email)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create reset password code: %v", err)
 		return err
@@ -122,17 +128,17 @@ func (svc *resetPasswordSvc) ResendResetPasswordEmail(ctx context.Context, dto *
 	}
 
 	// map dto to user
-	resetPasswordUser, err := user.MapToEntity(userDTO)
+	userEntity, err := user.MapToEntity(userDTO)
 	if err != nil {
 		return err
 	}
 
 	// if user does not active or not verified return ErrPermissionDenied
-	if !resetPasswordUser.IsActive() || !resetPasswordUser.IsVerified {
-		return ErrPermissionDenied
+	if !userEntity.IsActive() || !userEntity.IsVerified {
+		return user.ErrUserDoesNotVerify
 	}
 
-	newResetPasswordCode, err := svc.verificationSvc.CreateResetPasswordCode(ctx, resetPasswordUser.Email)
+	newResetPasswordCode, err := svc.verificationSvc.CreateResetPasswordCode(ctx, userEntity.Email)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create reset password code: %v", err)
 		return err
@@ -156,7 +162,7 @@ func (svc *resetPasswordSvc) ResendResetPasswordEmail(ctx context.Context, dto *
 		return err
 	}
 
-	svc.log.WithContext(ctx).Infof("reset password code successfully sent to: %s", dto.Email)
+	svc.log.WithContext(ctx).Infof("reset password code successfully resend to: %s", dto.Email)
 	return nil
 }
 
@@ -168,13 +174,13 @@ func (svc *resetPasswordSvc) ResetPasswordCode(ctx context.Context, dto *ResetPa
 	}
 
 	// map dto to user
-	resetPasswordUser, err := user.MapToEntity(userDTO)
+	userEntity, err := user.MapToEntity(userDTO)
 	if err != nil {
 		return err
 	}
 
 	// if user does not active or not verified return ErrPermissionDenied
-	if !resetPasswordUser.IsActive() || !resetPasswordUser.IsVerified {
+	if !userEntity.IsActive() || !userEntity.IsVerified {
 		return ErrPermissionDenied
 	}
 
@@ -194,13 +200,18 @@ func (svc *resetPasswordSvc) SetupNewPassword(ctx context.Context, dto *SetupNew
 	}
 
 	// map dto to user
-	resetPasswordUser, err := user.MapToEntity(userDTO)
+	userEntity, err := user.MapToEntity(userDTO)
 	if err != nil {
 		return err
 	}
 
+	// if user does not active or not verified return ErrPermissionDenied
+	if !userEntity.IsActive() || !userEntity.IsVerified {
+		return ErrPermissionDenied
+	}
+
 	// Create new credentials
-	userCredentialsDTO, err := svc.credentialsSvc.CreateCredentials(ctx, dto.Password, resetPasswordUser.Credentials.SecretOTP)
+	userCredentialsDTO, err := svc.credentialsSvc.CreateCredentials(ctx, dto.Password, userEntity.Credentials.SecretOTP)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create user credentials: %v", err)
 		return err
@@ -210,10 +221,10 @@ func (svc *resetPasswordSvc) SetupNewPassword(ctx context.Context, dto *SetupNew
 	userCredentials := credentials.MapToEntity(userCredentialsDTO)
 
 	// Set-up new credentials
-	resetPasswordUser.Credentials = userCredentials
+	userEntity.Credentials = userCredentials
 
 	// map to userDTO
-	resetPasswordUserDTO := user.MapToDTO(resetPasswordUser)
+	resetPasswordUserDTO := user.MapToDTO(userEntity)
 
 	err = svc.userSvc.UpdateUser(ctx, resetPasswordUserDTO)
 	if err != nil {

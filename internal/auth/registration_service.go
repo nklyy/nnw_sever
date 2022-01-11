@@ -46,13 +46,19 @@ func NewRegistrationService(log *logrus.Logger, emailSender string, deps *Servic
 		return nil, errors.NewInternal("invalid user service")
 	}
 	if deps.NotificatorService == nil {
-		return nil, errors.NewInternal("invalid notificator service")
+		return nil, errors.NewInternal("invalid notification service")
 	}
 	if deps.VerificationService == nil {
 		return nil, errors.NewInternal("invalid verification service")
 	}
 	if deps.TwoFAService == nil {
 		return nil, errors.NewInternal("invalid TwoFA service")
+	}
+	if deps.JWTService == nil {
+		return nil, errors.NewInternal("invalid JWT service")
+	}
+	if deps.CredentialsService == nil {
+		return nil, errors.NewInternal("invalid credentials service")
 	}
 	if log == nil {
 		return nil, errors.NewInternal("invalid logger")
@@ -79,7 +85,7 @@ func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserD
 			svc.log.WithContext(ctx).Errorf("failed to register user: %v", err)
 			return err
 		}
-	} else if userDTO != nil && userDTO.Status == "disabled" {
+	} else if userDTO.Status == "disabled" {
 		err := svc.userSvc.DeleteUserByEmail(ctx, dto.Email)
 		if err != nil {
 			svc.log.WithContext(ctx).Errorf("failed to delete user: %v", err)
@@ -100,7 +106,7 @@ func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserD
 	newVerificationCode, err := svc.verificationSvc.CreateVerificationCode(ctx, dto.Email)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create verification code: %v", err)
-		return err
+		return ErrFailedCreateCode
 	}
 
 	emailData := notificator.Email{
@@ -118,7 +124,7 @@ func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserD
 	// send email to recipient
 	if err = svc.notificatorSvc.SendEmail(ctx, &emailData); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to send email: %v", err)
-		return err
+		return ErrFailedSendEmail
 	}
 
 	svc.log.WithContext(ctx).Infof("verification code successfully sent to: %s", dto.Email)
@@ -128,7 +134,7 @@ func (svc *registrationSvc) RegisterUser(ctx context.Context, dto *RegisterUserD
 func (svc *registrationSvc) VerifyUser(ctx context.Context, dto *VerifyUserDTO) error {
 	// check if user's verification code is valid
 	if err := svc.verificationSvc.CheckVerificationCode(ctx, dto.Email, dto.Code); err != nil {
-		return err
+		return ErrInvalidCode
 	}
 
 	// get not activated user
@@ -139,13 +145,13 @@ func (svc *registrationSvc) VerifyUser(ctx context.Context, dto *VerifyUserDTO) 
 
 	if notActivatedUserDTO.IsVerified == true {
 		svc.log.WithContext(ctx).Errorf("user %v, already verify", dto.Email)
-		return ErrAlreadyVerify
+		return user.ErrUserAlreadyVerify
 	}
 
 	// mapping userDTO to user entity
 	notActivatedUser, err := user.MapToEntity(notActivatedUserDTO)
 	if err != nil {
-		return err
+		return ErrInvalidDTO
 	}
 
 	// activating user
@@ -157,7 +163,7 @@ func (svc *registrationSvc) VerifyUser(ctx context.Context, dto *VerifyUserDTO) 
 	// update user entity in storage
 	if err = svc.userSvc.UpdateUser(ctx, notActivatedUserDTO); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to update user's status field: %v", err)
-		return err
+		return user.ErrFailedUpdateUser
 	}
 
 	svc.log.WithContext(ctx).Infof("user '%s' successfully verified", notActivatedUser.Email)
@@ -168,25 +174,25 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, dto *Re
 	// get not activated user
 	notActivatedUserDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
-		return err
+		return errors.WithMessage(ErrPermissionDenied, err.Error())
 	}
 
 	// mapping userDTO to user entity
-	notActivatedUser, err := user.MapToEntity(notActivatedUserDTO)
+	userEntity, err := user.MapToEntity(notActivatedUserDTO)
 	if err != nil {
-		return err
+		return ErrInvalidDTO
 	}
 
-	// check if user not active and not verified
-	if notActivatedUser.IsActive() && notActivatedUser.IsVerified {
-		return ErrAlreadyVerify
+	// if user does not active or not verified return ErrPermissionDenied
+	if userEntity.IsActive() || userEntity.IsVerified {
+		return user.ErrUserAlreadyVerify
 	}
 
 	// create verification code for further activation by email
 	newVerificationCode, err := svc.verificationSvc.CreateVerificationCode(ctx, dto.Email)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create verification code: %v", err)
-		return err
+		return ErrFailedCreateCode
 	}
 
 	emailData := notificator.Email{
@@ -204,7 +210,7 @@ func (svc *registrationSvc) ResendVerificationEmail(ctx context.Context, dto *Re
 	// send email to recipient
 	if err = svc.notificatorSvc.SendEmail(ctx, &emailData); err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to send email: %v", err)
-		return err
+		return ErrFailedSendEmail
 	}
 
 	svc.log.WithContext(ctx).Infof("verification code successfully sent to: %s", dto.Email)
@@ -215,37 +221,37 @@ func (svc *registrationSvc) SetupTwoFA(ctx context.Context, dto *SetupTwoFaDTO) 
 	// find user
 	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
-		return nil, err
+		return nil, user.ErrNotFound
 	}
 
 	// map userDTO to user
-	disabledUser, err := user.MapToEntity(userDTO)
+	userEntity, err := user.MapToEntity(userDTO)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidDTO
 	}
 
 	// check if user is active or not verified, if yes - return ErrPermissionDenied
-	if disabledUser.IsActive() || !disabledUser.IsVerified {
-		return nil, ErrPermissionDenied
+	if userEntity.IsActive() || !userEntity.IsVerified {
+		return nil, user.ErrUserAlreadyVerify
 	}
 
 	// generate TwoFa Image
 	buffImg, key, err := svc.twoFaSvc.GenerateTwoFAImage(ctx, dto.Email)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create TwoFA image for '%s': %v", dto.Email, err)
-		return nil, err
+		return nil, ErrFailedGenerateTwoFaImage
 	}
 
 	// update user SecretOTP key
-	disabledUser.Credentials.SetSecretOTP(key)
-	disabledUser.UpdatedAt = time.Now()
+	userEntity.Credentials.SetSecretOTP(key)
+	userEntity.UpdatedAt = time.Now()
 
 	// map to userDTO
-	userDTO = user.MapToDTO(disabledUser)
+	userDTO = user.MapToDTO(userEntity)
 
 	// update user in storage
 	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
-		return nil, err
+		return nil, user.ErrFailedUpdateUser
 	}
 	return buffImg.Bytes(), nil
 }
@@ -254,36 +260,36 @@ func (svc *registrationSvc) ActivateUser(ctx context.Context, dto *ActivateUserD
 	// find user
 	userDTO, err := svc.userSvc.GetUserByEmail(ctx, dto.Email)
 	if err != nil {
-		return err
+		return user.ErrNotFound
 	}
 
 	// map userDTO to user
-	disabledUser, err := user.MapToEntity(userDTO)
+	userEntity, err := user.MapToEntity(userDTO)
 	if err != nil {
-		return err
+		return ErrInvalidDTO
 	}
 
 	// check if user is active or not verified, if yes - return ErrPermissionDenied
-	if disabledUser.IsActive() || !disabledUser.IsVerified {
-		return ErrPermissionDenied
+	if userEntity.IsActive() && userEntity.IsVerified {
+		return user.ErrUserAlreadyActive
 	}
 
 	// check TwoFA Code
-	if err = svc.twoFaSvc.CheckTwoFACode(ctx, dto.Code, *disabledUser.Credentials.SecretOTP); err != nil {
-		return err
+	if err = svc.twoFaSvc.CheckTwoFACode(ctx, dto.Code, *userEntity.Credentials.SecretOTP); err != nil {
+		return ErrInvalidCode
 	}
 
 	// activate user
-	disabledUser.SetToActive()
+	userEntity.SetToActive()
 
 	// map back to DTO
-	userDTO = user.MapToDTO(disabledUser)
+	userDTO = user.MapToDTO(userEntity)
 
 	// update user in storage
 	if err = svc.userSvc.UpdateUser(ctx, userDTO); err != nil {
-		return err
+		return user.ErrFailedUpdateUser
 	}
 
-	svc.log.WithContext(ctx).Infof("user '%s' successfully activated TwoFA authentication", disabledUser.Email)
+	svc.log.WithContext(ctx).Infof("user '%s' successfully activated TwoFA authentication", userEntity.Email)
 	return nil
 }
