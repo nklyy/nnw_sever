@@ -233,7 +233,7 @@ func (svc *walletSvc) GetBalance(ctx context.Context, dto *GetWalletBalanceDTO) 
 			return nil, err
 		}
 
-		balance = float64(*balanceInt) / 1e-18
+		balance = float64(balanceInt.Int64()) / 1e-18
 	}
 
 	return &BalanceDTO{
