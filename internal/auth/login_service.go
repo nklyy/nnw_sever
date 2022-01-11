@@ -18,7 +18,7 @@ type LoginService interface {
 	Login(ctx context.Context, dto *LoginDTO) error
 	CheckCode(ctx context.Context, dto *LoginCodeDTO) (*TokenDTO, error)
 
-	Logout(ctx context.Context, email string) error
+	//Logout(ctx context.Context, email string) error
 }
 
 type loginSvc struct {
@@ -133,7 +133,7 @@ func (svc *loginSvc) CheckCode(ctx context.Context, dto *LoginCodeDTO) (*TokenDT
 	return &TokenDTO{Token: jwtTokenDTO.Token, ExpireAt: jwtTokenDTO.ExpireAt}, nil
 }
 
-// todo: find then delete or diacttivate jwt token
-func (svc *loginSvc) Logout(ctx context.Context, email string) error {
-	return nil
-}
+//// todo: find then delete or diacttivate jwt token
+//func (svc *loginSvc) Logout(ctx context.Context, email string) error {
+//	return nil
+//}

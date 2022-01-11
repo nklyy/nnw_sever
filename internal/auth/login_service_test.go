@@ -16,6 +16,7 @@ import (
 	mock_user "nnw_s/internal/user/mocks"
 	"nnw_s/pkg/errors"
 	mock_notificator "nnw_s/pkg/notificator/mocks"
+	"nnw_s/pkg/wallet"
 	"testing"
 	"time"
 )
@@ -47,7 +48,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid service dependencies'",
+			name: "should return invalid service dependencies",
 			log:  logrus.New(),
 			deps: nil,
 			expect: func(t *testing.T, service LoginService, err error) {
@@ -57,7 +58,17 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid user service'",
+			name: "should return invalid user service",
+			log:  logrus.New(),
+			deps: nil,
+			expect: func(t *testing.T, service LoginService, err error) {
+				assert.Nil(t, service)
+				assert.NotNil(t, err)
+				assert.EqualError(t, err, "code: 500; status: internal_error; message: invalid service dependencies")
+			},
+		},
+		{
+			name: "should return invalid user service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         nil,
@@ -74,7 +85,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid notification service'",
+			name: "should return invalid notification service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -91,7 +102,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid verification service'",
+			name: "should return invalid verification service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -108,7 +119,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid TwoFA service'",
+			name: "should return invalid TwoFA service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -125,7 +136,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid JWT service'",
+			name: "should return invalid JWT service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -142,7 +153,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid credentials service'",
+			name: "should return invalid credentials service",
 			log:  logrus.New(),
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -159,7 +170,7 @@ func TestNewLoginService(t *testing.T) {
 			},
 		},
 		{
-			name: "should return 'invalid logger'",
+			name: "should return invalid logger",
 			log:  nil,
 			deps: &ServiceDeps{
 				UserService:         mock_user.NewMockService(controller),
@@ -207,25 +218,33 @@ func TestLoginSvc_Login(t *testing.T) {
 	loginUserDTO.Email = "some@mail.com"
 	loginUserDTO.Password = "==WvZitmZDgzSHgAWvKs"
 
-	// Cred
+	// Test Cred
 	secretKey := "secret"
 	var testCred credentials.Credentials
 	testCred.Password = "==WvZitmZDgzSHgAWvKs"
 	testCred.SecretOTP = &secretKey
 	credDTO := credentials.MapToDTO(&testCred)
 
+	// Test wallet
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
 	// Verify user
-	testActiveUser, _ := user.NewUser("some@mail.com", &testCred)
+	testActiveUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	testActiveUser.SetToActive()
 	testActiveUser.SetToVerified()
 	activeUserDTO := user.MapToDTO(testActiveUser)
 
 	// Disable user
-	testDisableUser, _ := user.NewUser("some@mail.com", &testCred)
+	testDisableUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	disableUserDTO := user.MapToDTO(testDisableUser)
 
 	// User with wrong id
-	testWrongUser, _ := user.NewUser("some@mail.com", &testCred)
+	testWrongUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	testWrongUser.SetToActive()
 	testWrongUser.SetToVerified()
 	wrongUserDTO := user.MapToDTO(testWrongUser)
@@ -335,18 +354,26 @@ func TestLoginSvc_CheckCode(t *testing.T) {
 	testCred.Password = "==WvZitmZDgzSHgAWvKs"
 	testCred.SecretOTP = &secretKey
 
+	// Test wallet
+	var testWallet []*wallet.Wallet
+	testWallet = append(testWallet, &wallet.Wallet{
+		Name:     "BTC",
+		WalletId: "8ebdfa95-484d-11ec-ba92-38d547b6cf94",
+		Address:  "mrgZBqLCicXRGfSjqiSiV39mXgsV3euVZt",
+	})
+
 	// Verify user
-	testActiveUser, _ := user.NewUser("some@mail.com", &testCred)
+	testActiveUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	testActiveUser.SetToActive()
 	testActiveUser.SetToVerified()
 	activeUserDTO := user.MapToDTO(testActiveUser)
 
 	// Disable user
-	testDisableUser, _ := user.NewUser("some@mail.com", &testCred)
+	testDisableUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	disableUserDTO := user.MapToDTO(testDisableUser)
 
 	// User with wrong id
-	testWrongUser, _ := user.NewUser("some@mail.com", &testCred)
+	testWrongUser, _ := user.NewUser("some@mail.com", &testWallet, &testCred)
 	testWrongUser.SetToActive()
 	testWrongUser.SetToVerified()
 	wrongUserDTO := user.MapToDTO(testWrongUser)

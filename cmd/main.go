@@ -1,6 +1,9 @@
 package main
 
 import (
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
 	"nnw_s/config"
@@ -10,14 +13,10 @@ import (
 	"nnw_s/internal/auth/verification"
 	"nnw_s/internal/user"
 	"nnw_s/internal/user/credentials"
+	"nnw_s/internal/user/wallet"
 	"nnw_s/pkg/mongodb"
 	"nnw_s/pkg/notificator"
 	"nnw_s/pkg/smtp"
-
-	"github.com/sirupsen/logrus"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -112,8 +111,30 @@ func main() {
 		logger.Fatalf("failed to connect reset password service: %v", err)
 	}
 
+	walletDeps := wallet.ServiceDeps{
+		UserService:        userSvc,
+		TwoFAService:       twoFaSvc,
+		JWTService:         jwtSvc,
+		CredentialsService: credentialsSvc,
+	}
+
+	walletSvc, err := wallet.NewWalletService(logger, &walletDeps)
+	if err != nil {
+		logger.Fatalf("failed to connect wallet wallet service: %v", err)
+	}
+
+	// Handlers
+	// User
+	userHandler := user.NewHandler(userSvc, jwtSvc, cfg.Shift)
+	userHandler.SetupRoutes(router)
+
+	// Auth
 	authHandler := auth.NewHandler(registrationSvc, loginSvc, resetPasswordSvc, jwtSvc, cfg.Shift)
 	authHandler.SetupRoutes(router)
+
+	// Wallet
+	walletHandler := wallet.NewHandler(walletSvc, jwtSvc, cfg.Shift)
+	walletHandler.SetupRoutes(router)
 
 	// NotFound Urls
 	echo.NotFoundHandler = func(c echo.Context) error {

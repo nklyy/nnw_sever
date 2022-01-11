@@ -3,6 +3,7 @@ package user
 import (
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/wallet"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -12,6 +13,12 @@ func MapToDTO(u *User) *DTO {
 	if u.Credentials.SecretOTP != nil {
 		secretOTP = *u.Credentials.SecretOTP
 	}
+
+	var userWallet []*wallet.Wallet
+	if u.Wallet != nil {
+		userWallet = *u.Wallet
+	}
+
 	return &DTO{
 		ID:         u.ID.Hex(),
 		Email:      u.Email,
@@ -19,6 +26,7 @@ func MapToDTO(u *User) *DTO {
 		SecretOTP:  secretOTP,
 		Status:     string(u.Status),
 		IsVerified: u.IsVerified,
+		Wallet:     &userWallet,
 		CreatedAt:  u.CreatedAt,
 		UpdatedAt:  u.UpdatedAt,
 	}
@@ -39,6 +47,7 @@ func MapToEntity(dto *DTO) (*User, error) {
 		},
 		Status:     Status(dto.Status),
 		IsVerified: dto.IsVerified,
+		Wallet:     dto.Wallet,
 		CreatedAt:  dto.CreatedAt,
 		UpdatedAt:  dto.UpdatedAt,
 	}, nil

@@ -2,13 +2,12 @@ package user
 
 import (
 	"context"
-	"nnw_s/pkg/errors"
-
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"nnw_s/pkg/errors"
 )
 
 //go:generate mockgen -source=repository.go -destination=mocks/repository_mock.go
@@ -18,6 +17,8 @@ type Repository interface {
 	SaveUser(ctx context.Context, user *User) (string, error)
 	UpdateUser(ctx context.Context, user *User) error
 	DeleteUserByEmail(ctx context.Context, email string) error
+
+	GetWalletByID(ctx context.Context, email, walletId string) (*User, error)
 }
 
 type repository struct {
@@ -106,4 +107,20 @@ func (repo *repository) DeleteUserByEmail(ctx context.Context, email string) err
 	}
 
 	return nil
+}
+
+func (repo *repository) GetWalletByID(ctx context.Context, email, walletId string) (*User, error) {
+	var user User
+
+	if err := repo.db.Collection("user").FindOne(ctx, bson.M{"email": email, "wallet.wallet_name": walletId}).Decode(&user); err != nil {
+		if err == mongo.ErrNoDocuments {
+			repo.log.WithContext(ctx).Errorf("unable to find wallet by id'%s': %v", walletId, err)
+			return nil, ErrNotFound
+		}
+
+		repo.log.WithContext(ctx).Errorf("unable to find user due to internal error: %v; wallet id: %s", err, walletId)
+		return nil, errors.NewInternal(err.Error())
+	}
+
+	return &user, nil
 }

@@ -79,6 +79,21 @@ func (mr *MockRepositoryMockRecorder) GetUserByID(ctx, userID interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockRepository)(nil).GetUserByID), ctx, userID)
 }
 
+// GetWalletByID mocks base method.
+func (m *MockRepository) GetWalletByID(ctx context.Context, email, walletId string) (*user.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWalletByID", ctx, email, walletId)
+	ret0, _ := ret[0].(*user.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWalletByID indicates an expected call of GetWalletByID.
+func (mr *MockRepositoryMockRecorder) GetWalletByID(ctx, email, walletId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWalletByID", reflect.TypeOf((*MockRepository)(nil).GetWalletByID), ctx, email, walletId)
+}
+
 // SaveUser mocks base method.
 func (m *MockRepository) SaveUser(ctx context.Context, user *user.User) (string, error) {
 	m.ctrl.T.Helper()

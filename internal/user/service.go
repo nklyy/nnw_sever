@@ -4,6 +4,7 @@ import (
 	"context"
 	"nnw_s/internal/user/credentials"
 	"nnw_s/pkg/errors"
+	"nnw_s/pkg/wallet"
 
 	"github.com/sirupsen/logrus"
 )
@@ -12,6 +13,7 @@ import (
 type Service interface {
 	GetUserByID(ctx context.Context, userID string) (*DTO, error)
 	GetUserByEmail(ctx context.Context, email string) (*DTO, error)
+	GetUserByWalletID(ctx context.Context, email, walletId string) (*DTO, error)
 
 	CreateUser(ctx context.Context, dto *CreateUserDTO) (string, error)
 
@@ -67,7 +69,7 @@ func (svc *service) CreateUser(ctx context.Context, dto *CreateUserDTO) (string,
 	userCredentials := credentials.MapToEntity(userCredentialsDTO)
 
 	// create user with new credentials
-	newUser, err := NewUser(dto.Email, userCredentials)
+	newUser, err := NewUser(dto.Email, wallet.NilWallet, userCredentials)
 	if err != nil {
 		svc.log.WithContext(ctx).Errorf("failed to create user due to validation error: %v", err)
 		return "", err
@@ -102,4 +104,12 @@ func (svc *service) DeleteUserByEmail(ctx context.Context, email string) error {
 		return err
 	}
 	return nil
+}
+
+func (svc *service) GetUserByWalletID(ctx context.Context, email, walletId string) (*DTO, error) {
+	u, err := svc.repo.GetWalletByID(ctx, email, walletId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToDTO(u), nil
 }
